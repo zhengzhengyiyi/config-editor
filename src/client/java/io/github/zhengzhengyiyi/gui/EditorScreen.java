@@ -195,28 +195,37 @@ public class EditorScreen extends Screen {
         }).start();
     }
 
+//    private void openConfigFolder() {
+//        try {
+//            Path configDir = FabricLoader.getInstance().getConfigDir();
+//            java.awt.Desktop.getDesktop().open(configDir.toFile());
+//            LOGGER.info("Opened config folder: {}", configDir);
+//        } catch (Exception e) {
+//            LOGGER.error("Failed to open config folder", e);
+//            showErrorPopup(Text.translatable("zhengzhengyiyi.error.openfolder"));
+//        }
+//    }
+    
     private void openConfigFolder() {
         try {
             Path configDir = FabricLoader.getInstance().getConfigDir();
-            java.awt.Desktop.getDesktop().open(configDir.toFile());
-            LOGGER.info("Opened config folder: {}", configDir);
+            LOGGER.info("Config folder location: {}", configDir);
         } catch (Exception e) {
-            LOGGER.error("Failed to open config folder", e);
-            showErrorPopup(Text.translatable("zhengzhengyiyi.error.openfolder"));
+            LOGGER.error("Failed to get config folder", e);
         }
     }
 
     private void showErrorPopup(Text message) {
-        client.setScreen(PopupScreen.createErrorScreen(
-            Text.translatable("zhengzhengyiyi.error.title"),
-            message
-        ));
+//        client.setScreen(PopupScreen.Builder(
+//        	this,
+//            Text.translatable("zhengzhengyiyi.error.title")
+//        ));
     }
 
     private void showMessagePopup(Text message) {
         client.setScreen(new PopupScreen.Builder(
-            Text.translatable("zhengzhengyiyi.message.title"),
-            message
+        	this,
+            Text.translatable("zhengzhengyiyi.message.title")
         ).button(Text.translatable("gui.ok"), popup -> {
             client.setScreen(this);
         }).build());
