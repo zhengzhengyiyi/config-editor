@@ -2,6 +2,7 @@ plugins {
 	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 	id "com.modrinth.minotaur" version "2.8.9"
+	id 'signing'
 }
 
 version = project.mod_version
@@ -81,7 +82,9 @@ publishing {
 
 	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
 	repositories {
-		
+		maven {
+			url = layout.buildDirectory.dir('repo')
+		}
 	}
 }
 
@@ -97,4 +100,20 @@ modrinth {
     	required.project "fabric-api"
     	required.project "modmenu"
     }
+}
+
+javadoc {
+    source += sourceSets.client.java.srcDirs
+    classpath += sourceSets.client.compileClasspath
+    options.encoding = 'UTF-8'
+    options {
+    	links = [
+    		"https://maven.fabricmc.net/docs/yarn-1.21.8+build.1/"
+    	]
+    }
+}
+
+signing {
+    useGpgCmd()
+    sign publishing.publications.mavenJava
 }

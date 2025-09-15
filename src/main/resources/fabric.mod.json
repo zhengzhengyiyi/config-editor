@@ -3,9 +3,9 @@
 	"id": "config_editor",
 	"version": "${version}",
 	"name": "config editor",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "A mod that allows you to edit configure file inside the game",
 	"authors": [
-		"Me!"
+		"zhengzhengyiyi"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",

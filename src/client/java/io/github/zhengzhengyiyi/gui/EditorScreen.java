@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.PopupScreen;
@@ -32,6 +33,7 @@ public class EditorScreen extends Screen {
     private boolean modified = false;
     private ButtonWidget saveButton;
     private ButtonWidget openFolderButton;
+    private String buffer = "";
 
     public EditorScreen() {
         super(Text.translatable("zhengzhengyiyi.configeditor.title"));
@@ -89,8 +91,10 @@ public class EditorScreen extends Screen {
         textField.setMaxLength(Integer.MAX_VALUE);
         textField.setEditable(true);
         textField.setChangedListener(text -> {
-            modified = true;
-            updateButtonStates();
+        	if (buffer != text) {
+	            modified = true;
+	            updateButtonStates();
+        	}
         });
         
         this.addSelectableChild(textField);
@@ -117,8 +121,12 @@ public class EditorScreen extends Screen {
                 result -> {
                     if (result) {
                         saveFileAsync(() -> loadFile(index));
+                        this.client.setScreen(null);
+                        this.client.setScreen(this);
                     } else {
                         loadFile(index);
+                        this.client.setScreen(null);
+                        this.client.setScreen(this);
                     }
                 },
                 Text.translatable("zhengzhengyiyi.confirm.title"),
@@ -142,6 +150,7 @@ public class EditorScreen extends Screen {
         
         try {
             String content = Files.readString(file);
+            buffer = content;
             JsonElement json = JsonParser.parseString(content);
             String formattedContent = GSON.toJson(json);
             textField.setText(formattedContent);
@@ -194,22 +203,12 @@ public class EditorScreen extends Screen {
             }
         }).start();
     }
-
-//    private void openConfigFolder() {
-//        try {
-//            Path configDir = FabricLoader.getInstance().getConfigDir();
-//            java.awt.Desktop.getDesktop().open(configDir.toFile());
-//            LOGGER.info("Opened config folder: {}", configDir);
-//        } catch (Exception e) {
-//            LOGGER.error("Failed to open config folder", e);
-//            showErrorPopup(Text.translatable("zhengzhengyiyi.error.openfolder"));
-//        }
-//    }
     
     private void openConfigFolder() {
         try {
             Path configDir = FabricLoader.getInstance().getConfigDir();
             LOGGER.info("Config folder location: {}", configDir);
+            Util.getOperatingSystem().open(configDir.toUri());
         } catch (Exception e) {
             LOGGER.error("Failed to get config folder", e);
         }
@@ -255,9 +254,10 @@ public class EditorScreen extends Screen {
             ConfirmScreen confirmScreen = new ConfirmScreen(
                 result -> {
                     if (result) {
-                        saveFileAsync(() -> this.close());
+                        saveFileAsync(() -> {this.close(); this.client.setScreen(null);});
                     } else {
                         this.close();
+                        this.client.setScreen(null);
                     }
                 },
                 Text.translatable("zhengzhengyiyi.confirm.title"),
