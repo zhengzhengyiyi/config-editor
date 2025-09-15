@@ -1,0 +1,19 @@
+{
+  "zhengzhengyiyi.configeditor.title": "Config Editor",
+  "zhengzhengyiyi.configeditor.save": "Save",
+  "zhengzhengyiyi.configeditor.openfolder": "Open Folder",
+  "zhengzhengyiyi.configeditor.editor": "JSON Editor",
+  
+  "zhengzhengyiyi.confirm.title": "Confirm",
+  "zhengzhengyiyi.confirm.unsaved": "You have unsaved changes. Save before switching?",
+  "zhengzhengyiyi.confirm.unsavedclose": "You have unsaved changes. Save before closing?",
+  
+  "zhengzhengyiyi.error.title": "Error",
+  "zhengzhengyiyi.error.loadfailed": "Failed to load config file",
+  "zhengzhengyiyi.error.savefailed": "Failed to save config file",
+  "zhengzhengyiyi.error.invalidjson": "Invalid JSON format",
+  "zhengzhengyiyi.error.openfolder": "Cannot open config folder",
+  
+  "zhengzhengyiyi.message.title": "Message",
+  "zhengzhengyiyi.message.saved": "Config saved successfully"
+}
