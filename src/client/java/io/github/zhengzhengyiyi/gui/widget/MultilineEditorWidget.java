@@ -23,11 +23,14 @@ public class MultilineEditorWidget extends ClickableWidget {
     private int cursorPosition = 0;
     private long lastCursorBlinkTime = 0;
     private boolean cursorVisible = true;
+    
+    private int lastCursorX = 0;
 
     public MultilineEditorWidget(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
         this.textRenderer = MinecraftClient.getInstance().textRenderer;
         this.setFocused(false);
+        System.out.println(lastCursorX);
     }
 
     @Override
@@ -88,6 +91,34 @@ public class MultilineEditorWidget extends ClickableWidget {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.isMouseOver(mouseX, mouseY) && this.editable) {
             this.setFocused(true);
+            
+            int lineHeight = this.textRenderer.fontHeight + 2;
+            int clickedY = (int)mouseY - (this.getY() + 4);
+            int lineIndex = MathHelper.clamp(clickedY / lineHeight + this.scrollOffset, 0, this.text.split("\n", -1).length - 1);
+            
+            String[] lines = this.text.split("\n", -1);
+            String line = lines[lineIndex];
+            
+            int clickedX = (int)mouseX - (this.getX() + 4);
+            
+            int charIndex = 0;
+            for (int i = 1; i <= line.length(); i++) {
+                if (this.textRenderer.getWidth(line.substring(0, i)) > clickedX) {
+                    charIndex = i - 1;
+                    break;
+                }
+                charIndex = i;
+            }
+            
+            int newPosition = 0;
+            for (int i = 0; i < lineIndex; i++) {
+                newPosition += lines[i].length() + 1;
+            }
+            newPosition += charIndex;
+            
+            this.cursorPosition = MathHelper.clamp(newPosition, 0, this.text.length());
+//            this.lastCursorX = this.textRenderer.getWidth(line.substring(0, charIndex));
+            
             return true;
         } else {
             this.setFocused(false);
@@ -95,15 +126,22 @@ public class MultilineEditorWidget extends ClickableWidget {
         }
     }
 
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+//    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (!this.isMouseOver(mouseX, mouseY)) return false;
+        
         int lineHeight = this.textRenderer.fontHeight + 2;
         int maxLines = this.text.split("\n", -1).length;
         int maxVisibleLines = this.height / lineHeight;
         
-        int newScrollOffset = this.scrollOffset - (int)Math.signum(verticalAmount);
+        int newScrollOffset = this.scrollOffset - (int)Math.signum(amount);
         this.scrollOffset = MathHelper.clamp(newScrollOffset, 0, Math.max(0, maxLines - maxVisibleLines));
         return true;
+    }
+    
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        return this.mouseScrolled(mouseX, mouseY, verticalAmount);
     }
 
     @Override
@@ -112,7 +150,10 @@ public class MultilineEditorWidget extends ClickableWidget {
             return false;
         }
 
-        if (Screen.hasControlDown()) {
+        boolean controlDown = Screen.hasControlDown();
+//        boolean shiftDown = Screen.hasShiftDown();
+
+        if (controlDown) {
             if (keyCode == GLFW.GLFW_KEY_V) {
                 pasteFromClipboard();
                 return true;
@@ -123,11 +164,64 @@ public class MultilineEditorWidget extends ClickableWidget {
             }
         }
         
+        if (keyCode == GLFW.GLFW_KEY_LEFT) {
+            this.cursorPosition = MathHelper.clamp(this.cursorPosition - 1, 0, this.text.length());
+            updateCursorX();
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_RIGHT) {
+            this.cursorPosition = MathHelper.clamp(this.cursorPosition + 1, 0, this.text.length());
+            updateCursorX();
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_HOME) {
+            this.cursorPosition = getLineStart(this.cursorPosition);
+            updateCursorX();
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_END) {
+            this.cursorPosition = getLineEnd(this.cursorPosition);
+            updateCursorX();
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_UP) {
+            int lineStart = getLineStart(this.cursorPosition);
+//            int lineEnd = getLineEnd(this.cursorPosition);
+//            int currentLineLength = lineEnd - lineStart;
+            int currentX = this.cursorPosition - lineStart;
+            
+            int prevLineEnd = lineStart > 0 ? getLineEnd(lineStart - 1) : -1;
+            if (prevLineEnd != -1) {
+                int prevLineStart = getLineStart(prevLineEnd);
+                int prevLineLength = prevLineEnd - prevLineStart;
+                int newX = Math.min(currentX, prevLineLength);
+                this.cursorPosition = prevLineStart + newX;
+            }
+            updateCursorX();
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_DOWN) {
+            int lineEnd = getLineEnd(this.cursorPosition);
+//            int currentLineLength = lineEnd - getLineStart(this.cursorPosition);
+            int currentX = this.cursorPosition - getLineStart(this.cursorPosition);
+            
+            int nextLineStart = lineEnd < this.text.length() ? lineEnd + 1 : -1;
+            if (nextLineStart != -1) {
+                int nextLineEnd = getLineEnd(nextLineStart);
+                int nextLineLength = nextLineEnd - nextLineStart;
+                int newX = Math.min(currentX, nextLineLength);
+                this.cursorPosition = nextLineStart + newX;
+            }
+            updateCursorX();
+            return true;
+        }
+
         if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
             if (this.cursorPosition > 0) {
                 this.text = this.text.substring(0, this.cursorPosition - 1) + this.text.substring(this.cursorPosition);
                 this.cursorPosition--;
                 this.onTextChanged();
+                updateCursorX();
             }
             return true;
         }
@@ -136,6 +230,7 @@ public class MultilineEditorWidget extends ClickableWidget {
             if (this.cursorPosition < this.text.length()) {
                 this.text = this.text.substring(0, this.cursorPosition) + this.text.substring(this.cursorPosition + 1);
                 this.onTextChanged();
+                updateCursorX();
             }
             return true;
         }
@@ -144,6 +239,7 @@ public class MultilineEditorWidget extends ClickableWidget {
             this.text = this.text.substring(0, this.cursorPosition) + "\n" + this.text.substring(this.cursorPosition);
             this.cursorPosition++;
             this.onTextChanged();
+            updateCursorX();
             return true;
         }
 
@@ -160,6 +256,7 @@ public class MultilineEditorWidget extends ClickableWidget {
             this.text = this.text.substring(0, this.cursorPosition) + chr + this.text.substring(this.cursorPosition);
             this.cursorPosition++;
             this.onTextChanged();
+            updateCursorX();
             return true;
         }
         return false;
@@ -178,6 +275,7 @@ public class MultilineEditorWidget extends ClickableWidget {
         this.text = text;
         this.cursorPosition = MathHelper.clamp(this.cursorPosition, 0, this.text.length());
         this.onTextChanged();
+        updateCursorX();
     }
     
     public void setEditable(boolean editable) {
@@ -193,6 +291,25 @@ public class MultilineEditorWidget extends ClickableWidget {
             this.changedListener.accept(this.text);
         }
     }
+    
+    private void updateCursorX() {
+        int lineStart = getLineStart(this.cursorPosition);
+        String currentLine = this.text.substring(lineStart, this.cursorPosition);
+        this.lastCursorX = this.textRenderer.getWidth(currentLine);
+    }
+
+    private int getLineStart(int pos) {
+        int start = this.text.lastIndexOf('\n', pos - 1) + 1;
+        return start;
+    }
+
+    private int getLineEnd(int pos) {
+        int end = this.text.indexOf('\n', pos);
+        if (end == -1) {
+            end = this.text.length();
+        }
+        return end;
+    }
 
     private void copyToClipboard() {
         MinecraftClient.getInstance().keyboard.setClipboard(this.text);
@@ -204,6 +321,7 @@ public class MultilineEditorWidget extends ClickableWidget {
             this.text = this.text.substring(0, this.cursorPosition) + clipboardText + this.text.substring(this.cursorPosition);
             this.cursorPosition += clipboardText.length();
             this.onTextChanged();
+            updateCursorX();
         }
     }
 }
