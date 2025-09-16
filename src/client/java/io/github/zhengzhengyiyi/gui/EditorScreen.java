@@ -3,19 +3,20 @@ package io.github.zhengzhengyiyi.gui;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+
+import io.github.zhengzhengyiyi.util.BackupHelper;
+import io.github.zhengzhengyiyi.gui.widget.MultilineEditorWidget;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.PopupScreen;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,16 +24,20 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class EditorScreen extends Screen {
     private static final Logger LOGGER = LoggerFactory.getLogger(EditorScreen.class);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private List<Path> configFiles;
     private int selectedIndex = 0;
-    private TextFieldWidget textField;
+    private MultilineEditorWidget multilineEditor;
     private boolean modified = false;
     private ButtonWidget saveButton;
     private ButtonWidget openFolderButton;
+    private ButtonWidget backupButton;
     private String buffer = "";
 
     public EditorScreen() {
@@ -75,6 +80,11 @@ public class EditorScreen extends Screen {
                 .dimensions(this.width - 170, this.height - 30, 80, 20)
                 .build();
         this.addDrawableChild(saveButton);
+        
+        backupButton = ButtonWidget.builder(Text.translatable("zhengzhengyiyi.configeditor.backup"), button -> BackupHelper.backupEntireConfigDirectory())
+        		.dimensions(0, 0, 70, 20)
+        		.build();
+        this.addDrawableChild(backupButton);
 
         openFolderButton = ButtonWidget.builder(
                 Text.translatable("zhengzhengyiyi.configeditor.openfolder"),
@@ -83,28 +93,28 @@ public class EditorScreen extends Screen {
                 .build();
         this.addDrawableChild(openFolderButton);
 
-        textField = new TextFieldWidget(
-                this.textRenderer,
+        multilineEditor = new MultilineEditorWidget(
                 170, 20, 
                 this.width - 180, this.height - 60,
                 Text.translatable("zhengzhengyiyi.configeditor.editor"));
-        textField.setMaxLength(Integer.MAX_VALUE);
-        textField.setEditable(true);
-        textField.setChangedListener(text -> {
-        	if (buffer != text) {
+        multilineEditor.setChangedListener(text -> {
+        	if (!buffer.equals(text)) {
 	            modified = true;
 	            updateButtonStates();
+        	} else {
+        		modified = false;
         	}
         });
         
-        this.addSelectableChild(textField);
-        this.setInitialFocus(textField);
+        // 修正：将 multilineEditor 作为可绘制子组件添加
+        this.addDrawableChild(multilineEditor);
+        this.setInitialFocus(multilineEditor);
 
         if (!configFiles.isEmpty()) {
             loadFile(selectedIndex);
         } else {
-            textField.setText("{}");
-            textField.setEditable(false);
+            multilineEditor.setText("{}");
+            multilineEditor.setEditable(false);
             LOGGER.warn("No config files found in config directory");
         }
         
@@ -153,11 +163,12 @@ public class EditorScreen extends Screen {
             buffer = content;
             JsonElement json = JsonParser.parseString(content);
             String formattedContent = GSON.toJson(json);
-            textField.setText(formattedContent);
+            multilineEditor.setText(formattedContent);
             LOGGER.info("Successfully loaded config file: {}", file.getFileName());
         } catch (Exception e) {
             LOGGER.error("Failed to load config file: {}", file.getFileName(), e);
-            textField.setText("{}");
+            multilineEditor.setText("{}");
+            multilineEditor.setEditable(false);
             showErrorPopup(Text.translatable("zhengzhengyiyi.error.loadfailed"));
         }
         
@@ -172,7 +183,7 @@ public class EditorScreen extends Screen {
         if (configFiles.isEmpty()) return;
         
         Path file = configFiles.get(selectedIndex);
-        String content = textField.getText();
+        String content = multilineEditor.getText();
         
         try {
             JsonParser.parseString(content);
@@ -215,10 +226,12 @@ public class EditorScreen extends Screen {
     }
 
     private void showErrorPopup(Text message) {
-//        client.setScreen(PopupScreen.Builder(
-//        	this,
-//            Text.translatable("zhengzhengyiyi.error.title")
-//        ));
+        client.setScreen(new PopupScreen.Builder(
+        	this,
+            Text.translatable("zhengzhengyiyi.error.title")
+        ).button(Text.translatable("gui.ok"), popup -> {
+            client.setScreen(this);
+        }).build());
     }
 
     private void showMessagePopup(Text message) {
@@ -232,7 +245,7 @@ public class EditorScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context, mouseX, mouseY, delta);
+        super.render(context, mouseX, mouseY, delta);
         
         context.drawText(this.textRenderer, 
             Text.translatable("zhengzhengyiyi.configeditor.title"), 
@@ -243,9 +256,6 @@ public class EditorScreen extends Screen {
                 configFiles.get(selectedIndex).getFileName().toString();
             context.drawText(this.textRenderer, status, 170, 5, modified ? 0xFF5555 : 0xFFFFFF, false);
         }
-        
-        super.render(context, mouseX, mouseY, delta);
-        textField.render(context, mouseX, mouseY, delta);
     }
 
     @Override

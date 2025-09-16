@@ -1,7 +1,7 @@
 plugins {
 	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
-	id "com.modrinth.minotaur" version "2.8.9"
+	id "com.modrinth.minotaur" version "2.8.10"
 	id 'signing'
 }
 
@@ -14,7 +14,7 @@ base {
 
 repositories {
 	// maven { url "https://maven.shedaniel.me/" }
-	maven { url "https://maven.terraformersmc.com/releases/" }
+	// maven { url "https://maven.terraformersmc.com/releases/" }
 }
 
 loom {
@@ -38,7 +38,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	modApi "com.terraformersmc:modmenu:10.0.0"
+	// modApi "com.terraformersmc:modmenu:10.0.0"
 }
 
 processResources {
@@ -58,6 +58,7 @@ java {
 	// if it is present.
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
+	withJavadocJar()
 
 	sourceCompatibility = JavaVersion.VERSION_21
 	targetCompatibility = JavaVersion.VERSION_21
@@ -77,6 +78,33 @@ publishing {
 		create("mavenJava", MavenPublication) {
 			artifactId = project.archives_base_name
 			from components.java
+			
+			pom {
+                name = project.archives_base_name
+                description = 'A Minecraft mod for editing configuration files'
+                url = 'http://modrinth.com/mod/config-editor'
+                
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id = 'zhengzhengyiyi'
+                        name = 'zhengzhengyiyi'
+                        email = 'zhengzhengyiyiminecraft@gmail.com'
+                    }
+                }
+                
+                scm {
+                    connection = 'scm:git:git://github.com/zhengzhengyiyi/config-editor.git'
+                    developerConnection = 'scm:git:https://zhengzhengyiyi.github.io'
+                    url = 'http://modrinth.com/mod/config-editor'
+                }
+            }
 		}
 	}
 
@@ -91,14 +119,13 @@ publishing {
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "config-editor"
-    versionType = "beta"
+    versionType = "release"
     gameVersions = ["${project.minecraft_version}"]
     loaders = ["fabric"]
     versionNumber = "${project.mod_version}"
-    uploadFile = "remapJar"
+    uploadFile = remapJar
     dependencies {
     	required.project "fabric-api"
-    	required.project "modmenu"
     }
 }
 
