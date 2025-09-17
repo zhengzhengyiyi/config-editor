@@ -1,11 +1,13 @@
 package io.github.zhengzhengyiyi.gui.widget;
 
 import io.github.zhengzhengyiyi.ConfigEditorClient;
+import io.github.zhengzhengyiyi.config.ConfigManager;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -15,7 +17,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
 
-public class UndoRedoEntrypoint extends ClickableWidget {
+public class MultilineEditor extends ClickableWidget {
     private final TextRenderer textRenderer;
     private String text = "";
 //    private int yOffset = 0;
@@ -28,11 +30,15 @@ public class UndoRedoEntrypoint extends ClickableWidget {
     
     private int lastCursorX = 0;
 
-    public UndoRedoEntrypoint(int x, int y, int width, int height, Text message) {
+    public MultilineEditor(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
         this.textRenderer = MinecraftClient.getInstance().textRenderer;
         this.setFocused(false);
         System.out.println(lastCursorX);
+        
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+        	editable = !ConfigManager.getConfig().readonly_mode;
+        });
     }
 
     @Override

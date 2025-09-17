@@ -6,7 +6,7 @@ import com.google.gson.JsonSyntaxException;
 
 import io.github.zhengzhengyiyi.util.BackupHelper;
 import io.github.zhengzhengyiyi.ConfigEditorClient;
-import io.github.zhengzhengyiyi.gui.widget.UndoRedoEntrypoint;
+import io.github.zhengzhengyiyi.gui.widget.MultilineEditor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -33,7 +33,7 @@ public class EditorScreen extends Screen {
 
     private List<Path> configFiles;
     private int selectedIndex = 0;
-    private UndoRedoEntrypoint multilineEditor;
+    private MultilineEditor multilineEditor;
     private boolean modified = false;
     private ButtonWidget saveButton;
     private ButtonWidget openFolderButton;
@@ -93,7 +93,7 @@ public class EditorScreen extends Screen {
                 .build();
         this.addDrawableChild(openFolderButton);
 
-        multilineEditor = new UndoRedoEntrypoint(
+        multilineEditor = new MultilineEditor(
                 170, 20, 
                 this.width - 180, this.height - 60,
                 Text.translatable("zhengzhengyiyi.configeditor.editor"));
@@ -254,9 +254,9 @@ public class EditorScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         
-        context.drawText(this.textRenderer, 
-            Text.translatable("zhengzhengyiyi.configeditor.title"), 
-            this.width / 2 - 50, 5, 0xFFFFFF, true);
+//        context.drawText(this.textRenderer, 
+//            Text.translatable("zhengzhengyiyi.configeditor.title"), 
+//            this.width / 2 - 50, 5, 0xFFFFFF, true);
         
         if (!configFiles.isEmpty()) {
             String status = modified ? "* " + configFiles.get(selectedIndex).getFileName().toString() : 
@@ -286,7 +286,7 @@ public class EditorScreen extends Screen {
         return true;
     }
     
-    public UndoRedoEntrypoint getTextWidget() {
+    public MultilineEditor getTextWidget() {
         return this.multilineEditor;
     }
 

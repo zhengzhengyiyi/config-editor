@@ -4,9 +4,11 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.github.zhengzhengyiyi.addon.DateTimeDisplayEntrypoint;
 import io.github.zhengzhengyiyi.addon.TextStatsEntrypoint;
 import io.github.zhengzhengyiyi.addon.UndoRedoEntrypoint;
 import io.github.zhengzhengyiyi.api.ApiEntrypoint;
+import io.github.zhengzhengyiyi.config.ConfigManager;
 import io.github.zhengzhengyiyi.gui.EditorScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -64,8 +66,11 @@ public class ConfigEditorClient implements ClientModInitializer {
             }
         });
 		
+		ConfigManager.init();
+		
 		ENTRYPOINTS.add(new UndoRedoEntrypoint());
 		ENTRYPOINTS.add(new TextStatsEntrypoint());
+		ENTRYPOINTS.add(new DateTimeDisplayEntrypoint());
 		
 		ClientTickEvents.END_CLIENT_TICK.register((client) -> {
 			if (key.isPressed()) {
