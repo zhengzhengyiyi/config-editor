@@ -4,6 +4,8 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.github.zhengzhengyiyi.addon.TextStatsEntrypoint;
+import io.github.zhengzhengyiyi.addon.UndoRedoEntrypoint;
 import io.github.zhengzhengyiyi.api.ApiEntrypoint;
 import io.github.zhengzhengyiyi.gui.EditorScreen;
 import net.fabricmc.api.ClientModInitializer;
@@ -63,6 +65,7 @@ public class ConfigEditorClient implements ClientModInitializer {
         });
 		
 		ENTRYPOINTS.add(new UndoRedoEntrypoint());
+		ENTRYPOINTS.add(new TextStatsEntrypoint());
 		
 		ClientTickEvents.END_CLIENT_TICK.register((client) -> {
 			if (key.isPressed()) {

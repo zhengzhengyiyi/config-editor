@@ -117,7 +117,7 @@ publishing {
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "config-editor"
-    versionType = "release"
+    versionType = "beta"
     gameVersions = ["${project.minecraft_version}"]
     loaders = ["fabric"]
     versionNumber = "${project.mod_version}"

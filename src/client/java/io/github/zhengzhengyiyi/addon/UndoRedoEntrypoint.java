@@ -1,4 +1,4 @@
-package io.github.zhengzhengyiyi;
+package io.github.zhengzhengyiyi.addon;
 
 import io.github.zhengzhengyiyi.gui.EditorScreen;
 import io.github.zhengzhengyiyi.api.*;
