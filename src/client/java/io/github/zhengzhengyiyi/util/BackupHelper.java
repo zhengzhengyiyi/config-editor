@@ -52,7 +52,7 @@ public class BackupHelper {
      * @return the path to the created ZIP backup file, or null if backup failed
      */
     public static Path backupEntireConfigDirectory() {
-        Path configDir = FabricLoader.getInstance().getConfigDir();
+        Path configDir = FabricLoader.getInstance().getGameDir();
         return backupDirectoryToZip(configDir, "config_backup");
     }
 

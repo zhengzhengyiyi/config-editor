@@ -1,19 +1,21 @@
 package io.github.zhengzhengyiyi.gui.widget;
 
+import io.github.zhengzhengyiyi.ConfigEditorClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
 
-public class MultilineEditorWidget extends ClickableWidget {
+public class UndoRedoEntrypoint extends ClickableWidget {
     private final TextRenderer textRenderer;
     private String text = "";
 //    private int yOffset = 0;
@@ -26,7 +28,7 @@ public class MultilineEditorWidget extends ClickableWidget {
     
     private int lastCursorX = 0;
 
-    public MultilineEditorWidget(int x, int y, int width, int height, Text message) {
+    public UndoRedoEntrypoint(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
         this.textRenderer = MinecraftClient.getInstance().textRenderer;
         this.setFocused(false);
@@ -51,6 +53,10 @@ public class MultilineEditorWidget extends ClickableWidget {
                 int yPos = this.getY() + 4 + (i - this.scrollOffset) * lineHeight;
                 context.drawText(this.textRenderer, lines[i], this.getX() + 4, yPos, this.editable ? 0xFFFFFFFF : 0xFF777777, false);
             }
+        }
+
+        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+            entrypoint.renderButton(context, mouseX, mouseY, delta);
         }
 
         if (this.isFocused() && this.editable) {
@@ -119,6 +125,13 @@ public class MultilineEditorWidget extends ClickableWidget {
             this.cursorPosition = MathHelper.clamp(newPosition, 0, this.text.length());
 //            this.lastCursorX = this.textRenderer.getWidth(line.substring(0, charIndex));
             
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+            	ActionResult result = entrypoint.onMouseDown((int)Math.round(mouseX), (int)Math.round(mouseY));
+                if (result == ActionResult.FAIL) {
+                    return true;
+                }
+            }
+            
             return true;
         } else {
             this.setFocused(false);
@@ -136,6 +149,11 @@ public class MultilineEditorWidget extends ClickableWidget {
         
         int newScrollOffset = this.scrollOffset - (int)Math.signum(amount);
         this.scrollOffset = MathHelper.clamp(newScrollOffset, 0, Math.max(0, maxLines - maxVisibleLines));
+        
+        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+            entrypoint.onMouseScroll();
+        }
+        
         return true;
     }
     
@@ -144,10 +162,17 @@ public class MultilineEditorWidget extends ClickableWidget {
         return this.mouseScrolled(mouseX, mouseY, verticalAmount);
     }
 
-    @Override
+//    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!this.isFocused() || !this.editable) {
             return false;
+        }
+        
+        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+        	ActionResult result = entrypoint.onType(keyCode, scanCode, modifiers);
+            if (result == ActionResult.FAIL) {
+                return true;
+            }
         }
 
         boolean controlDown = Screen.hasControlDown();
@@ -172,16 +197,25 @@ public class MultilineEditorWidget extends ClickableWidget {
         if (keyCode == GLFW.GLFW_KEY_RIGHT) {
             this.cursorPosition = MathHelper.clamp(this.cursorPosition + 1, 0, this.text.length());
             updateCursorX();
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(keyCode, scanCode, modifiers);
+            }
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_HOME) {
             this.cursorPosition = getLineStart(this.cursorPosition);
             updateCursorX();
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(keyCode, scanCode, modifiers);
+            }
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_END) {
             this.cursorPosition = getLineEnd(this.cursorPosition);
             updateCursorX();
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(keyCode, scanCode, modifiers);
+            }
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_UP) {
@@ -198,6 +232,9 @@ public class MultilineEditorWidget extends ClickableWidget {
                 this.cursorPosition = prevLineStart + newX;
             }
             updateCursorX();
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(keyCode, scanCode, modifiers);
+            }
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_DOWN) {
@@ -213,6 +250,9 @@ public class MultilineEditorWidget extends ClickableWidget {
                 this.cursorPosition = nextLineStart + newX;
             }
             updateCursorX();
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(keyCode, scanCode, modifiers);
+            }
             return true;
         }
 
@@ -223,6 +263,9 @@ public class MultilineEditorWidget extends ClickableWidget {
                 this.onTextChanged();
                 updateCursorX();
             }
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(keyCode, scanCode, modifiers);
+            }
             return true;
         }
 
@@ -232,6 +275,9 @@ public class MultilineEditorWidget extends ClickableWidget {
                 this.onTextChanged();
                 updateCursorX();
             }
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(keyCode, scanCode, modifiers);
+            }
             return true;
         }
         
@@ -240,6 +286,9 @@ public class MultilineEditorWidget extends ClickableWidget {
             this.cursorPosition++;
             this.onTextChanged();
             updateCursorX();
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(keyCode, scanCode, modifiers);
+            }
             return true;
         }
 
@@ -252,11 +301,21 @@ public class MultilineEditorWidget extends ClickableWidget {
             return false;
         }
         
+        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+        	ActionResult result = entrypoint.onCharTyped(chr, modifiers);
+            if (result == ActionResult.FAIL) {
+                return true;
+            }
+        }
+        
         if (chr >= 32 && chr != 127) {
             this.text = this.text.substring(0, this.cursorPosition) + chr + this.text.substring(this.cursorPosition);
             this.cursorPosition++;
             this.onTextChanged();
             updateCursorX();
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(chr, 0, modifiers);
+            }
             return true;
         }
         return false;
@@ -323,5 +382,21 @@ public class MultilineEditorWidget extends ClickableWidget {
             this.onTextChanged();
             updateCursorX();
         }
+    }
+    
+    public void insertTextAtCursor(String text) {
+        this.text = this.text.substring(0, this.cursorPosition) + text + this.text.substring(this.cursorPosition);
+        this.cursorPosition += text.length();
+        this.onTextChanged();
+        updateCursorX();
+    }
+    
+    public int getCursorPosition() {
+        return this.cursorPosition;
+    }
+
+    public void setCursorPosition(int position) {
+        this.cursorPosition = MathHelper.clamp(position, 0, this.text.length());
+        updateCursorX();
     }
 }

@@ -5,7 +5,8 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import io.github.zhengzhengyiyi.util.BackupHelper;
-import io.github.zhengzhengyiyi.gui.widget.MultilineEditorWidget;
+import io.github.zhengzhengyiyi.ConfigEditorClient;
+import io.github.zhengzhengyiyi.gui.widget.UndoRedoEntrypoint;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,7 +17,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.screen.PopupScreen;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,7 +33,7 @@ public class EditorScreen extends Screen {
 
     private List<Path> configFiles;
     private int selectedIndex = 0;
-    private MultilineEditorWidget multilineEditor;
+    private UndoRedoEntrypoint multilineEditor;
     private boolean modified = false;
     private ButtonWidget saveButton;
     private ButtonWidget openFolderButton;
@@ -93,7 +93,7 @@ public class EditorScreen extends Screen {
                 .build();
         this.addDrawableChild(openFolderButton);
 
-        multilineEditor = new MultilineEditorWidget(
+        multilineEditor = new UndoRedoEntrypoint(
                 170, 20, 
                 this.width - 180, this.height - 60,
                 Text.translatable("zhengzhengyiyi.configeditor.editor"));
@@ -106,7 +106,6 @@ public class EditorScreen extends Screen {
         	}
         });
         
-        // 修正：将 multilineEditor 作为可绘制子组件添加
         this.addDrawableChild(multilineEditor);
         this.setInitialFocus(multilineEditor);
 
@@ -116,6 +115,10 @@ public class EditorScreen extends Screen {
             multilineEditor.setText("{}");
             multilineEditor.setEditable(false);
             LOGGER.warn("No config files found in config directory");
+        }
+        
+        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+            entrypoint.onEditerOpen(this);
         }
         
         updateButtonStates();
@@ -226,21 +229,25 @@ public class EditorScreen extends Screen {
     }
 
     private void showErrorPopup(Text message) {
-        client.setScreen(new PopupScreen.Builder(
-        	this,
+    	client.setScreen(new ConfirmScreen(
+        	result -> {
+        		this.close();
+           		this.client.setScreen(this);
+           	},
+            Text.translatable("zhengzhengyiyi.confirm.title"),
             Text.translatable("zhengzhengyiyi.error.title")
-        ).button(Text.translatable("gui.ok"), popup -> {
-            client.setScreen(this);
-        }).build());
+        ));
     }
 
     private void showMessagePopup(Text message) {
-        client.setScreen(new PopupScreen.Builder(
-        	this,
+        client.setScreen(new ConfirmScreen(
+        	result -> {
+        		this.close();
+        		this.client.setScreen(null);
+        	},
+            Text.translatable("zhengzhengyiyi.confirm.title"),
             Text.translatable("zhengzhengyiyi.message.title")
-        ).button(Text.translatable("gui.ok"), popup -> {
-            client.setScreen(this);
-        }).build());
+        ));
     }
 
     @Override
@@ -278,10 +285,17 @@ public class EditorScreen extends Screen {
         }
         return true;
     }
+    
+    public UndoRedoEntrypoint getTextWidget() {
+        return this.multilineEditor;
+    }
 
     @Override
     public void close() {
         super.close();
+        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+            entrypoint.onEditerClose(this);
+        }
         LOGGER.info("Config editor closed");
     }
 

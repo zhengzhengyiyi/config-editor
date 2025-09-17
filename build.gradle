@@ -2,7 +2,6 @@ plugins {
 	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 	id "com.modrinth.minotaur" version "2.8.10"
-	id 'signing'
 }
 
 version = project.mod_version
@@ -26,7 +25,6 @@ loom {
 			sourceSet sourceSets.client
 		}
 	}
-
 }
 
 dependencies {
@@ -127,6 +125,10 @@ modrinth {
     dependencies {
     	required.project "fabric-api"
     }
+    additionalFiles = [
+        tasks.named("javadocJar").get().outputs.files.singleFile,
+        tasks.named("sourcesJar").get().outputs.files.singleFile
+    ]
 }
 
 javadoc {
@@ -135,12 +137,7 @@ javadoc {
     options.encoding = 'UTF-8'
     options {
     	links = [
-    		"https://maven.fabricmc.net/docs/yarn-1.21.8+build.1/"
+    		"https://maven.fabricmc.net/docs/yarn-1.21.5+build.1/"
     	]
     }
-}
-
-signing {
-    useGpgCmd()
-    sign publishing.publications.mavenJava
 }
