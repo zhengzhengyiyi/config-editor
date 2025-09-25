@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class EditorScreen extends Screen {
             LOGGER.error("Failed to list config files", e);
         }
 
-        int buttonY = 20;
+        int buttonY = 25;
         for (int i = 0; i < configFiles.size(); i++) {
             int index = i;
             Path file = configFiles.get(i);
@@ -71,7 +72,7 @@ public class EditorScreen extends Screen {
                     button -> switchFile(index))
                     .dimensions(10, buttonY, 150, 20)
                     .build());
-            buttonY += 25;
+            buttonY += 23;
         }
 
         saveButton = ButtonWidget.builder(
@@ -92,6 +93,13 @@ public class EditorScreen extends Screen {
                 .dimensions(this.width - 80, this.height - 30, 70, 20)
                 .build();
         this.addDrawableChild(openFolderButton);
+        
+        ButtonWidget exitButton = ButtonWidget.builder(
+                Text.translatable("close"),
+                button -> this.close())
+                .dimensions(0, this.height - 25, 80, 20)
+                .build();
+        this.addDrawableChild(exitButton);
 
         multilineEditor = new MultilineEditor(
                 170, 20, 
@@ -169,10 +177,19 @@ public class EditorScreen extends Screen {
             multilineEditor.setText(formattedContent);
             LOGGER.info("Successfully loaded config file: {}", file.getFileName());
         } catch (Exception e) {
-            LOGGER.error("Failed to load config file: {}", file.getFileName(), e);
-            multilineEditor.setText("{}");
-            multilineEditor.setEditable(false);
-            showErrorPopup(Text.translatable("zhengzhengyiyi.error.loadfailed"));
+        	String text = null;
+        	try {
+        		text = Files.readString(file);
+        	} catch (IOException ioexception) {
+        		LOGGER.error("tried to read file except IOException: ", ioexception.toString());
+        	}
+        	if (text == null) {
+        		LOGGER.error("Failed to load config file: {}", file.getFileName(), e);
+	            multilineEditor.setText("{}");
+	            multilineEditor.setEditable(false);
+	            showErrorPopup(Text.translatable("zhengzhengyiyi.error.loadfailed"));
+        	}
+        	multilineEditor.setText(text);
         }
         
         updateButtonStates();

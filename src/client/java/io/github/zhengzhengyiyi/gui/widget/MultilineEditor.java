@@ -2,6 +2,7 @@ package io.github.zhengzhengyiyi.gui.widget;
 
 import io.github.zhengzhengyiyi.ConfigEditorClient;
 import io.github.zhengzhengyiyi.config.ConfigManager;
+import io.github.zhengzhengyiyi.util.*;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -27,6 +28,7 @@ public class MultilineEditor extends ClickableWidget {
     private int cursorPosition = 0;
     private long lastCursorBlinkTime = 0;
     private boolean cursorVisible = true;
+    private String filename = "";
     
     private int lastCursorX = 0;
 
@@ -57,7 +59,8 @@ public class MultilineEditor extends ClickableWidget {
         for (int i = 0; i < lines.length; i++) {
             if (i >= this.scrollOffset && i < this.scrollOffset + maxVisibleLines) {
                 int yPos = this.getY() + 4 + (i - this.scrollOffset) * lineHeight;
-                context.drawText(this.textRenderer, lines[i], this.getX() + 4, yPos, this.editable ? 0xFFFFFFFF : 0xFF777777, false);
+//                context.drawText(this.textRenderer, lines[i], this.getX() + 4, yPos, this.editable ? 0xFFFFFFFF : 0xFF777777, false);
+                SyntaxHighlighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4, yPos, this.editable);
             }
         }
 
@@ -404,5 +407,13 @@ public class MultilineEditor extends ClickableWidget {
     public void setCursorPosition(int position) {
         this.cursorPosition = MathHelper.clamp(position, 0, this.text.length());
         updateCursorX();
+    }
+    
+    public void setFileName(String v) {
+    	this.filename = v;
+    }
+    
+    public String getFileName() {
+    	return this.filename;
     }
 }

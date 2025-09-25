@@ -19,7 +19,7 @@ public class TextStatsEntrypoint implements ApiEntrypoint {
     public void onEditerOpen(EditorScreen editor) {
         this.editor = editor;
         
-        statsX = this.editor.width / 2 - 30;
+        statsX = this.editor.width / 2 + 35;
         statsY = this.editor.height - 10;
     }
 

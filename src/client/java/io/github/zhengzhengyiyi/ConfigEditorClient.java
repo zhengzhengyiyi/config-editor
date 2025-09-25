@@ -4,13 +4,12 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.zhengzhengyiyi.addon.DateTimeDisplayEntrypoint;
-import io.github.zhengzhengyiyi.addon.TextStatsEntrypoint;
-import io.github.zhengzhengyiyi.addon.UndoRedoEntrypoint;
+import io.github.zhengzhengyiyi.addon.*;
 import io.github.zhengzhengyiyi.api.ApiEntrypoint;
 import io.github.zhengzhengyiyi.config.ConfigManager;
 import io.github.zhengzhengyiyi.gui.EditorScreen;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
@@ -71,11 +70,17 @@ public class ConfigEditorClient implements ClientModInitializer {
 		ENTRYPOINTS.add(new UndoRedoEntrypoint());
 		ENTRYPOINTS.add(new TextStatsEntrypoint());
 		ENTRYPOINTS.add(new DateTimeDisplayEntrypoint());
+		ENTRYPOINTS.add(new AutoBracketCompletionEntrypoint());
+		ENTRYPOINTS.add(new TextStatsEntrypoint());
 		
 		ClientTickEvents.END_CLIENT_TICK.register((client) -> {
 			if (key.isPressed()) {
 				client.setScreen(new EditorScreen());
 			}
 		});
+		
+		ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
+            ConfigManager.shutdown();
+        });
 	}
 }
