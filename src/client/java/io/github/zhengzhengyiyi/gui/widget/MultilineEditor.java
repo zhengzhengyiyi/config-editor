@@ -16,6 +16,9 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import java.util.function.Consumer;
 
 public class MultilineEditor extends ClickableWidget {
@@ -29,6 +32,8 @@ public class MultilineEditor extends ClickableWidget {
     private long lastCursorBlinkTime = 0;
     private boolean cursorVisible = true;
     private String filename = "";
+    public List<JSONError> currentErrors = new ArrayList<>();
+    public JSONError hoveredError = null;
     
     private int lastCursorX = 0;
 
@@ -63,6 +68,8 @@ public class MultilineEditor extends ClickableWidget {
                 SyntaxHighlighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4, yPos, this.editable);
             }
         }
+        
+        renderErrorUnderlines(context, lines, lineHeight, maxVisibleLines);
 
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
             entrypoint.renderButton(context, mouseX, mouseY, delta);
@@ -94,6 +101,8 @@ public class MultilineEditor extends ClickableWidget {
                 }
             }
         }
+        
+        renderErrorTooltips(context, mouseX, mouseY, lines, lineHeight, maxVisibleLines);
 
         if (lines.length > maxVisibleLines) {
             int scrollbarHeight = Math.max(20, (int)((float)this.height * (float)maxVisibleLines / (float)lines.length));
@@ -101,6 +110,42 @@ public class MultilineEditor extends ClickableWidget {
             context.fill(this.getX() + this.width - 5, this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFF555555);
             context.fill(this.getX() + this.width - 4, scrollbarY, this.getX() + this.width - 1, scrollbarY + scrollbarHeight, 0xFFBBBBBB);
         }
+    }
+    
+    private void renderErrorTooltips(DrawContext context, int mouseX, int mouseY, String[] lines, int lineHeight, int maxVisibleLines) {
+        hoveredError = null;
+        
+        if (isMouseOver(mouseX, mouseY)) {
+            for (JSONError error : currentErrors) {
+                if (isMouseOverError(mouseX, mouseY, error, lines, lineHeight, maxVisibleLines)) {
+                    hoveredError = error;
+                    String tooltip = "Line " + error.lineNumber + ", Col " + error.columnNumber + ": " + error.message;
+                    context.drawTooltip(textRenderer, Text.literal(tooltip), mouseX, mouseY);
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean isMouseOverError(int mouseX, int mouseY, JSONError error, String[] lines, int lineHeight, int maxVisibleLines) {
+        int lineIndex = error.lineNumber - 1;
+        if (lineIndex >= scrollOffset && lineIndex < scrollOffset + maxVisibleLines) {
+            int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight;
+            if (mouseY >= yPos && mouseY <= yPos + textRenderer.fontHeight) {
+                String line = lines[lineIndex];
+                int errorStartInLine = Math.min(error.startPosition - getLineStart(error.startPosition), line.length());
+                int errorEndInLine = Math.min(error.endPosition - getLineStart(error.startPosition), line.length());
+                
+                if (errorStartInLine < errorEndInLine) {
+                    String beforeError = line.substring(0, errorStartInLine);
+                    int xStart = getX() + 4 + textRenderer.getWidth(beforeError);
+                    int xEnd = xStart + textRenderer.getWidth(line.substring(errorStartInLine, errorEndInLine));
+                    
+                    return mouseX >= xStart && mouseX <= xEnd;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -216,6 +261,8 @@ public class MultilineEditor extends ClickableWidget {
         if (!this.isFocused() || !this.editable) {
             return false;
         }
+        
+//        JSONValidator.validateJSON(text);
         
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
         	ActionResult result = entrypoint.onType(keyCode, scanCode, modifiers);
@@ -398,6 +445,39 @@ public class MultilineEditor extends ClickableWidget {
         if (this.changedListener != null) {
             this.changedListener.accept(this.text);
         }
+        validateJSON();
+    }
+    
+    private void renderErrorUnderlines(DrawContext context, String[] lines, int lineHeight, int maxVisibleLines) {
+        for (JSONError error : currentErrors) {
+            int lineIndex = error.lineNumber - 1;
+            if (lineIndex >= scrollOffset && lineIndex < scrollOffset + maxVisibleLines) {
+                int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight;
+                
+                String line = lines[lineIndex];
+                int errorStartInLine = Math.min(error.startPosition - getLineStart(error.startPosition), line.length());
+                int errorEndInLine = Math.min(error.endPosition - getLineStart(error.startPosition), line.length());
+                
+                if (errorStartInLine < errorEndInLine) {
+                    String beforeError = line.substring(0, errorStartInLine);
+                    String errorText = line.substring(errorStartInLine, errorEndInLine);
+                    
+                    int xStart = getX() + 4 + textRenderer.getWidth(beforeError);
+                    int errorWidth = textRenderer.getWidth(errorText);
+                    
+                    for (int i = 0; i < errorWidth; i += 3) {
+                        int x = xStart + i;
+                        if (i + 2 <= errorWidth) {
+                            context.drawHorizontalLine(x, x + 2, yPos + textRenderer.fontHeight + 1, 0xFFFF0000);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    public void validateJSON() {
+        this.currentErrors = JSONValidator.validateJSON(this.text);
     }
     
     private void updateCursorX() {
