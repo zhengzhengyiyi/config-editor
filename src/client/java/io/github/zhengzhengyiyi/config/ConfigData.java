@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
  */
 public class ConfigData {
 	/**
-	 * If it is true, you can not edit the file
+	 * If it is true, you can not edit the files
 	 */
     @SerializedName("readonly_mode")
     public boolean readonly_mode = false;
