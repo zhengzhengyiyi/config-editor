@@ -5,7 +5,8 @@ import net.minecraft.client.gui.DrawContext;
 import java.util.*;
 
 public class SyntaxHighlighter {
-    private enum TokenType {
+    
+    public enum TokenType {
         BRACE_LEFT, BRACE_RIGHT,
         BRACKET_LEFT, BRACKET_RIGHT,
         COLON, COMMA,
@@ -26,6 +27,42 @@ public class SyntaxHighlighter {
             this.type = type;
             this.content = content;
         }
+    }
+    
+    public static int getCharIndexFromTokens(TextRenderer textRenderer, String line, int targetX) {
+        if (line.isEmpty()) return 0;
+        
+        for (int i = 0; i <= line.length(); i++) {
+            int width = getTextWidthUpToChar(textRenderer, line, i);
+            if (width >= targetX) {
+                return i;
+            }
+        }
+        return line.length();
+    }
+    
+    public static int getTextWidthUpToChar(TextRenderer textRenderer, String line, int charIndex) {
+        if (line.isEmpty() || charIndex <= 0) return 0;
+        
+        List<Token> tokens = tokenizeLine(line);
+        int currentCharIndex = 0;
+        int totalWidth = 0;
+        
+        for (Token token : tokens) {
+            int tokenLength = token.content.length();
+            if (currentCharIndex + tokenLength >= charIndex) {
+                int charsInThisToken = charIndex - currentCharIndex;
+                if (charsInThisToken > 0) {
+                    totalWidth += textRenderer.getWidth(token.content.substring(0, charsInThisToken));
+                }
+                break;
+            } else {
+                totalWidth += textRenderer.getWidth(token.content);
+                currentCharIndex += tokenLength;
+            }
+        }
+        
+        return totalWidth;
     }
     
     public static void drawHighlightedText(DrawContext context, TextRenderer textRenderer, String text, int x, int y, boolean editable) {
@@ -56,13 +93,16 @@ public class SyntaxHighlighter {
             if (c == '"') {
                 if (!inString) {
                     inString = true;
-                    currentToken.setLength(0);
+                    tokens.add(new Token(TokenType.TEXT, "\""));
                 } else {
                     inString = false;
-                    TokenType type = isKey ? TokenType.KEY : (expectValue ? TokenType.STRING_VALUE : TokenType.TEXT);
-                    tokens.add(new Token(type, currentToken.toString()));
-                    currentToken.setLength(0);
-                    if (type == TokenType.KEY) expectValue = true;
+                    if (currentToken.length() > 0) {
+                        TokenType type = isKey ? TokenType.KEY : (expectValue ? TokenType.STRING_VALUE : TokenType.TEXT);
+                        tokens.add(new Token(type, currentToken.toString()));
+                        currentToken.setLength(0);
+                        if (type == TokenType.KEY) expectValue = true;
+                    }
+                    tokens.add(new Token(TokenType.TEXT, "\""));
                 }
             } else if (inString) {
                 currentToken.append(c);
@@ -167,7 +207,7 @@ public class SyntaxHighlighter {
             case NUMBER_VALUE:
                 return 0xFFAE81FF;
             case BOOLEAN_VALUE:
-                return 0xFFF92672;
+                return 0xFF569CD6;
             case NULL_VALUE:
                 return 0xFFF92672;
             case TEXT:

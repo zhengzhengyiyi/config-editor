@@ -80,7 +80,8 @@ public class MultilineEditor extends ClickableWidget {
                 int remaining = this.cursorPosition;
                 for (int i = 0; i < lines.length; i++) {
                     if (remaining <= lines[i].length()) {
-                        xPos += this.textRenderer.getWidth(lines[i].substring(0, remaining));
+//                        xPos += this.textRenderer.getWidth(lines[i].substring(0, remaining));
+                    	xPos += SyntaxHighlighter.getTextWidthUpToChar(this.textRenderer, lines[i], remaining);
                         lineIndex = i;
                         break;
                     }
@@ -116,14 +117,16 @@ public class MultilineEditor extends ClickableWidget {
             
             int clickedX = (int)mouseX - (this.getX() + 4);
             
-            int charIndex = 0;
-            for (int i = 1; i <= line.length(); i++) {
-                if (this.textRenderer.getWidth(line.substring(0, i)) > clickedX) {
-                    charIndex = i - 1;
-                    break;
-                }
-                charIndex = i;
-            }
+//            int charIndex = 0;
+//            for (int i = 1; i <= line.length(); i++) {
+//                if (this.textRenderer.getWidth(line.substring(0, i)) > clickedX) {
+//                    charIndex = i - 1;
+//                    break;
+//                }
+//                charIndex = i;
+//            }
+            
+            int charIndex = SyntaxHighlighter.getCharIndexFromTokens(this.textRenderer, line, clickedX);
             
             int newPosition = 0;
             for (int i = 0; i < lineIndex; i++) {
@@ -147,6 +150,43 @@ public class MultilineEditor extends ClickableWidget {
             return false;
         }
     }
+    
+//    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+//        if (this.isMouseOver(mouseX, mouseY) && this.editable) {
+//            this.setFocused(true);
+//            
+//            int lineHeight = this.textRenderer.fontHeight + 2;
+//            int clickedY = (int)mouseY - (this.getY() + 4);
+//            int lineIndex = MathHelper.clamp(clickedY / lineHeight + this.scrollOffset, 0, this.text.split("\n", -1).length - 1);
+//            
+//            String[] lines = this.text.split("\n", -1);
+//            String line = lines[lineIndex];
+//            
+//            int clickedX = (int)mouseX - (this.getX() + 4);
+//            
+//            int charIndex = SyntaxHighlighter.getCharIndexFromTokens(textRenderer, line, clickedX);
+//            
+//            int newPosition = 0;
+//            for (int i = 0; i < lineIndex; i++) {
+//                newPosition += lines[i].length() + 1;
+//            }
+//            newPosition += charIndex;
+//            
+//            this.cursorPosition = MathHelper.clamp(newPosition, 0, this.text.length());
+//            
+//            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+//                ActionResult result = entrypoint.onMouseDown((int)Math.round(mouseX), (int)Math.round(mouseY));
+//                if (result == ActionResult.FAIL) {
+//                    return true;
+//                }
+//            }
+//            
+//            return true;
+//        } else {
+//            this.setFocused(false);
+//            return false;
+//        }
+//    }
 
 //    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
