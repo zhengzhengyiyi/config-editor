@@ -18,13 +18,11 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.function.Consumer;
 
 public class MultilineEditor extends ClickableWidget {
     private final TextRenderer textRenderer;
     private String text = "";
-//    private int yOffset = 0;
     private int scrollOffset = 0;
     public static int maxVisibleLines = 10;
     private boolean editable = true;
@@ -38,17 +36,18 @@ public class MultilineEditor extends ClickableWidget {
     private TextSearchEngine searchEngine = new TextSearchEngine();
     private boolean isSearching = false;
     public String searchQuery = "";
-    
-    private int lastCursorX = 0;
+    public int lastCursorX = 0;
+    private List<String> currentSuggestions = new ArrayList<>();
+    private int selectedSuggestion = -1;
+    private boolean showSuggestions = false;
 
     public MultilineEditor(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
         this.textRenderer = MinecraftClient.getInstance().textRenderer;
         this.setFocused(false);
-        System.out.println(lastCursorX);
         
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-        	editable = !ConfigManager.getConfig().readonly_mode;
+            editable = !ConfigManager.getConfig().readonly_mode;
         });
     }
 
@@ -111,6 +110,10 @@ public class MultilineEditor extends ClickableWidget {
         }
         
         renderErrorTooltips(context, mouseX, mouseY, lines, lineHeight, maxVisibleLines);
+        
+        if (showSuggestions && !currentSuggestions.isEmpty()) {
+            renderSuggestions(context, mouseX, mouseY);
+        }
 
         if (lines.length > maxVisibleLines) {
             int scrollbarHeight = Math.max(20, (int)((float)this.height * (float)maxVisibleLines / (float)lines.length));
@@ -171,6 +174,46 @@ public class MultilineEditor extends ClickableWidget {
             }
         }
     }
+    
+    private void renderSuggestions(DrawContext context, int mouseX, int mouseY) {
+        int lineHeight = textRenderer.fontHeight + 2;
+        String[] lines = text.split("\n", -1);
+        
+        int lineIndex = 0;
+        int xPos = getX() + 4 + 12;
+        int remaining = cursorPosition;
+        for (int i = 0; i < lines.length; i++) {
+            if (remaining <= lines[i].length()) {
+                xPos += SyntaxHighlighter.getTextWidthUpToChar(textRenderer, lines[i], remaining);
+                lineIndex = i;
+                break;
+            }
+            remaining -= (lines[i].length() + 1);
+        }
+        
+        int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight + textRenderer.fontHeight;
+        
+        if (yPos + Math.min(currentSuggestions.size(), 5) * lineHeight > getY() + height) {
+            yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight - Math.min(currentSuggestions.size(), 5) * lineHeight;
+        }
+        
+        int suggestionHeight = Math.min(currentSuggestions.size(), 5) * lineHeight;
+        int suggestionWidth = 200;
+        
+        context.fill(xPos, yPos, xPos + suggestionWidth, yPos + suggestionHeight, 0xFF333333);
+        context.drawBorder(xPos, yPos, suggestionWidth, suggestionHeight, 0xFFFFFFFF);
+        
+        int startIndex = Math.max(0, Math.min(selectedSuggestion - 2, currentSuggestions.size() - 5));
+        int endIndex = Math.min(startIndex + 5, currentSuggestions.size());
+        
+        for (int i = startIndex; i < endIndex; i++) {
+            int itemY = yPos + (i - startIndex) * lineHeight;
+            if (i == selectedSuggestion) {
+                context.fill(xPos, itemY, xPos + suggestionWidth, itemY + lineHeight, 0xFF555555);
+            }
+            context.drawText(textRenderer, currentSuggestions.get(i), xPos + 2, itemY + 2, 0xFFFFFFFF, false);
+        }
+    }
 
     private boolean isMouseOverError(int mouseX, int mouseY, JSONError error, String[] lines, int lineHeight, int maxVisibleLines) {
         int lineIndex = error.lineNumber - 1;
@@ -195,6 +238,19 @@ public class MultilineEditor extends ClickableWidget {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    	if (showSuggestions) {
+    		hideSuggestions();
+    		return true;
+    	}
+    	
+        if (showSuggestions && isMouseOverSuggestion(mouseX, mouseY)) {
+            if (selectedSuggestion >= 0 && selectedSuggestion < currentSuggestions.size()) {
+                insertSuggestion(currentSuggestions.get(selectedSuggestion));
+                hideSuggestions();
+                return true;
+            }
+        }
+        
         if (this.isMouseOver(mouseX, mouseY) && this.editable) {
             this.setFocused(true);
             
@@ -205,16 +261,8 @@ public class MultilineEditor extends ClickableWidget {
             String[] lines = this.text.split("\n", -1);
             String line = lines[lineIndex];
             
-            int clickedX = (int)mouseX - (this.getX() + 4);
-            
-//            int charIndex = 0;
-//            for (int i = 1; i <= line.length(); i++) {
-//                if (this.textRenderer.getWidth(line.substring(0, i)) > clickedX) {
-//                    charIndex = i - 1;
-//                    break;
-//                }
-//                charIndex = i;
-//            }
+//            int clickedX = (int)mouseX - (this.getX() + 4);
+            int clickedX = (int)mouseX - (this.getX() + 4 + 12);
             
             int charIndex = SyntaxHighlighter.getCharIndexFromTokens(this.textRenderer, line, clickedX);
             
@@ -225,24 +273,33 @@ public class MultilineEditor extends ClickableWidget {
             newPosition += charIndex;
             
             this.cursorPosition = MathHelper.clamp(newPosition, 0, this.text.length());
-//            this.lastCursorX = this.textRenderer.getWidth(line.substring(0, charIndex));
             
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-            	ActionResult result = entrypoint.onMouseDown((int)Math.round(mouseX), (int)Math.round(mouseY));
+                ActionResult result = entrypoint.onMouseDown((int)Math.round(mouseX), (int)Math.round(mouseY));
                 if (result == ActionResult.FAIL) {
                     return true;
                 }
             }
             
+            updateSuggestions();
             return true;
         } else {
             this.setFocused(false);
+            hideSuggestions();
             return false;
         }
     }
 
-//    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (showSuggestions && isMouseOverSuggestion(mouseX, mouseY)) {
+            if (amount < 0) {
+                selectedSuggestion = Math.min(currentSuggestions.size() - 1, selectedSuggestion + 1);
+            } else {
+                selectedSuggestion = Math.max(0, selectedSuggestion - 1);
+            }
+            return true;
+        }
+        
         if (!this.isMouseOver(mouseX, mouseY)) return false;
         
         int lineHeight = this.textRenderer.fontHeight + 2;
@@ -264,31 +321,54 @@ public class MultilineEditor extends ClickableWidget {
         return this.mouseScrolled(mouseX, mouseY, verticalAmount);
     }
 
-//    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!this.isFocused() || !this.editable) {
             return false;
         }
         
-//        JSONValidator.validateJSON(text);
-        
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-        	ActionResult result = entrypoint.onType(keyCode, scanCode, modifiers);
+            ActionResult result = entrypoint.onType(keyCode, scanCode, modifiers);
             if (result == ActionResult.FAIL) {
                 return true;
             }
         }
 
         boolean controlDown = Screen.hasControlDown();
-//        boolean shiftDown = Screen.hasShiftDown();
+
+        if (showSuggestions && keyCode != GLFW.GLFW_KEY_COMMA && keyCode != GLFW.GLFW_KEY_DELETE) {
+            if (keyCode == GLFW.GLFW_KEY_UP) {
+                selectedSuggestion = Math.max(0, selectedSuggestion - 1);
+                return true;
+            }
+            if (keyCode == GLFW.GLFW_KEY_DOWN) {
+                selectedSuggestion = Math.min(currentSuggestions.size() - 1, selectedSuggestion + 1);
+                return true;
+            }
+            if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_TAB) {
+                if (selectedSuggestion >= 0 && selectedSuggestion < currentSuggestions.size()) {
+                    insertSuggestion(currentSuggestions.get(selectedSuggestion));
+                    hideSuggestions();
+                    return true;
+                }
+            }
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                hideSuggestions();
+                return true;
+            }
+        }
 
         if (controlDown) {
             if (keyCode == GLFW.GLFW_KEY_V) {
                 pasteFromClipboard();
+                updateSuggestions();
                 return true;
             }
             if (keyCode == GLFW.GLFW_KEY_C) {
                 copyToClipboard();
+                return true;
+            }
+            if (keyCode == GLFW.GLFW_KEY_SPACE) {
+                updateSuggestions();
                 return true;
             }
         }
@@ -296,11 +376,13 @@ public class MultilineEditor extends ClickableWidget {
         if (keyCode == GLFW.GLFW_KEY_LEFT) {
             this.cursorPosition = MathHelper.clamp(this.cursorPosition - 1, 0, this.text.length());
             updateCursorX();
+            hideSuggestions();
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_RIGHT) {
             this.cursorPosition = MathHelper.clamp(this.cursorPosition + 1, 0, this.text.length());
             updateCursorX();
+            hideSuggestions();
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
                 entrypoint.onType(keyCode, scanCode, modifiers);
             }
@@ -309,6 +391,7 @@ public class MultilineEditor extends ClickableWidget {
         if (keyCode == GLFW.GLFW_KEY_HOME) {
             this.cursorPosition = getLineStart(this.cursorPosition);
             updateCursorX();
+            hideSuggestions();
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
                 entrypoint.onType(keyCode, scanCode, modifiers);
             }
@@ -317,45 +400,47 @@ public class MultilineEditor extends ClickableWidget {
         if (keyCode == GLFW.GLFW_KEY_END) {
             this.cursorPosition = getLineEnd(this.cursorPosition);
             updateCursorX();
+            hideSuggestions();
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
                 entrypoint.onType(keyCode, scanCode, modifiers);
             }
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_UP) {
-            int lineStart = getLineStart(this.cursorPosition);
-//            int lineEnd = getLineEnd(this.cursorPosition);
-//            int currentLineLength = lineEnd - lineStart;
-            int currentX = this.cursorPosition - lineStart;
-            
-            int prevLineEnd = lineStart > 0 ? getLineEnd(lineStart - 1) : -1;
-            if (prevLineEnd != -1) {
-                int prevLineStart = getLineStart(prevLineEnd);
-                int prevLineLength = prevLineEnd - prevLineStart;
-                int newX = Math.min(currentX, prevLineLength);
-                this.cursorPosition = prevLineStart + newX;
-            }
-            updateCursorX();
-            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-                entrypoint.onType(keyCode, scanCode, modifiers);
+            if (!showSuggestions) {
+                int lineStart = getLineStart(this.cursorPosition);
+                int currentX = this.cursorPosition - lineStart;
+                
+                int prevLineEnd = lineStart > 0 ? getLineEnd(lineStart - 1) : -1;
+                if (prevLineEnd != -1) {
+                    int prevLineStart = getLineStart(prevLineEnd);
+                    int prevLineLength = prevLineEnd - prevLineStart;
+                    int newX = Math.min(currentX, prevLineLength);
+                    this.cursorPosition = prevLineStart + newX;
+                }
+                updateCursorX();
+                for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                    entrypoint.onType(keyCode, scanCode, modifiers);
+                }
             }
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_DOWN) {
-            int lineEnd = getLineEnd(this.cursorPosition);
-//            int currentLineLength = lineEnd - getLineStart(this.cursorPosition);
-            int currentX = this.cursorPosition - getLineStart(this.cursorPosition);
-            
-            int nextLineStart = lineEnd < this.text.length() ? lineEnd + 1 : -1;
-            if (nextLineStart != -1) {
-                int nextLineEnd = getLineEnd(nextLineStart);
-                int nextLineLength = nextLineEnd - nextLineStart;
-                int newX = Math.min(currentX, nextLineLength);
-                this.cursorPosition = nextLineStart + newX;
-            }
-            updateCursorX();
-            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-                entrypoint.onType(keyCode, scanCode, modifiers);
+            if (!showSuggestions) {
+                int lineEnd = getLineEnd(this.cursorPosition);
+                int currentX = this.cursorPosition - getLineStart(this.cursorPosition);
+                
+                int nextLineStart = lineEnd < this.text.length() ? lineEnd + 1 : -1;
+                if (nextLineStart != -1) {
+                    int nextLineEnd = getLineEnd(nextLineStart);
+                    int nextLineLength = nextLineEnd - nextLineStart;
+                    int newX = Math.min(currentX, nextLineLength);
+                    this.cursorPosition = nextLineStart + newX;
+                }
+                updateCursorX();
+                for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                    entrypoint.onType(keyCode, scanCode, modifiers);
+                }
             }
             return true;
         }
@@ -366,6 +451,7 @@ public class MultilineEditor extends ClickableWidget {
                 this.cursorPosition--;
                 this.onTextChanged();
                 updateCursorX();
+                updateSuggestions();
             }
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
                 entrypoint.onType(keyCode, scanCode, modifiers);
@@ -378,6 +464,7 @@ public class MultilineEditor extends ClickableWidget {
                 this.text = this.text.substring(0, this.cursorPosition) + this.text.substring(this.cursorPosition + 1);
                 this.onTextChanged();
                 updateCursorX();
+                updateSuggestions();
             }
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
                 entrypoint.onType(keyCode, scanCode, modifiers);
@@ -390,6 +477,7 @@ public class MultilineEditor extends ClickableWidget {
             this.cursorPosition++;
             this.onTextChanged();
             updateCursorX();
+            hideSuggestions();
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
                 entrypoint.onType(keyCode, scanCode, modifiers);
             }
@@ -399,6 +487,33 @@ public class MultilineEditor extends ClickableWidget {
         return false;
     }
 
+//    @Override
+//    public boolean charTyped(char chr, int modifiers) {
+//        if (!this.isFocused() || !this.editable) {
+//            return false;
+//        }
+//        
+//        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+//            ActionResult result = entrypoint.onCharTyped(chr, modifiers);
+//            if (result == ActionResult.FAIL) {
+//                return true;
+//            }
+//        }
+//        
+//        if (chr >= 32 && chr != 127) {
+//            this.text = this.text.substring(0, this.cursorPosition) + chr + this.text.substring(this.cursorPosition);
+//            this.cursorPosition++;
+//            this.onTextChanged();
+//            updateCursorX();
+//            updateSuggestions();
+//            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+//                entrypoint.onType(chr, 0, modifiers);
+//            }
+//            return true;
+//        }
+//        return false;
+//    }
+    
     @Override
     public boolean charTyped(char chr, int modifiers) {
         if (!this.isFocused() || !this.editable) {
@@ -406,7 +521,7 @@ public class MultilineEditor extends ClickableWidget {
         }
         
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-        	ActionResult result = entrypoint.onCharTyped(chr, modifiers);
+            ActionResult result = entrypoint.onCharTyped(chr, modifiers);
             if (result == ActionResult.FAIL) {
                 return true;
             }
@@ -417,6 +532,13 @@ public class MultilineEditor extends ClickableWidget {
             this.cursorPosition++;
             this.onTextChanged();
             updateCursorX();
+            
+            if (chr != ',' && chr != '\n' && chr != '\r') {
+                updateSuggestions();
+            } else {
+                hideSuggestions();
+            }
+
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
                 entrypoint.onType(chr, 0, modifiers);
             }
@@ -439,6 +561,7 @@ public class MultilineEditor extends ClickableWidget {
         this.cursorPosition = MathHelper.clamp(this.cursorPosition, 0, this.text.length());
         this.onTextChanged();
         updateCursorX();
+        hideSuggestions();
     }
     
     public void setEditable(boolean editable) {
@@ -526,6 +649,7 @@ public class MultilineEditor extends ClickableWidget {
         this.cursorPosition += text.length();
         this.onTextChanged();
         updateCursorX();
+        hideSuggestions();
     }
     
     public int getCursorPosition() {
@@ -535,14 +659,15 @@ public class MultilineEditor extends ClickableWidget {
     public void setCursorPosition(int position) {
         this.cursorPosition = MathHelper.clamp(position, 0, this.text.length());
         updateCursorX();
+        hideSuggestions();
     }
     
     public void setFileName(String v) {
-    	this.filename = v;
+        this.filename = v;
     }
     
     public String getFileName() {
-    	return this.filename;
+        return this.filename;
     }
     
     public void startSearch(String query) {
@@ -552,6 +677,7 @@ public class MultilineEditor extends ClickableWidget {
         if (searchEngine.hasMatches()) {
             scrollToCurrentMatch();
         }
+        hideSuggestions();
     }
     
     public void findNext() {
@@ -604,5 +730,49 @@ public class MultilineEditor extends ClickableWidget {
     
     public int getCurrentSearchIndex() {
         return searchEngine.getCurrentMatchIndex() + 1;
+    }
+    
+    private void updateSuggestions() {
+        currentSuggestions = CodeSuggester.suggestForPosition(text, cursorPosition);
+        showSuggestions = !currentSuggestions.isEmpty();
+        selectedSuggestion = showSuggestions ? 0 : -1;
+    }
+    
+    private void hideSuggestions() {
+        showSuggestions = false;
+        currentSuggestions.clear();
+        selectedSuggestion = -1;
+    }
+    
+    private void insertSuggestion(String suggestion) {
+        insertTextAtCursor(suggestion);
+        hideSuggestions();
+    }
+    
+    private boolean isMouseOverSuggestion(double mouseX, double mouseY) {
+        if (!showSuggestions) return false;
+        
+        int lineHeight = textRenderer.fontHeight + 2;
+//        int maxVisibleLines = this.height / lineHeight;
+        String[] lines = text.split("\n", -1);
+        
+        int lineIndex = 0;
+        int xPos = getX() + 4 + 12;
+        int remaining = cursorPosition;
+        for (int i = 0; i < lines.length; i++) {
+            if (remaining <= lines[i].length()) {
+                xPos += SyntaxHighlighter.getTextWidthUpToChar(textRenderer, lines[i], remaining);
+                lineIndex = i;
+                break;
+            }
+            remaining -= (lines[i].length() + 1);
+        }
+        
+        int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight + textRenderer.fontHeight;
+        int suggestionHeight = Math.min(currentSuggestions.size(), 5) * lineHeight;
+        int suggestionWidth = 200;
+        
+        return mouseX >= xPos && mouseX <= xPos + suggestionWidth &&
+               mouseY >= yPos && mouseY <= yPos + suggestionHeight;
     }
 }
