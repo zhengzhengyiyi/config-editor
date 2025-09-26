@@ -26,5 +26,7 @@
   
   "configeditor.theme.dark": "dark",
   "configeditor.theme.light": "light",
-  "configeditor.theme.auto": "auto"
+  "configeditor.theme.auto": "auto",
+  
+  "configEditor.test": "test"
 }

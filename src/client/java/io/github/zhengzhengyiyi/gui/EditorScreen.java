@@ -235,22 +235,23 @@ public class EditorScreen extends Screen {
     }
 
     private void switchFile(int index) {
-        if (modified) {
-            ConfirmScreen confirmScreen = new ConfirmScreen(
-                result -> {
-                    if (result) {
-                        saveFileAsync(() -> loadFile(index));
-                    } else {
-                        loadFile(index);
-                    }
-                },
-                Text.translatable("configeditor.confirm.title"),
-                Text.translatable("configeditor.confirm.unsaved")
-            );
-            this.client.setScreen(confirmScreen);
-        } else {
-            loadFile(index);
-        }
+    	loadFile(index);
+//        if (modified) {
+//            ConfirmScreen confirmScreen = new ConfirmScreen(
+//                result -> {
+//                    if (result) {
+//                        saveFileAsync(() -> loadFile(index));
+//                    } else {
+//                        loadFile(index);
+//                    }
+//                },
+//                Text.translatable("configeditor.confirm.title"),
+//                Text.translatable("configeditor.confirm.unsaved")
+//            );
+//            this.client.setScreen(confirmScreen);
+//        } else {
+//            loadFile(index);
+//        }
     }
 
     private void loadFile(int index) {

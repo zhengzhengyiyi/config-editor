@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.Text;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -82,5 +83,16 @@ public class ConfigEditorClient implements ClientModInitializer {
 		ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             ConfigManager.shutdown();
         });
+		
+//		testLanguageResources();
+	}
+	
+	public static void testLanguageResources() {
+		Text test = Text.translatable("configEditor.test");
+		
+		LOGGER.info("----------------test------------------");
+		LOGGER.info(test.toString());
+		LOGGER.info(test.getLiteralString());
+		LOGGER.info("--------------test-ended--------------");
 	}
 }

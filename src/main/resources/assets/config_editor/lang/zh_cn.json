@@ -26,5 +26,7 @@
   
   "configeditor.theme.dark": "暗色",
   "configeditor.theme.light": "亮色",
-  "configeditor.theme.auto": "自动"
+  "configeditor.theme.auto": "自动",
+  
+  "configEditor.test": "测试"
 }
