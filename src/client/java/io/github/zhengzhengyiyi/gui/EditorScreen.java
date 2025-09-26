@@ -6,6 +6,9 @@ import com.google.gson.JsonSyntaxException;
 
 import io.github.zhengzhengyiyi.util.BackupHelper;
 import io.github.zhengzhengyiyi.*;
+import io.github.zhengzhengyiyi.config.ConfigData;
+import io.github.zhengzhengyiyi.config.ConfigManager;
+import io.github.zhengzhengyiyi.gui.theme.ThemeManager;
 import io.github.zhengzhengyiyi.gui.widget.*;
 
 import com.google.gson.Gson;
@@ -46,6 +49,8 @@ public class EditorScreen extends Screen {
     private ButtonWidget searchNextButton;
     private ButtonWidget searchPrevButton;
     private boolean searchVisible = false;
+    private ThemeManager themeManager;
+    private ButtonWidget themeToggleButton;
 
     public EditorScreen() {
         super(Text.translatable("configeditor.title"));
@@ -54,6 +59,14 @@ public class EditorScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        
+        themeManager = ThemeManager.getInstance();
+        themeToggleButton = ButtonWidget.builder(
+                Text.translatable(getThemeButtonText()),
+                button -> toggleTheme())
+                .dimensions(this.width - 350, 5, 45, 16)
+                .build();
+        this.addDrawableChild(themeToggleButton);
         
         try {
             Path configDir = FabricLoader.getInstance().getConfigDir();
@@ -122,7 +135,6 @@ public class EditorScreen extends Screen {
                 .build();
         this.addDrawableChild(exitButton);
         
-        // 搜索组件 - 调整了位置和大小避免重叠
         searchField = new TextFieldWidget(textRenderer, this.width - 250, 5, 120, 16, Text.translatable("configeditor.search.placeholder"));
         searchField.setVisible(false);
         addDrawableChild(searchField);
@@ -143,7 +155,6 @@ public class EditorScreen extends Screen {
         searchPrevButton.visible = false;
         addDrawableChild(searchPrevButton);
         
-        // 搜索按钮变小并调整位置
         addDrawableChild(ButtonWidget.builder(Text.translatable("configeditor.button.search"), button -> {
             toggleSearch();
         }).dimensions(this.width - 300, 5, 45, 16).build());
@@ -260,7 +271,7 @@ public class EditorScreen extends Screen {
                 } else {
                     client.execute(() -> {
                         updateButtonStates();
-                        showMessagePopup(Text.translatable("configeditor.message.saved"));
+//                        showMessagePopup(Text.translatable("configeditor.message.saved"));
                     });
                 }
             } catch (Exception e) {
@@ -292,7 +303,7 @@ public class EditorScreen extends Screen {
         ));
     }
 
-    private void showMessagePopup(Text message) {
+    public void showMessagePopup(Text message) {
         client.setScreen(new ConfirmScreen(
         	result -> {
         		this.close();
@@ -305,12 +316,14 @@ public class EditorScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+//        super.render(context, mouseX, mouseY, delta);
+    	if (ConfigManager.getConfig().doRenderBackground) context.fill(0, 0, this.width, this.height, themeManager.getBackgroundColor());
         super.render(context, mouseX, mouseY, delta);
         
         if (!configFiles.isEmpty()) {
             String status = modified ? "* " + configFiles.get(selectedIndex).getFileName().toString() : 
                 configFiles.get(selectedIndex).getFileName().toString();
-            context.drawText(this.textRenderer, status, 170, 5, modified ? 0xFF5555 : 0xFFFFFF, false);
+            context.drawText(this.textRenderer, status, 170, 5, modified ? 0xFFFF00 : 0xFFFFFF, false);
         }
     }
 
@@ -398,5 +411,24 @@ public class EditorScreen extends Screen {
         }
         
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+    
+    private void toggleTheme() {
+        ConfigData config = ConfigManager.getConfig();
+        switch (config.theme) {
+            case DARK -> config.theme = ConfigData.ThemeMode.LIGHT;
+            case LIGHT -> config.theme = ConfigData.ThemeMode.AUTO;
+            case AUTO -> config.theme = ConfigData.ThemeMode.DARK;
+        }
+        ConfigManager.save();
+        themeToggleButton.setMessage(Text.translatable(getThemeButtonText()));
+    }
+    
+    private String getThemeButtonText() {
+        return switch (ConfigManager.getConfig().theme) {
+            case DARK -> "configeditor.theme.dark";
+            case LIGHT -> "configeditor.theme.light";
+            case AUTO -> "configeditor.theme.auto";
+        };
     }
 }

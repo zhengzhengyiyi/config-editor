@@ -22,5 +22,9 @@
   "configeditor.error.invalidjson": "JSON语法无效",
   
   "configeditor.message.title": "信息",
-  "configeditor.message.saved": "文件保存成功"
+  "configeditor.message.saved": "文件保存成功",
+  
+  "configeditor.theme.dark": "暗色",
+  "configeditor.theme.light": "亮色",
+  "configeditor.theme.auto": "自动"
 }

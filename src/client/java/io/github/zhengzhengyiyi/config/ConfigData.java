@@ -18,4 +18,21 @@ public class ConfigData {
      */
     @SerializedName("hint")
     public boolean hint = true;
+    
+    /**
+     * The theme of the editor {@link ThemeMode}
+     */
+    public ThemeMode theme = ThemeMode.DARK;
+    
+    /**
+     * If true, it will use theme to render background
+     */
+    public boolean doRenderBackground = false;
+    
+    /**
+     * The theme can be either dark, light and auto
+     */
+    public enum ThemeMode {
+        DARK, LIGHT, AUTO
+    }
 }

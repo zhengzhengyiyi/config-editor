@@ -22,5 +22,9 @@
   "configeditor.error.invalidjson": "Invalid JSON syntax",
   
   "configeditor.message.title": "Information",
-  "configeditor.message.saved": "File saved successfully"
+  "configeditor.message.saved": "File saved successfully",
+  
+  "configeditor.theme.dark": "dark",
+  "configeditor.theme.light": "light",
+  "configeditor.theme.auto": "auto"
 }
