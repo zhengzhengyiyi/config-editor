@@ -19,8 +19,12 @@ import net.minecraft.util.Util;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -289,6 +293,41 @@ public class EditorScreen extends Screen {
         saveFileAsync(null);
     }
 
+//    private void saveFileAsync(Runnable callback) {
+//        if (configFiles.isEmpty()) return;
+//        
+//        Path file = configFiles.get(selectedIndex);
+//        String content = multilineEditor.getText();
+//        
+//        try {
+//            JsonParser.parseString(content);
+//        } catch (JsonSyntaxException e) {
+//            LOGGER.warn("Invalid JSON syntax in file: {}", file.getFileName());
+//            showErrorPopup(Text.translatable("configeditor.error.invalidjson"));
+//            return;
+//        }
+//        
+//        new Thread(() -> {
+//            try {
+//                Files.writeString(file, content);
+//                modified = false;
+//                LOGGER.info("Successfully saved config file: {}", file.getFileName());
+//                
+//                if (callback != null) {
+//                    client.execute(callback);
+//                } else {
+//                    client.execute(() -> {
+//                        updateButtonStates();
+//                    });
+//                }
+//            } catch (Exception e) {
+//                LOGGER.error("Failed to save config file: {}", file.getFileName(), e);
+//                client.execute(() -> 
+//                    showErrorPopup(Text.translatable("configeditor.error.savefailed")));
+//            }
+//        }).start();
+//    }
+    
     private void saveFileAsync(Runnable callback) {
         if (configFiles.isEmpty()) return;
         
@@ -304,23 +343,56 @@ public class EditorScreen extends Screen {
         }
         
         new Thread(() -> {
-            try {
-                Files.writeString(file, content);
-                modified = false;
-                LOGGER.info("Successfully saved config file: {}", file.getFileName());
-                
-                if (callback != null) {
-                    client.execute(callback);
-                } else {
-                    client.execute(() -> {
-                        updateButtonStates();
-                    });
+            int retryCount = 0;
+            final int maxRetries = 3;
+            
+            while (retryCount <= maxRetries) {
+                try {
+                    try (FileChannel channel = FileChannel.open(file, 
+                         StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+                        FileLock lock = channel.tryLock(0, Long.MAX_VALUE, false);
+                        if (lock != null) {
+                            try {
+                                Files.writeString(file, content, StandardOpenOption.TRUNCATE_EXISTING);
+                                modified = false;
+                                LOGGER.info("Successfully saved config file: {}", file.getFileName());
+                                
+                                if (callback != null) {
+                                    client.execute(callback);
+                                } else {
+                                    client.execute(this::updateButtonStates);
+                                }
+                                return;
+                            } finally {
+                                lock.release();
+                            }
+                        }
+                    }
+                    
+                    retryCount++;
+                    if (retryCount <= maxRetries) {
+                        Thread.sleep(300);
+                    }
+                    
+                } catch (Exception e) {
+                    retryCount++;
+                    if (retryCount > maxRetries) {
+                        LOGGER.error("Failed to save config file after {} attempts: {}", maxRetries, file.getFileName(), e);
+                        client.execute(() -> {
+                            if (this.client.currentScreen != null && this.client.currentScreen.equals(this)) {
+                                showErrorPopup(Text.translatable("configeditor.error.savefailed"));
+                            }
+                        });
+                    }
                 }
-            } catch (Exception e) {
-                LOGGER.error("Failed to save config file: {}", file.getFileName(), e);
-                client.execute(() -> 
-                    showErrorPopup(Text.translatable("configeditor.error.savefailed")));
             }
+            
+            client.execute(() -> {
+                if (this.client.currentScreen != null && this.client.currentScreen.equals(this)) {
+                    showErrorPopup(Text.translatable("configeditor.error.fileretryfailed"));
+                }
+            });
+            
         }).start();
     }
     
@@ -428,6 +500,12 @@ public class EditorScreen extends Screen {
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    	if (keyCode == GLFW.GLFW_KEY_Q && hasControlDown() && hasAltDown()) {
+            this.client.setScreen(null);
+            LOGGER.info("Config editor force closed by user shortcut");
+            return true;
+        }
+    	
         if (multilineEditor == null) return super.keyPressed(keyCode, scanCode, modifiers);
         
         if (searchVisible) {
