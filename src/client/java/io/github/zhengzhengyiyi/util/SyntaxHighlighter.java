@@ -189,6 +189,19 @@ public class SyntaxHighlighter {
         return tokens;
     }
     
+    public static int getTextWidth(TextRenderer textRenderer, String text) {
+        if (text == null || text.isEmpty()) return 0;
+        
+        List<Token> tokens = tokenizeLine(text);
+        int totalWidth = 0;
+        
+        for (Token token : tokens) {
+            totalWidth += textRenderer.getWidth(token.content);
+        }
+        
+        return totalWidth;
+    }
+    
     private static int getTokenColor(TokenType type, boolean editable) {
         int defaultColor = editable ? 0xFFFFFFFF : 0xFFAAAAAA;
         

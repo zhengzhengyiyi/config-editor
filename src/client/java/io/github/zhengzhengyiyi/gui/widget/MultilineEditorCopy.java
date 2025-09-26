@@ -20,14 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class MultilineEditor extends ClickableWidget {
+public class MultilineEditorCopy extends ClickableWidget {
     private final TextRenderer textRenderer;
-    private boolean isDraggingHorizontalScroll = false;
-    private int dragStartX = 0;
-    private int dragStartScrollOffset = 0;
     private String text = "";
     private int scrollOffset = 0;
-    private int horizontalScrollOffset = 0;
     public static int maxVisibleLines = 10;
     private boolean editable = true;
     private Consumer<String> changedListener;
@@ -44,9 +40,8 @@ public class MultilineEditor extends ClickableWidget {
     private List<String> currentSuggestions = new ArrayList<>();
     private int selectedSuggestion = -1;
     private boolean showSuggestions = false;
-    private int maxLineWidth = 0;
 
-    public MultilineEditor(int x, int y, int width, int height, Text message) {
+    public MultilineEditorCopy(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
         this.textRenderer = MinecraftClient.getInstance().textRenderer;
         this.setFocused(false);
@@ -56,176 +51,75 @@ public class MultilineEditor extends ClickableWidget {
         });
     }
 
-//    @Override
-//    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-//        if (!this.visible) {
-//            return;
-//        }
-//
-//        context.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFF000000);
-//        context.drawBorder(this.getX(), this.getY(), this.width, this.height, 0xFFFFFFFF);
-//
-//        String[] lines = this.text.split("\n", -1);
-//        int lineHeight = this.textRenderer.fontHeight + 2;
-//        int maxVisibleLines = this.height / lineHeight;
-//
-//        calculateMaxLineWidth(lines);
-//
-//        if (isSearching && !searchQuery.isEmpty()) {
-//            renderSearchHighlights(context, lines, lineHeight, maxVisibleLines);
-//        }
-//
-//        for (int i = 0; i < lines.length; i++) {
-//            if (i >= this.scrollOffset && i < this.scrollOffset + maxVisibleLines) {
-//                int yPos = this.getY() + 4 + (i - this.scrollOffset) * lineHeight;
-//                String lineNum = String.valueOf(i + 1);
-//                context.drawText(textRenderer, lineNum, this.getX() + 2 - horizontalScrollOffset, yPos, 0xFF888888, false);
-//                SyntaxHighlighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4 + 12 - horizontalScrollOffset, yPos, this.editable);
-//            }
-//        }
-//        
-//        renderErrorUnderlines(context, lines, lineHeight, maxVisibleLines);
-//
-//        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-//            entrypoint.renderButton(context, mouseX, mouseY, delta);
-//        }
-//
-//        if (this.isFocused() && this.editable) {
-//            long currentTime = Util.getMeasuringTimeNano();
-//            if (currentTime - lastCursorBlinkTime > 500000000) {
-//                cursorVisible = !cursorVisible;
-//                lastCursorBlinkTime = currentTime;
-//            }
-//            if (cursorVisible) {
-//                int lineIndex = 0;
-//                int xPos = this.getX() + 4 + 12;
-//                int remaining = this.cursorPosition;
-//                for (int i = 0; i < lines.length; i++) {
-//                    if (remaining <= lines[i].length()) {
-//                        xPos += SyntaxHighlighter.getTextWidthUpToChar(this.textRenderer, lines[i], remaining);
-//                        lineIndex = i;
-//                        break;
-//                    }
-//                    remaining -= (lines[i].length() + 1);
-//                }
-//                
-//                if (lineIndex >= this.scrollOffset && lineIndex < this.scrollOffset + maxVisibleLines) {
-//                    int yPos = this.getY() + 4 + (lineIndex - this.scrollOffset) * lineHeight;
-//                    context.drawVerticalLine(xPos - horizontalScrollOffset, yPos - 1, yPos + this.textRenderer.fontHeight + 1, 0xFFFFFFFF);
-//                }
-//            }
-//        }
-//        
-//        renderErrorTooltips(context, mouseX, mouseY, lines, lineHeight, maxVisibleLines);
-//        
-//        if (showSuggestions && !currentSuggestions.isEmpty()) {
-//            renderSuggestions(context, mouseX, mouseY);
-//        }
-//
-//        renderScrollBars(context, lines.length, maxVisibleLines);
-//    }
-    
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         if (!this.visible) {
             return;
         }
 
-        context.enableScissor(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height);
+        context.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFF000000);
+        context.drawBorder(this.getX(), this.getY(), this.width, this.height, 0xFFFFFFFF);
+
+        String[] lines = this.text.split("\n", -1);
+        int lineHeight = this.textRenderer.fontHeight + 2;
+        int maxVisibleLines = this.height / lineHeight;
+
+        if (isSearching && !searchQuery.isEmpty()) {
+            renderSearchHighlights(context, lines, lineHeight, maxVisibleLines);
+        }
+
+        for (int i = 0; i < lines.length; i++) {
+            if (i >= this.scrollOffset && i < this.scrollOffset + maxVisibleLines) {
+                int yPos = this.getY() + 4 + (i - this.scrollOffset) * lineHeight;
+                String lineNum = String.valueOf(i + 1);
+                context.drawText(textRenderer, lineNum, this.getX() + 2, yPos, 0xFF888888, false);
+                SyntaxHighlighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4 + 12, yPos, this.editable);
+            }
+        }
         
-        try {
-            context.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFF000000);
-            context.drawBorder(this.getX(), this.getY(), this.width, this.height, 0xFFFFFFFF);
+        renderErrorUnderlines(context, lines, lineHeight, maxVisibleLines);
 
-            String[] lines = this.text.split("\n", -1);
-            int lineHeight = this.textRenderer.fontHeight + 2;
-            int maxVisibleLines = this.height / lineHeight;
+        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+            entrypoint.renderButton(context, mouseX, mouseY, delta);
+        }
 
-            calculateMaxLineWidth(lines);
-
-            if (isSearching && !searchQuery.isEmpty()) {
-                renderSearchHighlights(context, lines, lineHeight, maxVisibleLines);
+        if (this.isFocused() && this.editable) {
+            long currentTime = Util.getMeasuringTimeNano();
+            if (currentTime - lastCursorBlinkTime > 500000000) {
+                cursorVisible = !cursorVisible;
+                lastCursorBlinkTime = currentTime;
             }
-
-            for (int i = 0; i < lines.length; i++) {
-                if (i >= this.scrollOffset && i < this.scrollOffset + maxVisibleLines) {
-                    int yPos = this.getY() + 4 + (i - this.scrollOffset) * lineHeight;
-                    String lineNum = String.valueOf(i + 1);
-                    context.drawText(textRenderer, lineNum, this.getX() + 2 - horizontalScrollOffset, yPos, 0xFF888888, false);
-                    SyntaxHighlighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4 + 12 - horizontalScrollOffset, yPos, this.editable);
-                }
-            }
-            
-            renderErrorUnderlines(context, lines, lineHeight, maxVisibleLines);
-
-            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-                entrypoint.renderButton(context, mouseX, mouseY, delta);
-            }
-
-            if (this.isFocused() && this.editable) {
-                long currentTime = Util.getMeasuringTimeNano();
-                if (currentTime - lastCursorBlinkTime > 500000000) {
-                    cursorVisible = !cursorVisible;
-                    lastCursorBlinkTime = currentTime;
-                }
-                if (cursorVisible) {
-                    int lineIndex = 0;
-                    int xPos = this.getX() + 4 + 12;
-                    int remaining = this.cursorPosition;
-                    for (int i = 0; i < lines.length; i++) {
-                        if (remaining <= lines[i].length()) {
-                            xPos += SyntaxHighlighter.getTextWidthUpToChar(this.textRenderer, lines[i], remaining);
-                            lineIndex = i;
-                            break;
-                        }
-                        remaining -= (lines[i].length() + 1);
+            if (cursorVisible) {
+                int lineIndex = 0;
+                int xPos = this.getX() + 4 + 12;
+                int remaining = this.cursorPosition;
+                for (int i = 0; i < lines.length; i++) {
+                    if (remaining <= lines[i].length()) {
+                        xPos += SyntaxHighlighter.getTextWidthUpToChar(this.textRenderer, lines[i], remaining);
+                        lineIndex = i;
+                        break;
                     }
-                    
-                    if (lineIndex >= this.scrollOffset && lineIndex < this.scrollOffset + maxVisibleLines) {
-                        int yPos = this.getY() + 4 + (lineIndex - this.scrollOffset) * lineHeight;
-                        context.drawVerticalLine(xPos - horizontalScrollOffset, yPos - 1, yPos + this.textRenderer.fontHeight + 1, 0xFFFFFFFF);
-                    }
+                    remaining -= (lines[i].length() + 1);
+                }
+                
+                if (lineIndex >= this.scrollOffset && lineIndex < this.scrollOffset + maxVisibleLines) {
+                    int yPos = this.getY() + 4 + (lineIndex - this.scrollOffset) * lineHeight;
+                    context.drawVerticalLine(xPos, yPos - 1, yPos + this.textRenderer.fontHeight + 1, 0xFFFFFFFF);
                 }
             }
-            
-            renderErrorTooltips(context, mouseX, mouseY, lines, lineHeight, maxVisibleLines);
-            
-            if (showSuggestions && !currentSuggestions.isEmpty()) {
-                renderSuggestions(context, mouseX, mouseY);
-            }
-
-            renderScrollBars(context, lines.length, maxVisibleLines);
-        } finally {
-            context.disableScissor();
-        }
-    }
-
-    private void calculateMaxLineWidth(String[] lines) {
-        maxLineWidth = 0;
-        for (String line : lines) {
-            int lineWidth = SyntaxHighlighter.getTextWidth(this.textRenderer, line);
-            maxLineWidth = Math.max(maxLineWidth, lineWidth);
-        }
-    }
-
-    private void renderScrollBars(DrawContext context, int totalLines, int maxVisibleLines) {
-        int scrollbarWidth = 5;
-        
-        if (totalLines > maxVisibleLines) {
-            int scrollbarHeight = Math.max(20, (int)((float)this.height * (float)maxVisibleLines / (float)totalLines));
-            int scrollbarY = this.getY() + (int)((float)(this.height - scrollbarHeight) * (float)this.scrollOffset / (float)(totalLines - maxVisibleLines));
-            context.fill(this.getX() + this.width - scrollbarWidth, this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFF555555);
-            context.fill(this.getX() + this.width - scrollbarWidth + 1, scrollbarY, this.getX() + this.width - 1, scrollbarY + scrollbarHeight, 0xFFBBBBBB);
         }
         
-        if (maxLineWidth > this.width - 20) {
-            int visibleWidth = this.width - 20;
-            int scrollbarHeight = 5;
-            int scrollbarX = this.getX() + (int)((float)(this.width - scrollbarWidth) * (float)this.horizontalScrollOffset / (float)(maxLineWidth - visibleWidth));
-            int scrollbarY = this.getY() + this.height - scrollbarHeight;
-            
-            context.fill(this.getX(), this.getY() + this.height - scrollbarHeight, this.getX() + this.width, this.getY() + this.height, 0xFF555555);
-            context.fill(scrollbarX, scrollbarY, scrollbarX + Math.max(20, (int)((float)this.width * (float)visibleWidth / (float)maxLineWidth)), scrollbarY + scrollbarHeight, 0xFFBBBBBB);
+        renderErrorTooltips(context, mouseX, mouseY, lines, lineHeight, maxVisibleLines);
+        
+        if (showSuggestions && !currentSuggestions.isEmpty()) {
+            renderSuggestions(context, mouseX, mouseY);
+        }
+
+        if (lines.length > maxVisibleLines) {
+            int scrollbarHeight = Math.max(20, (int)((float)this.height * (float)maxVisibleLines / (float)lines.length));
+            int scrollbarY = this.getY() + (int)((float)(this.height - scrollbarHeight) * (float)this.scrollOffset / (float)(lines.length - maxVisibleLines));
+            context.fill(this.getX() + this.width - 5, this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFF555555);
+            context.fill(this.getX() + this.width - 4, scrollbarY, this.getX() + this.width - 1, scrollbarY + scrollbarHeight, 0xFFBBBBBB);
         }
     }
 
@@ -238,7 +132,7 @@ public class MultilineEditor extends ClickableWidget {
             
             if (lineIndex >= scrollOffset && lineIndex < scrollOffset + maxVisibleLines) {
                 int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight;
-                int xBase = getX() + 4 + 12 - horizontalScrollOffset;
+                int xBase = getX() + 4 + 12;
                 
                 for (int matchPos : searchEngine.matchPositions) {
                     if (matchPos >= currentLineStart && matchPos < currentLineStart + line.length()) {
@@ -286,7 +180,7 @@ public class MultilineEditor extends ClickableWidget {
         String[] lines = text.split("\n", -1);
         
         int lineIndex = 0;
-        int xPos = getX() + 4 + 12 - horizontalScrollOffset;
+        int xPos = getX() + 4 + 12;
         int remaining = cursorPosition;
         for (int i = 0; i < lines.length; i++) {
             if (remaining <= lines[i].length()) {
@@ -332,7 +226,7 @@ public class MultilineEditor extends ClickableWidget {
                 
                 if (errorStartInLine < errorEndInLine) {
                     String beforeError = line.substring(0, errorStartInLine);
-                    int xStart = getX() + 4 + textRenderer.getWidth(beforeError) - horizontalScrollOffset;
+                    int xStart = getX() + 4 + textRenderer.getWidth(beforeError);
                     int xEnd = xStart + textRenderer.getWidth(line.substring(errorStartInLine, errorEndInLine));
                     
                     return mouseX >= xStart && mouseX <= xEnd;
@@ -341,21 +235,14 @@ public class MultilineEditor extends ClickableWidget {
         }
         return false;
     }
-    
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (showSuggestions) {
-            hideSuggestions();
-            return true;
-        }
-        
-        if (isMouseOverHorizontalScrollBar(mouseX, mouseY)) {
-            isDraggingHorizontalScroll = true;
-            dragStartX = (int) mouseX;
-            dragStartScrollOffset = horizontalScrollOffset;
-            return true;
-        }
-        
+    	if (showSuggestions) {
+    		hideSuggestions();
+    		return true;
+    	}
+    	
         if (showSuggestions && isMouseOverSuggestion(mouseX, mouseY)) {
             if (selectedSuggestion >= 0 && selectedSuggestion < currentSuggestions.size()) {
                 insertSuggestion(currentSuggestions.get(selectedSuggestion));
@@ -374,7 +261,8 @@ public class MultilineEditor extends ClickableWidget {
             String[] lines = this.text.split("\n", -1);
             String line = lines[lineIndex];
             
-            int clickedX = (int)mouseX - (this.getX() + 4 + 12) + horizontalScrollOffset;
+//            int clickedX = (int)mouseX - (this.getX() + 4);
+            int clickedX = (int)mouseX - (this.getX() + 4 + 12);
             
             int charIndex = SyntaxHighlighter.getCharIndexFromTokens(this.textRenderer, line, clickedX);
             
@@ -402,63 +290,6 @@ public class MultilineEditor extends ClickableWidget {
         }
     }
 
-//    @Override
-//    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-//        if (showSuggestions) {
-//            hideSuggestions();
-//            return true;
-//        }
-//        
-//        if (isMouseOverHorizontalScrollBar(mouseX, mouseY)) {
-//            return true;
-//        }
-//        
-//        if (showSuggestions && isMouseOverSuggestion(mouseX, mouseY)) {
-//            if (selectedSuggestion >= 0 && selectedSuggestion < currentSuggestions.size()) {
-//                insertSuggestion(currentSuggestions.get(selectedSuggestion));
-//                hideSuggestions();
-//                return true;
-//            }
-//        }
-//        
-//        if (this.isMouseOver(mouseX, mouseY) && this.editable) {
-//            this.setFocused(true);
-//            
-//            int lineHeight = this.textRenderer.fontHeight + 2;
-//            int clickedY = (int)mouseY - (this.getY() + 4);
-//            int lineIndex = MathHelper.clamp(clickedY / lineHeight + this.scrollOffset, 0, this.text.split("\n", -1).length - 1);
-//            
-//            String[] lines = this.text.split("\n", -1);
-//            String line = lines[lineIndex];
-//            
-//            int clickedX = (int)mouseX - (this.getX() + 4 + 12) + horizontalScrollOffset;
-//            
-//            int charIndex = SyntaxHighlighter.getCharIndexFromTokens(this.textRenderer, line, clickedX);
-//            
-//            int newPosition = 0;
-//            for (int i = 0; i < lineIndex; i++) {
-//                newPosition += lines[i].length() + 1;
-//            }
-//            newPosition += charIndex;
-//            
-//            this.cursorPosition = MathHelper.clamp(newPosition, 0, this.text.length());
-//            
-//            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-//                ActionResult result = entrypoint.onMouseDown((int)Math.round(mouseX), (int)Math.round(mouseY));
-//                if (result == ActionResult.FAIL) {
-//                    return true;
-//                }
-//            }
-//            
-//            updateSuggestions();
-//            return true;
-//        } else {
-//            this.setFocused(false);
-//            hideSuggestions();
-//            return false;
-//        }
-//    }
-
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (showSuggestions && isMouseOverSuggestion(mouseX, mouseY)) {
             if (amount < 0) {
@@ -471,40 +302,23 @@ public class MultilineEditor extends ClickableWidget {
         
         if (!this.isMouseOver(mouseX, mouseY)) return false;
         
-        boolean shiftDown = Screen.hasShiftDown();
+        int lineHeight = this.textRenderer.fontHeight + 2;
+        int maxLines = this.text.split("\n", -1).length;
+        int maxVisibleLines = this.height / lineHeight;
         
-        if (shiftDown) {
-            int visibleWidth = this.width - 20;
-            int newHorizontalScroll = this.horizontalScrollOffset - (int)(amount * 20);
-            this.horizontalScrollOffset = MathHelper.clamp(newHorizontalScroll, 0, Math.max(0, maxLineWidth - visibleWidth));
-            return true;
-        } else {
-            int lineHeight = this.textRenderer.fontHeight + 2;
-            int maxLines = this.text.split("\n", -1).length;
-            int maxVisibleLines = this.height / lineHeight;
-            
-            int newScrollOffset = this.scrollOffset - (int)Math.signum(amount);
-            this.scrollOffset = MathHelper.clamp(newScrollOffset, 0, Math.max(0, maxLines - maxVisibleLines));
-            
-            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-                entrypoint.onMouseScroll();
-            }
-            
-            return true;
+        int newScrollOffset = this.scrollOffset - (int)Math.signum(amount);
+        this.scrollOffset = MathHelper.clamp(newScrollOffset, 0, Math.max(0, maxLines - maxVisibleLines));
+        
+        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+            entrypoint.onMouseScroll();
         }
+        
+        return true;
     }
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         return this.mouseScrolled(mouseX, mouseY, verticalAmount);
-    }
-
-    private boolean isMouseOverHorizontalScrollBar(double mouseX, double mouseY) {
-        if (maxLineWidth <= this.width - 20) return false;
-        
-        int scrollbarHeight = 5;
-        return mouseX >= this.getX() && mouseX <= this.getX() + this.width &&
-               mouseY >= this.getY() + this.height - scrollbarHeight && mouseY <= this.getY() + this.height;
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
@@ -522,7 +336,6 @@ public class MultilineEditor extends ClickableWidget {
         }
 
         boolean controlDown = Screen.hasControlDown();
-//        boolean shiftDown = Screen.hasShiftDown();
 
         if (showSuggestions && keyCode != GLFW.GLFW_KEY_COMMA && keyCode != GLFW.GLFW_KEY_DELETE) {
             if (keyCode == GLFW.GLFW_KEY_UP) {
@@ -757,7 +570,7 @@ public class MultilineEditor extends ClickableWidget {
                     String beforeError = line.substring(0, errorStartInLine);
                     String errorText = line.substring(errorStartInLine, errorEndInLine);
                     
-                    int xStart = getX() + 4 + textRenderer.getWidth(beforeError) - horizontalScrollOffset;
+                    int xStart = getX() + 4 + textRenderer.getWidth(beforeError);
                     int errorWidth = textRenderer.getWidth(errorText);
                     
                     for (int i = 0; i < errorWidth; i += 3) {
@@ -779,13 +592,6 @@ public class MultilineEditor extends ClickableWidget {
         int lineStart = getLineStart(this.cursorPosition);
         String currentLine = this.text.substring(lineStart, this.cursorPosition);
         this.lastCursorX = this.textRenderer.getWidth(currentLine);
-        
-        int visibleWidth = this.width - 20;
-        if (lastCursorX > horizontalScrollOffset + visibleWidth) {
-            horizontalScrollOffset = lastCursorX - visibleWidth + 10;
-        } else if (lastCursorX < horizontalScrollOffset) {
-            horizontalScrollOffset = Math.max(0, lastCursorX - 10);
-        }
     }
 
     private int getLineStart(int pos) {
@@ -904,10 +710,10 @@ public class MultilineEditor extends ClickableWidget {
     }
     
     private void updateSuggestions() {
-        if (!ConfigManager.getConfig().doSuggestions) {
-            hideSuggestions();
-            return;
-        }
+    	if (!ConfigManager.getConfig().doSuggestions) {
+    		hideSuggestions();
+    		return;
+    	}
         currentSuggestions = CodeSuggester.suggestForPosition(text, cursorPosition);
         showSuggestions = !currentSuggestions.isEmpty();
         selectedSuggestion = showSuggestions ? 0 : -1;
@@ -928,10 +734,11 @@ public class MultilineEditor extends ClickableWidget {
         if (!showSuggestions) return false;
         
         int lineHeight = textRenderer.fontHeight + 2;
+//        int maxVisibleLines = this.height / lineHeight;
         String[] lines = text.split("\n", -1);
         
         int lineIndex = 0;
-        int xPos = getX() + 4 + 12 - horizontalScrollOffset;
+        int xPos = getX() + 4 + 12;
         int remaining = cursorPosition;
         for (int i = 0; i < lines.length; i++) {
             if (remaining <= lines[i].length()) {
@@ -948,31 +755,5 @@ public class MultilineEditor extends ClickableWidget {
         
         return mouseX >= xPos && mouseX <= xPos + suggestionWidth &&
                mouseY >= yPos && mouseY <= yPos + suggestionHeight;
-    }
-    
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (isDraggingHorizontalScroll) {
-            int visibleWidth = this.width - 20;
-            int dragDeltaX = (int) mouseX - dragStartX;
-            int scrollRange = Math.max(0, maxLineWidth - visibleWidth);
-            
-            if (scrollRange > 0) {
-                float scrollRatio = (float) dragDeltaX / (float) this.width;
-                int newScrollOffset = dragStartScrollOffset + (int) (scrollRatio * scrollRange);
-                horizontalScrollOffset = MathHelper.clamp(newScrollOffset, 0, scrollRange);
-            }
-            return true;
-        }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (isDraggingHorizontalScroll) {
-            isDraggingHorizontalScroll = false;
-            return true;
-        }
-        return super.mouseReleased(mouseX, mouseY, button);
     }
 }

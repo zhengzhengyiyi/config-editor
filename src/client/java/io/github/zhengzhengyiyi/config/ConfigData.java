@@ -30,6 +30,11 @@ public class ConfigData {
     public boolean doRenderBackground = false;
     
     /**
+     * to enable suggestions when you type
+     */
+    public boolean doSuggestions = true;
+    
+    /**
      * The theme can be either dark, light and auto
      */
     public enum ThemeMode {
