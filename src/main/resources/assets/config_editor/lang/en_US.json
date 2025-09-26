@@ -1,20 +1,26 @@
 {
-  "zhengzhengyiyi.configeditor.title": "Config Editor",
-  "zhengzhengyiyi.configeditor.save": "Save",
-  "zhengzhengyiyi.configeditor.openfolder": "Open Folder",
-  "zhengzhengyiyi.configeditor.editor": "JSON Editor",
+  "configeditor.title": "Config Editor",
+  "configeditor.editor": "JSON Editor",
   
-  "zhengzhengyiyi.confirm.title": "Confirm",
-  "zhengzhengyiyi.confirm.unsaved": "You have unsaved changes. Save before switching?",
-  "zhengzhengyiyi.confirm.unsavedclose": "You have unsaved changes. Save before closing?",
+  "configeditor.button.save": "Save",
+  "configeditor.button.backup": "Backup",
+  "configeditor.button.openfolder": "Open Folder",
+  "configeditor.button.close": "Close",
+  "configeditor.button.search": "Search",
   
-  "zhengzhengyiyi.error.title": "Error",
-  "zhengzhengyiyi.error.loadfailed": "Failed to load config file",
-  "zhengzhengyiyi.error.savefailed": "Failed to save config file",
-  "zhengzhengyiyi.error.invalidjson": "Invalid JSON format",
-  "zhengzhengyiyi.error.openfolder": "Cannot open config folder",
+  "configeditor.search.placeholder": "Search text...",
+  "configeditor.search.next": "Next",
+  "configeditor.search.prev": "Prev",
   
-  "zhengzhengyiyi.message.title": "Message",
-  "zhengzhengyiyi.message.saved": "Config saved successfully",
-  "zhengzhengyiyi.configeditor.backup": "backup"
+  "configeditor.confirm.title": "Confirmation",
+  "configeditor.confirm.unsaved": "You have unsaved changes. Save before switching?",
+  "configeditor.confirm.unsavedclose": "You have unsaved changes. Save before closing?",
+  
+  "configeditor.error.title": "Error",
+  "configeditor.error.loadfailed": "Failed to load config file",
+  "configeditor.error.savefailed": "Failed to save config file",
+  "configeditor.error.invalidjson": "Invalid JSON syntax",
+  
+  "configeditor.message.title": "Information",
+  "configeditor.message.saved": "File saved successfully"
 }

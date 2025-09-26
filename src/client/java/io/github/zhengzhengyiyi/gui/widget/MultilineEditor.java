@@ -26,6 +26,7 @@ public class MultilineEditor extends ClickableWidget {
     private String text = "";
 //    private int yOffset = 0;
     private int scrollOffset = 0;
+    public static int maxVisibleLines = 10;
     private boolean editable = true;
     private Consumer<String> changedListener;
     private int cursorPosition = 0;
@@ -34,6 +35,9 @@ public class MultilineEditor extends ClickableWidget {
     private String filename = "";
     public List<JSONError> currentErrors = new ArrayList<>();
     public JSONError hoveredError = null;
+    private TextSearchEngine searchEngine = new TextSearchEngine();
+    private boolean isSearching = false;
+    public String searchQuery = "";
     
     private int lastCursorX = 0;
 
@@ -61,11 +65,16 @@ public class MultilineEditor extends ClickableWidget {
         int lineHeight = this.textRenderer.fontHeight + 2;
         int maxVisibleLines = this.height / lineHeight;
 
+        if (isSearching && !searchQuery.isEmpty()) {
+            renderSearchHighlights(context, lines, lineHeight, maxVisibleLines);
+        }
+
         for (int i = 0; i < lines.length; i++) {
             if (i >= this.scrollOffset && i < this.scrollOffset + maxVisibleLines) {
                 int yPos = this.getY() + 4 + (i - this.scrollOffset) * lineHeight;
-//                context.drawText(this.textRenderer, lines[i], this.getX() + 4, yPos, this.editable ? 0xFFFFFFFF : 0xFF777777, false);
-                SyntaxHighlighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4, yPos, this.editable);
+                String lineNum = String.valueOf(i + 1);
+                context.drawText(textRenderer, lineNum, this.getX() + 2, yPos, 0xFF888888, false);
+                SyntaxHighlighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4 + 12, yPos, this.editable);
             }
         }
         
@@ -83,12 +92,11 @@ public class MultilineEditor extends ClickableWidget {
             }
             if (cursorVisible) {
                 int lineIndex = 0;
-                int xPos = this.getX() + 4;
+                int xPos = this.getX() + 4 + 12;
                 int remaining = this.cursorPosition;
                 for (int i = 0; i < lines.length; i++) {
                     if (remaining <= lines[i].length()) {
-//                        xPos += this.textRenderer.getWidth(lines[i].substring(0, remaining));
-                    	xPos += SyntaxHighlighter.getTextWidthUpToChar(this.textRenderer, lines[i], remaining);
+                        xPos += SyntaxHighlighter.getTextWidthUpToChar(this.textRenderer, lines[i], remaining);
                         lineIndex = i;
                         break;
                     }
@@ -109,6 +117,43 @@ public class MultilineEditor extends ClickableWidget {
             int scrollbarY = this.getY() + (int)((float)(this.height - scrollbarHeight) * (float)this.scrollOffset / (float)(lines.length - maxVisibleLines));
             context.fill(this.getX() + this.width - 5, this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFF555555);
             context.fill(this.getX() + this.width - 4, scrollbarY, this.getX() + this.width - 1, scrollbarY + scrollbarHeight, 0xFFBBBBBB);
+        }
+    }
+
+    private void renderSearchHighlights(DrawContext context, String[] lines, int lineHeight, int maxVisibleLines) {
+        searchEngine.setScrollOffset(this.scrollOffset);
+        
+        int currentLineStart = 0;
+        for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+            String line = lines[lineIndex];
+            
+            if (lineIndex >= scrollOffset && lineIndex < scrollOffset + maxVisibleLines) {
+                int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight;
+                int xBase = getX() + 4 + 12;
+                
+                for (int matchPos : searchEngine.matchPositions) {
+                    if (matchPos >= currentLineStart && matchPos < currentLineStart + line.length()) {
+                        int matchInLine = matchPos - currentLineStart;
+                        int matchEndInLine = Math.min(matchInLine + searchQuery.length(), line.length());
+                        
+                        if (matchInLine < matchEndInLine) {
+                            String beforeMatch = line.substring(0, matchInLine);
+                            String matchText = line.substring(matchInLine, matchEndInLine);
+                            
+                            int xStart = xBase + textRenderer.getWidth(beforeMatch);
+                            int highlightWidth = textRenderer.getWidth(matchText);
+                            int yStart = yPos + textRenderer.fontHeight - 1;
+                            
+                            boolean isCurrentMatch = matchPos == searchEngine.getCurrentMatchPosition();
+                            int color = isCurrentMatch ? 0x66FFD700 : 0x66FFFF00;
+                            
+                            context.fill(xStart, yStart, xStart + highlightWidth, yStart + 2, color);
+                        }
+                    }
+                }
+            }
+            
+            currentLineStart += line.length() + 1;
         }
     }
     
@@ -195,43 +240,6 @@ public class MultilineEditor extends ClickableWidget {
             return false;
         }
     }
-    
-//    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-//        if (this.isMouseOver(mouseX, mouseY) && this.editable) {
-//            this.setFocused(true);
-//            
-//            int lineHeight = this.textRenderer.fontHeight + 2;
-//            int clickedY = (int)mouseY - (this.getY() + 4);
-//            int lineIndex = MathHelper.clamp(clickedY / lineHeight + this.scrollOffset, 0, this.text.split("\n", -1).length - 1);
-//            
-//            String[] lines = this.text.split("\n", -1);
-//            String line = lines[lineIndex];
-//            
-//            int clickedX = (int)mouseX - (this.getX() + 4);
-//            
-//            int charIndex = SyntaxHighlighter.getCharIndexFromTokens(textRenderer, line, clickedX);
-//            
-//            int newPosition = 0;
-//            for (int i = 0; i < lineIndex; i++) {
-//                newPosition += lines[i].length() + 1;
-//            }
-//            newPosition += charIndex;
-//            
-//            this.cursorPosition = MathHelper.clamp(newPosition, 0, this.text.length());
-//            
-//            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-//                ActionResult result = entrypoint.onMouseDown((int)Math.round(mouseX), (int)Math.round(mouseY));
-//                if (result == ActionResult.FAIL) {
-//                    return true;
-//                }
-//            }
-//            
-//            return true;
-//        } else {
-//            this.setFocused(false);
-//            return false;
-//        }
-//    }
 
 //    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
@@ -468,7 +476,7 @@ public class MultilineEditor extends ClickableWidget {
                     for (int i = 0; i < errorWidth; i += 3) {
                         int x = xStart + i;
                         if (i + 2 <= errorWidth) {
-                            context.drawHorizontalLine(x, x + 2, yPos + textRenderer.fontHeight + 1, 0xFFFF0000);
+                            context.drawHorizontalLine(x, x + 2 + 12, yPos + textRenderer.fontHeight + 1, 0xFFFF0000);
                         }
                     }
                 }
@@ -535,5 +543,66 @@ public class MultilineEditor extends ClickableWidget {
     
     public String getFileName() {
     	return this.filename;
+    }
+    
+    public void startSearch(String query) {
+        this.searchQuery = query;
+        this.isSearching = true;
+        searchEngine.search(query, text);
+        if (searchEngine.hasMatches()) {
+            scrollToCurrentMatch();
+        }
+    }
+    
+    public void findNext() {
+        if (isSearching && searchEngine.hasMatches()) {
+            searchEngine.nextMatch();
+            scrollToCurrentMatch();
+        }
+    }
+    
+    public void findPrevious() {
+        if (isSearching && searchEngine.hasMatches()) {
+            searchEngine.previousMatch();
+            scrollToCurrentMatch();
+        }
+    }
+    
+    private void scrollToCurrentMatch() {
+        Integer matchPos = searchEngine.getCurrentMatchPosition();
+        if (matchPos != null) {
+            int lineIndex = getLineIndex(matchPos);
+            if (lineIndex < scrollOffset || lineIndex >= scrollOffset + maxVisibleLines) {
+                scrollOffset = Math.max(0, lineIndex - 2);
+            }
+        }
+    }
+    
+    public void endSearch() {
+        isSearching = false;
+        searchQuery = "";
+        searchEngine.clear();
+    }
+    
+    private int getLineIndex(int position) {
+        int line = 0;
+        for (int i = 0; i < position && i < text.length(); i++) {
+            if (text.charAt(i) == '\n') {
+                line++;
+            }
+        }
+        return line;
+    }
+    
+    public boolean isSearching() {
+        return isSearching;
+    }
+    
+    public int getSearchMatchCount() {
+        return searchEngine.getMatchCount();
+    }
+    
+    public int getCurrentSearchIndex() {
+        return searchEngine.getCurrentMatchIndex() + 1;
     }
 }

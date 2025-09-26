@@ -1,20 +1,26 @@
 {
-  "zhengzhengyiyi.configeditor.title": "配置编辑器",
-  "zhengzhengyiyi.configeditor.save": "保存",
-  "zhengzhengyiyi.configeditor.openfolder": "打开文件夹",
-  "zhengzhengyiyi.configeditor.editor": "JSON编辑器",
+  "configeditor.title": "配置编辑器",
+  "configeditor.editor": "JSON编辑器",
   
-  "zhengzhengyiyi.confirm.title": "确认",
-  "zhengzhengyiyi.confirm.unsaved": "您有未保存的更改。是否在切换前保存？",
-  "zhengzhengyiyi.confirm.unsavedclose": "您有未保存的更改。是否在关闭前保存？",
+  "configeditor.button.save": "保存",
+  "configeditor.button.backup": "备份",
+  "configeditor.button.openfolder": "打开文件夹",
+  "configeditor.button.close": "关闭",
+  "configeditor.button.search": "搜索",
   
-  "zhengzhengyiyi.error.title": "错误",
-  "zhengzhengyiyi.error.loadfailed": "加载配置文件失败",
-  "zhengzhengyiyi.error.savefailed": "保存配置文件失败",
-  "zhengzhengyiyi.error.invalidjson": "JSON格式无效",
-  "zhengzhengyiyi.error.openfolder": "无法打开配置文件夹",
+  "configeditor.search.placeholder": "搜索文本...",
+  "configeditor.search.next": "下一个",
+  "configeditor.search.prev": "上一个",
   
-  "zhengzhengyiyi.message.title": "消息",
-  "zhengzhengyiyi.message.saved": "配置保存成功",
-  "zhengzhengyiyi.configeditor.backup": "备份"
+  "configeditor.confirm.title": "确认",
+  "configeditor.confirm.unsaved": "您有未保存的更改。切换前是否保存？",
+  "configeditor.confirm.unsavedclose": "您有未保存的更改。关闭前是否保存？",
+  
+  "configeditor.error.title": "错误",
+  "configeditor.error.loadfailed": "加载配置文件失败",
+  "configeditor.error.savefailed": "保存配置文件失败",
+  "configeditor.error.invalidjson": "JSON语法无效",
+  
+  "configeditor.message.title": "信息",
+  "configeditor.message.saved": "文件保存成功"
 }

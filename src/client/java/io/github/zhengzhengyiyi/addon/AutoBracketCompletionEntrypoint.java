@@ -2,6 +2,7 @@ package io.github.zhengzhengyiyi.addon;
 
 import io.github.zhengzhengyiyi.gui.EditorScreen;
 import io.github.zhengzhengyiyi.api.*;
+import io.github.zhengzhengyiyi.config.*;
 import net.minecraft.util.ActionResult;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,6 +64,8 @@ public class AutoBracketCompletionEntrypoint implements ApiEntrypoint {
         if (!enabled || editor == null || editor.getTextWidget() == null) {
             return ActionResult.PASS;
         }
+        
+        if (!ConfigManager.getConfig().hint) return ActionResult.SUCCESS;
 
         if (bracketPairs.containsKey(chr)) {
             handleBracketCompletion(chr);
@@ -86,15 +89,15 @@ public class AutoBracketCompletionEntrypoint implements ApiEntrypoint {
     }
 
     private void handleBracketCompletion(char openingChar) {
-        char closingChar = bracketPairs.get(openingChar);
-        String pair = String.valueOf(openingChar) + closingChar;
-        
-        editor.getTextWidget().insertTextAtCursor(pair);
-        
-        if (openingChar != closingChar) {
-            int currentPos = editor.getTextWidget().getCursorPosition();
-            editor.getTextWidget().setCursorPosition(currentPos - 1);
-        }
+	    char closingChar = bracketPairs.get(openingChar);
+	    String pair = String.valueOf(openingChar) + closingChar;
+	        
+	    editor.getTextWidget().insertTextAtCursor(pair);
+	        
+	    if (openingChar != closingChar) {
+	        int currentPos = editor.getTextWidget().getCursorPosition();
+	        editor.getTextWidget().setCursorPosition(currentPos - 1);
+	   }
     }
 
     public void setEnabled(boolean enabled) {

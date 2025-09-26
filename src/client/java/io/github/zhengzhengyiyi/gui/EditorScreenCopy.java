@@ -5,13 +5,13 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import io.github.zhengzhengyiyi.util.BackupHelper;
-import io.github.zhengzhengyiyi.*;
-import io.github.zhengzhengyiyi.gui.widget.*;
+import io.github.zhengzhengyiyi.ConfigEditorClient;
+import io.github.zhengzhengyiyi.gui.widget.MultilineEditor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.screen.Screen;
+//import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
@@ -30,8 +30,8 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EditorScreen extends Screen {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EditorScreen.class);
+public class EditorScreenCopy extends EditorScreen {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EditorScreenCopy.class);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private List<Path> configFiles;
@@ -42,13 +42,14 @@ public class EditorScreen extends Screen {
     private ButtonWidget openFolderButton;
     private ButtonWidget backupButton;
     private String buffer = "";
+//    private MultilineEditor editor;
     private TextFieldWidget searchField;
     private ButtonWidget searchNextButton;
     private ButtonWidget searchPrevButton;
     private boolean searchVisible = false;
 
-    public EditorScreen() {
-        super(Text.translatable("configeditor.title"));
+    public EditorScreenCopy() {
+//        super(Text.translatable("zhengzhengyiyi.configeditor.title"));
     }
 
     @Override
@@ -84,7 +85,7 @@ public class EditorScreen extends Screen {
         multilineEditor = new MultilineEditor(
                 170, 20, 
                 this.width - 180, this.height - 60,
-                Text.translatable("configeditor.editor"));
+                Text.translatable("zhengzhengyiyi.configeditor.editor"));
         multilineEditor.setChangedListener(text -> {
         	if (!buffer.equals(text)) {
 	            modified = true;
@@ -95,58 +96,50 @@ public class EditorScreen extends Screen {
         });
 
         saveButton = ButtonWidget.builder(
-                Text.translatable("configeditor.button.save"),
+                Text.translatable("zhengzhengyiyi.configeditor.save"),
                 button -> saveFile())
                 .dimensions(this.width - 170, this.height - 30, 80, 20)
                 .build();
         this.addDrawableChild(saveButton);
         
-        backupButton = ButtonWidget.builder(
-                Text.translatable("configeditor.button.backup"), 
-                button -> BackupHelper.backupEntireConfigDirectory())
+        backupButton = ButtonWidget.builder(Text.translatable("zhengzhengyiyi.configeditor.backup"), button -> BackupHelper.backupEntireConfigDirectory())
         		.dimensions(0, 0, 70, 20)
         		.build();
         this.addDrawableChild(backupButton);
 
         openFolderButton = ButtonWidget.builder(
-                Text.translatable("configeditor.button.openfolder"),
+                Text.translatable("zhengzhengyiyi.configeditor.openfolder"),
                 button -> openConfigFolder())
                 .dimensions(this.width - 80, this.height - 30, 70, 20)
                 .build();
         this.addDrawableChild(openFolderButton);
         
         ButtonWidget exitButton = ButtonWidget.builder(
-                Text.translatable("configeditor.button.close"),
+                Text.translatable("close"),
                 button -> this.close())
                 .dimensions(0, this.height - 25, 80, 20)
                 .build();
         this.addDrawableChild(exitButton);
         
-        // 搜索组件 - 调整了位置和大小避免重叠
-        searchField = new TextFieldWidget(textRenderer, this.width - 250, 5, 120, 16, Text.translatable("configeditor.search.placeholder"));
+        searchField = new TextFieldWidget(textRenderer, 100, 10, 200, 20, Text.literal("Search"));
         searchField.setVisible(false);
         addDrawableChild(searchField);
         
-        searchNextButton = ButtonWidget.builder(Text.translatable("configeditor.search.next"), button -> {
-        	if (multilineEditor != null) {
-        		multilineEditor.findNext();
-        	}
-        }).dimensions(this.width - 125, 5, 50, 16).build();
+        searchNextButton = ButtonWidget.builder(Text.literal("Next"), button -> {
+        	multilineEditor.findNext();
+        }).dimensions(310, 10, 60, 20).build();
         searchNextButton.visible = false;
         addDrawableChild(searchNextButton);
         
-        searchPrevButton = ButtonWidget.builder(Text.translatable("configeditor.search.prev"), button -> {
-        	if (multilineEditor != null) {
-        		multilineEditor.findPrevious();
-        	}
-        }).dimensions(this.width - 70, 5, 50, 16).build();
+        searchPrevButton = ButtonWidget.builder(Text.literal("Prev"), button -> {
+        	multilineEditor.findPrevious();
+        }).dimensions(380, 10, 60, 20).build();
         searchPrevButton.visible = false;
         addDrawableChild(searchPrevButton);
         
-        // 搜索按钮变小并调整位置
-        addDrawableChild(ButtonWidget.builder(Text.translatable("configeditor.button.search"), button -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal("Search"), button -> {
             toggleSearch();
-        }).dimensions(this.width - 300, 5, 45, 16).build());
+        }).dimensions(20, 10, 70, 20).build());
         
         this.addDrawableChild(multilineEditor);
         this.setInitialFocus(multilineEditor);
@@ -167,9 +160,7 @@ public class EditorScreen extends Screen {
     }
 
     private void updateButtonStates() {
-        if (saveButton != null) {
-            saveButton.active = modified && !configFiles.isEmpty();
-        }
+        saveButton.active = modified && !configFiles.isEmpty();
     }
 
     private void switchFile(int index) {
@@ -186,8 +177,8 @@ public class EditorScreen extends Screen {
                         this.client.setScreen(this);
                     }
                 },
-                Text.translatable("configeditor.confirm.title"),
-                Text.translatable("configeditor.confirm.unsaved")
+                Text.translatable("zhengzhengyiyi.confirm.title"),
+                Text.translatable("zhengzhengyiyi.confirm.unsaved")
             );
             this.client.setScreen(confirmScreen);
         } else {
@@ -223,7 +214,7 @@ public class EditorScreen extends Screen {
         		LOGGER.error("Failed to load config file: {}", file.getFileName(), e);
 	            multilineEditor.setText("{}");
 	            multilineEditor.setEditable(false);
-	            showErrorPopup(Text.translatable("configeditor.error.loadfailed"));
+	            showErrorPopup(Text.translatable("zhengzhengyiyi.error.loadfailed"));
         	}
         	multilineEditor.setText(text);
         }
@@ -245,7 +236,7 @@ public class EditorScreen extends Screen {
             JsonParser.parseString(content);
         } catch (JsonSyntaxException e) {
             LOGGER.warn("Invalid JSON syntax in file: {}", file.getFileName());
-            showErrorPopup(Text.translatable("configeditor.error.invalidjson"));
+            showErrorPopup(Text.translatable("zhengzhengyiyi.error.invalidjson"));
             return;
         }
         
@@ -260,13 +251,13 @@ public class EditorScreen extends Screen {
                 } else {
                     client.execute(() -> {
                         updateButtonStates();
-                        showMessagePopup(Text.translatable("configeditor.message.saved"));
+                        showMessagePopup(Text.translatable("zhengzhengyiyi.message.saved"));
                     });
                 }
             } catch (Exception e) {
                 LOGGER.error("Failed to save config file: {}", file.getFileName(), e);
                 client.execute(() -> 
-                    showErrorPopup(Text.translatable("configeditor.error.savefailed")));
+                    showErrorPopup(Text.translatable("zhengzhengyiyi.error.savefailed")));
             }
         }).start();
     }
@@ -287,8 +278,8 @@ public class EditorScreen extends Screen {
         		this.close();
            		this.client.setScreen(this);
            	},
-            Text.translatable("configeditor.confirm.title"),
-            message
+            Text.translatable("zhengzhengyiyi.confirm.title"),
+            Text.translatable("zhengzhengyiyi.error.title")
         ));
     }
 
@@ -298,14 +289,18 @@ public class EditorScreen extends Screen {
         		this.close();
         		this.client.setScreen(null);
         	},
-            Text.translatable("configeditor.confirm.title"),
-            message
+            Text.translatable("zhengzhengyiyi.confirm.title"),
+            Text.translatable("zhengzhengyiyi.message.title")
         ));
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
+        
+//        context.drawText(this.textRenderer, 
+//            Text.translatable("zhengzhengyiyi.configeditor.title"), 
+//            this.width / 2 - 50, 5, 0xFFFFFF, true);
         
         if (!configFiles.isEmpty()) {
             String status = modified ? "* " + configFiles.get(selectedIndex).getFileName().toString() : 
@@ -326,8 +321,8 @@ public class EditorScreen extends Screen {
                         this.client.setScreen(null);
                     }
                 },
-                Text.translatable("configeditor.confirm.title"),
-                Text.translatable("configeditor.confirm.unsavedclose")
+                Text.translatable("zhengzhengyiyi.confirm.title"),
+                Text.translatable("zhengzhengyiyi.confirm.unsavedclose")
             );
             this.client.setScreen(confirmScreen);
             return false;
@@ -340,8 +335,6 @@ public class EditorScreen extends Screen {
     }
     
     private void toggleSearch() {
-        if (multilineEditor == null) return;
-        
         searchVisible = !searchVisible;
         searchField.setVisible(searchVisible);
         searchNextButton.visible = searchVisible;
@@ -349,9 +342,8 @@ public class EditorScreen extends Screen {
         
         if (searchVisible) {
             setFocused(searchField);
-            String searchText = searchField.getText();
-            if (searchText != null && !searchText.trim().isEmpty()) {
-            	multilineEditor.startSearch(searchText);
+            if (!searchField.getText().isEmpty()) {
+            	multilineEditor.startSearch(searchField.getText());
             }
         } else {
         	multilineEditor.endSearch();
@@ -375,8 +367,6 @@ public class EditorScreen extends Screen {
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (multilineEditor == null) return super.keyPressed(keyCode, scanCode, modifiers);
-        
         if (searchVisible) {
             if (keyCode == GLFW.GLFW_KEY_ENTER) {
             	multilineEditor.startSearch(searchField.getText());

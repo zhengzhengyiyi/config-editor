@@ -12,4 +12,10 @@ public class ConfigData {
 	 */
     @SerializedName("readonly_mode")
     public boolean readonly_mode = false;
+    
+    /**
+     * If enable, it will enable the auto hint like if you pressed "(" it will make a ")"
+     */
+    @SerializedName("hint")
+    public boolean hint = true;
 }
