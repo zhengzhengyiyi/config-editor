@@ -55,75 +55,6 @@ public class MultilineEditor extends ClickableWidget {
             editable = !ConfigManager.getConfig().readonly_mode;
         });
     }
-
-//    @Override
-//    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-//        if (!this.visible) {
-//            return;
-//        }
-//
-//        context.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFF000000);
-//        context.drawBorder(this.getX(), this.getY(), this.width, this.height, 0xFFFFFFFF);
-//
-//        String[] lines = this.text.split("\n", -1);
-//        int lineHeight = this.textRenderer.fontHeight + 2;
-//        int maxVisibleLines = this.height / lineHeight;
-//
-//        calculateMaxLineWidth(lines);
-//
-//        if (isSearching && !searchQuery.isEmpty()) {
-//            renderSearchHighlights(context, lines, lineHeight, maxVisibleLines);
-//        }
-//
-//        for (int i = 0; i < lines.length; i++) {
-//            if (i >= this.scrollOffset && i < this.scrollOffset + maxVisibleLines) {
-//                int yPos = this.getY() + 4 + (i - this.scrollOffset) * lineHeight;
-//                String lineNum = String.valueOf(i + 1);
-//                context.drawText(textRenderer, lineNum, this.getX() + 2 - horizontalScrollOffset, yPos, 0xFF888888, false);
-//                SyntaxHighlighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4 + 12 - horizontalScrollOffset, yPos, this.editable);
-//            }
-//        }
-//        
-//        renderErrorUnderlines(context, lines, lineHeight, maxVisibleLines);
-//
-//        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-//            entrypoint.renderButton(context, mouseX, mouseY, delta);
-//        }
-//
-//        if (this.isFocused() && this.editable) {
-//            long currentTime = Util.getMeasuringTimeNano();
-//            if (currentTime - lastCursorBlinkTime > 500000000) {
-//                cursorVisible = !cursorVisible;
-//                lastCursorBlinkTime = currentTime;
-//            }
-//            if (cursorVisible) {
-//                int lineIndex = 0;
-//                int xPos = this.getX() + 4 + 12;
-//                int remaining = this.cursorPosition;
-//                for (int i = 0; i < lines.length; i++) {
-//                    if (remaining <= lines[i].length()) {
-//                        xPos += SyntaxHighlighter.getTextWidthUpToChar(this.textRenderer, lines[i], remaining);
-//                        lineIndex = i;
-//                        break;
-//                    }
-//                    remaining -= (lines[i].length() + 1);
-//                }
-//                
-//                if (lineIndex >= this.scrollOffset && lineIndex < this.scrollOffset + maxVisibleLines) {
-//                    int yPos = this.getY() + 4 + (lineIndex - this.scrollOffset) * lineHeight;
-//                    context.drawVerticalLine(xPos - horizontalScrollOffset, yPos - 1, yPos + this.textRenderer.fontHeight + 1, 0xFFFFFFFF);
-//                }
-//            }
-//        }
-//        
-//        renderErrorTooltips(context, mouseX, mouseY, lines, lineHeight, maxVisibleLines);
-//        
-//        if (showSuggestions && !currentSuggestions.isEmpty()) {
-//            renderSuggestions(context, mouseX, mouseY);
-//        }
-//
-//        renderScrollBars(context, lines.length, maxVisibleLines);
-//    }
     
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
@@ -401,63 +332,6 @@ public class MultilineEditor extends ClickableWidget {
             return false;
         }
     }
-
-//    @Override
-//    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-//        if (showSuggestions) {
-//            hideSuggestions();
-//            return true;
-//        }
-//        
-//        if (isMouseOverHorizontalScrollBar(mouseX, mouseY)) {
-//            return true;
-//        }
-//        
-//        if (showSuggestions && isMouseOverSuggestion(mouseX, mouseY)) {
-//            if (selectedSuggestion >= 0 && selectedSuggestion < currentSuggestions.size()) {
-//                insertSuggestion(currentSuggestions.get(selectedSuggestion));
-//                hideSuggestions();
-//                return true;
-//            }
-//        }
-//        
-//        if (this.isMouseOver(mouseX, mouseY) && this.editable) {
-//            this.setFocused(true);
-//            
-//            int lineHeight = this.textRenderer.fontHeight + 2;
-//            int clickedY = (int)mouseY - (this.getY() + 4);
-//            int lineIndex = MathHelper.clamp(clickedY / lineHeight + this.scrollOffset, 0, this.text.split("\n", -1).length - 1);
-//            
-//            String[] lines = this.text.split("\n", -1);
-//            String line = lines[lineIndex];
-//            
-//            int clickedX = (int)mouseX - (this.getX() + 4 + 12) + horizontalScrollOffset;
-//            
-//            int charIndex = SyntaxHighlighter.getCharIndexFromTokens(this.textRenderer, line, clickedX);
-//            
-//            int newPosition = 0;
-//            for (int i = 0; i < lineIndex; i++) {
-//                newPosition += lines[i].length() + 1;
-//            }
-//            newPosition += charIndex;
-//            
-//            this.cursorPosition = MathHelper.clamp(newPosition, 0, this.text.length());
-//            
-//            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-//                ActionResult result = entrypoint.onMouseDown((int)Math.round(mouseX), (int)Math.round(mouseY));
-//                if (result == ActionResult.FAIL) {
-//                    return true;
-//                }
-//            }
-//            
-//            updateSuggestions();
-//            return true;
-//        } else {
-//            this.setFocused(false);
-//            hideSuggestions();
-//            return false;
-//        }
-//    }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (showSuggestions && isMouseOverSuggestion(mouseX, mouseY)) {
@@ -743,6 +617,42 @@ public class MultilineEditor extends ClickableWidget {
         validateJSON();
     }
     
+//    private void renderErrorUnderlines(DrawContext context, String[] lines, int lineHeight, int maxVisibleLines) {
+//        for (JSONError error : currentErrors) {
+//            int lineIndex = error.lineNumber - 1;
+//            if (lineIndex >= scrollOffset && lineIndex < scrollOffset + maxVisibleLines) {
+//                int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight;
+//                
+//                String line = lines[lineIndex];
+//                
+//                int lineStartPosition = calculateLineStartPosition(lineIndex, lines);
+//                int errorStartInLine = Math.min(error.startPosition - lineStartPosition, line.length());
+//                int errorEndInLine = Math.min(error.endPosition - lineStartPosition, line.length());
+//                
+//                if (errorStartInLine >= 0 && errorStartInLine < errorEndInLine && errorEndInLine <= line.length()) {
+//                    String beforeError = line.substring(0, errorStartInLine);
+//                    String errorText = line.substring(errorStartInLine, errorEndInLine);
+//                    
+//                    int xStart = getX() + 4 + 12 + textRenderer.getWidth(beforeError) - horizontalScrollOffset;
+//                    int errorWidth = textRenderer.getWidth(errorText);
+//                    
+//                    if (errorWidth > 0) {
+//                        for (int i = 0; i < errorWidth; i += 3) {
+//                            int x = xStart + i;
+//                            if (x < getX() + width && i + 2 <= errorWidth) {
+////                                context.drawHorizontalLine(x, x + 2, yPos + textRenderer.fontHeight + 1, 0xFFFF0000);
+//                            	context.drawHorizontalLine(x, x + 2, yPos, 0xFFFF0000);
+//                            }
+//                        }
+//                    } else {
+//                        int x = xStart;
+//                        context.drawHorizontalLine(x, x + 5, yPos + textRenderer.fontHeight + 1, 0xFFFF0000);
+//                    }
+//                }
+//            }
+//        }
+//    }
+    
     private void renderErrorUnderlines(DrawContext context, String[] lines, int lineHeight, int maxVisibleLines) {
         for (JSONError error : currentErrors) {
             int lineIndex = error.lineNumber - 1;
@@ -750,26 +660,75 @@ public class MultilineEditor extends ClickableWidget {
                 int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight;
                 
                 String line = lines[lineIndex];
-                int errorStartInLine = Math.min(error.startPosition - getLineStart(error.startPosition), line.length());
-                int errorEndInLine = Math.min(error.endPosition - getLineStart(error.startPosition), line.length());
                 
-                if (errorStartInLine < errorEndInLine) {
-                    String beforeError = line.substring(0, errorStartInLine);
-                    String errorText = line.substring(errorStartInLine, errorEndInLine);
+                int lineStartPosition = calculateLineStartPosition(lineIndex, lines);
+                int errorStartInLine = Math.min(error.startPosition - lineStartPosition, line.length());
+                int errorEndInLine = Math.min(error.endPosition - lineStartPosition, line.length());
+                
+                if (errorStartInLine >= 0 && errorStartInLine < errorEndInLine && errorEndInLine <= line.length()) {
+                    String visibleLine = line.substring(0, line.length());
+                    String beforeError = visibleLine.substring(0, errorStartInLine);
+                    String errorText = visibleLine.substring(errorStartInLine, errorEndInLine);
                     
-                    int xStart = getX() + 4 + textRenderer.getWidth(beforeError) - horizontalScrollOffset;
-                    int errorWidth = textRenderer.getWidth(errorText);
+                    int textStartX = getX() + 4 + 12;
+                    int beforeErrorWidth = SyntaxHighlighter.getTextWidth(textRenderer, beforeError);
+                    int errorWidth = SyntaxHighlighter.getTextWidth(textRenderer, errorText);
                     
-                    for (int i = 0; i < errorWidth; i += 3) {
-                        int x = xStart + i;
-                        if (i + 2 <= errorWidth) {
-                            context.drawHorizontalLine(x, x + 2 + 12, yPos + textRenderer.fontHeight + 1, 0xFFFF0000);
+                    int xStart = textStartX + beforeErrorWidth - horizontalScrollOffset;
+                    
+                    if (xStart >= getX() && xStart < getX() + width && errorWidth > 0) {
+                        for (int i = 0; i < errorWidth; i += 3) {
+                            int x = xStart + i;
+                            if (x < getX() + width && i + 2 <= errorWidth) {
+                                context.drawHorizontalLine(x, x + 2, yPos, 0xFFFF0000);
+                            }
+                        }
+                    } else if (errorWidth == 0) {
+                        int x = textStartX + beforeErrorWidth - horizontalScrollOffset;
+                        if (x >= getX() && x < getX() + width) {
+                            context.drawHorizontalLine(x, x + 5, yPos, 0xFFFF0000);
                         }
                     }
                 }
             }
         }
     }
+
+    private int calculateLineStartPosition(int lineIndex, String[] lines) {
+        int position = 0;
+        for (int i = 0; i < lineIndex; i++) {
+            position += lines[i].length() + 1;
+        }
+        return position;
+    }
+    
+//    private void renderErrorUnderlines(DrawContext context, String[] lines, int lineHeight, int maxVisibleLines) {
+//        for (JSONError error : currentErrors) {
+//            int lineIndex = error.lineNumber - 1;
+//            if (lineIndex >= scrollOffset && lineIndex < scrollOffset + maxVisibleLines) {
+//                int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight;
+//                
+//                String line = lines[lineIndex];
+//                int errorStartInLine = Math.min(error.startPosition - getLineStart(error.startPosition), line.length());
+//                int errorEndInLine = Math.min(error.endPosition - getLineStart(error.startPosition), line.length());
+//                
+//                if (errorStartInLine < errorEndInLine) {
+//                    String beforeError = line.substring(0, errorStartInLine);
+//                    String errorText = line.substring(errorStartInLine, errorEndInLine);
+//                    
+//                    int xStart = getX() + 4 + textRenderer.getWidth(beforeError) - horizontalScrollOffset;
+//                    int errorWidth = textRenderer.getWidth(errorText);
+//                    
+//                    for (int i = 0; i < errorWidth; i += 3) {
+//                        int x = xStart + i;
+//                        if (i + 2 <= errorWidth) {
+//                            context.drawHorizontalLine(x, x + 2 + 12, yPos + textRenderer.fontHeight + 1, 0xFFFF0000);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
     
     public void validateJSON() {
         this.currentErrors = JSONValidator.validateJSON(this.text);

@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import io.github.zhengzhengyiyi.util.BackupHelper;
+import io.github.zhengzhengyiyi.util.ConfigDiffEngine;
 import io.github.zhengzhengyiyi.*;
 import io.github.zhengzhengyiyi.config.ConfigData;
 import io.github.zhengzhengyiyi.config.ConfigManager;
@@ -48,6 +49,7 @@ public class EditorScreen extends Screen {
     private ButtonWidget searchNextButton;
     private ButtonWidget searchPrevButton;
     private ButtonWidget exitButton;
+    private ButtonWidget diffButton;
     private boolean searchVisible = false;
     private ThemeManager themeManager;
     private ButtonWidget themeToggleButton;
@@ -55,6 +57,9 @@ public class EditorScreen extends Screen {
     private ButtonWidget scrollUpButton;
     private ButtonWidget scrollDownButton;
     private List<ButtonWidget> fileButtonList;
+    private boolean showDiffView = false;
+    private List<ConfigDiffEngine.DiffLine> currentDiff = new ArrayList<>();
+    private String originalText = "";
 
     public EditorScreen() {
         super(Text.translatable("configeditor.title"));
@@ -134,6 +139,20 @@ public class EditorScreen extends Screen {
                 button -> this.close())
                 .dimensions(0, this.height - 25, 80, 20)
                 .build();
+        
+        diffButton = ButtonWidget.builder(
+            Text.literal("Different"),
+            button -> {
+                if (!showDiffView) {
+                    originalText = multilineEditor.getText();
+                    currentDiff = ConfigDiffEngine.computeDiff(originalText, multilineEditor.getText());
+                } else {
+                    currentDiff.clear();
+                }
+                showDiffView = !showDiffView;
+            }
+        ).dimensions(this.width - 40, 0, 40, 16).build();
+        this.addDrawableChild(diffButton);
         
         searchField = new TextFieldWidget(textRenderer, this.width - 250, 5, 120, 16, Text.translatable("configeditor.search.placeholder"));
         searchField.setVisible(false);
@@ -438,6 +457,8 @@ public class EditorScreen extends Screen {
                 configFiles.get(selectedIndex).getFileName().toString();
             context.drawText(this.textRenderer, status, 170, 5, modified ? 0xFFFF00 : 0xFFFFFF, false);
         }
+        
+        renderDiffPanel(context, mouseX, mouseY);
     }
 
     @Override
@@ -549,5 +570,62 @@ public class EditorScreen extends Screen {
             case LIGHT -> "configeditor.theme.light";
             case AUTO -> "configeditor.theme.auto";
         };
+    }
+    
+    @SuppressWarnings("incomplete-switch")
+	private void renderDiffPanel(DrawContext context, int mouseX, int mouseY) {
+        if (!showDiffView || currentDiff == null || currentDiff.isEmpty()) return;
+        
+        int panelWidth = 180;
+        int panelHeight = 60;
+        int x = this.width - panelWidth - 10;
+        int y = this.height - panelHeight - 10;
+        
+        context.fill(x, y, x + panelWidth, y + panelHeight, 0xCC000000);
+        context.drawBorder(x, y, panelWidth, panelHeight, 0xFFFFFFFF);
+        
+        int startY = y + 5;
+        context.drawText(textRenderer, "Line Changes", x + 5, startY, 0xFFFFFF00, false);
+        
+        int added = 0, deleted = 0;
+        for (ConfigDiffEngine.DiffLine line : currentDiff) {
+            switch (line.type) {
+                case ADDED -> added++;
+                case DELETED -> deleted++;
+            }
+        }
+        
+        startY += 12;
+        context.drawText(textRenderer, "Added: +" + added, x + 10, startY, 0xFF00FF00, false);
+        startY += 10;
+        context.drawText(textRenderer, "Deleted: -" + deleted, x + 10, startY, 0xFFFF0000, false);
+        startY += 10;
+        context.drawText(textRenderer, "Total: " + currentDiff.size(), x + 10, startY, 0xFFFFFFFF, false);
+        
+        if (isMouseOverPanel(mouseX, mouseY, x, y, panelWidth, panelHeight)) {
+            context.drawText(textRenderer, "Click to close", x + panelWidth - 60, y + panelHeight - 12, 0xFF8888FF, false);
+        }
+    }
+
+    private boolean isMouseOverPanel(int mouseX, int mouseY, int panelX, int panelY, int width, int height) {
+        return mouseX >= panelX && mouseX <= panelX + width && 
+               mouseY >= panelY && mouseY <= panelY + height;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (showDiffView && currentDiff != null) {
+            int panelWidth = 200;
+            int panelHeight = 80;
+            int x = this.width - panelWidth - 10;
+            int y = this.height - panelHeight - 10;
+            
+            if (isMouseOverPanel((int)mouseX, (int)mouseY, x, y, panelWidth, panelHeight)) {
+                showDiffView = false;
+                return true;
+            }
+        }
+        
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 }
