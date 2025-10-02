@@ -4,10 +4,12 @@ import io.github.zhengzhengyiyi.ConfigEditorClient;
 import io.github.zhengzhengyiyi.config.ConfigManager;
 import io.github.zhengzhengyiyi.util.*;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
+//import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.input.CharInput;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -66,7 +68,7 @@ public class MultilineEditor extends ClickableWidget {
         
         try {
             context.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFF000000);
-            context.drawBorder(this.getX(), this.getY(), this.width, this.height, 0xFFFFFFFF);
+//            context.drawBorder(this.getX(), this.getY(), this.width, this.height, 0xFFFFFFFF);
 
             String[] lines = this.text.split("\n", -1);
             int lineHeight = this.textRenderer.fontHeight + 2;
@@ -238,7 +240,7 @@ public class MultilineEditor extends ClickableWidget {
         int suggestionWidth = 200;
         
         context.fill(xPos, yPos, xPos + suggestionWidth, yPos + suggestionHeight, 0xFF333333);
-        context.drawBorder(xPos, yPos, suggestionWidth, suggestionHeight, 0xFFFFFFFF);
+//        context.drawBorder(xPos, yPos, suggestionWidth, suggestionHeight, 0xFFFFFFFF);
         
         int startIndex = Math.max(0, Math.min(selectedSuggestion - 2, currentSuggestions.size() - 5));
         int endIndex = Math.min(startIndex + 5, currentSuggestions.size());
@@ -274,11 +276,14 @@ public class MultilineEditor extends ClickableWidget {
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         if (showSuggestions) {
             hideSuggestions();
             return true;
         }
+        
+        double mouseX = click.x();
+        double mouseY = click.y();
         
         if (isMouseOverHorizontalScrollBar(mouseX, mouseY)) {
             isDraggingHorizontalScroll = true;
@@ -345,14 +350,14 @@ public class MultilineEditor extends ClickableWidget {
         
         if (!this.isMouseOver(mouseX, mouseY)) return false;
         
-        boolean shiftDown = Screen.hasShiftDown();
+//        boolean shiftDown = Screen.hasShiftDown();
         
-        if (shiftDown) {
-            int visibleWidth = this.width - 20;
-            int newHorizontalScroll = this.horizontalScrollOffset - (int)(amount * 20);
-            this.horizontalScrollOffset = MathHelper.clamp(newHorizontalScroll, 0, Math.max(0, maxLineWidth - visibleWidth));
-            return true;
-        } else {
+//        if (shiftDown) {
+//            int visibleWidth = this.width - 20;
+//            int newHorizontalScroll = this.horizontalScrollOffset - (int)(amount * 20);
+//            this.horizontalScrollOffset = MathHelper.clamp(newHorizontalScroll, 0, Math.max(0, maxLineWidth - visibleWidth));
+//            return true;
+//        } else {
             int lineHeight = this.textRenderer.fontHeight + 2;
             int maxLines = this.text.split("\n", -1).length;
             int maxVisibleLines = this.height / lineHeight;
@@ -365,7 +370,7 @@ public class MultilineEditor extends ClickableWidget {
             }
             
             return true;
-        }
+//        }
     }
     
     @Override
@@ -395,7 +400,7 @@ public class MultilineEditor extends ClickableWidget {
             }
         }
 
-        boolean controlDown = Screen.hasControlDown();
+//        boolean controlDown = Screen.hasControlDown();
 //        boolean shiftDown = Screen.hasShiftDown();
 
         if (showSuggestions && keyCode != GLFW.GLFW_KEY_COMMA && keyCode != GLFW.GLFW_KEY_DELETE) {
@@ -420,21 +425,21 @@ public class MultilineEditor extends ClickableWidget {
             }
         }
 
-        if (controlDown) {
-            if (keyCode == GLFW.GLFW_KEY_V) {
-                pasteFromClipboard();
-                updateSuggestions();
-                return true;
-            }
-            if (keyCode == GLFW.GLFW_KEY_C) {
-                copyToClipboard();
-                return true;
-            }
-            if (keyCode == GLFW.GLFW_KEY_SPACE) {
-                updateSuggestions();
-                return true;
-            }
-        }
+//        if (controlDown) {
+//            if (keyCode == GLFW.GLFW_KEY_V) {
+//                pasteFromClipboard();
+//                updateSuggestions();
+//                return true;
+//            }
+//            if (keyCode == GLFW.GLFW_KEY_C) {
+//                copyToClipboard();
+//                return true;
+//            }
+//            if (keyCode == GLFW.GLFW_KEY_SPACE) {
+//                updateSuggestions();
+//                return true;
+//            }
+//        }
         
         if (keyCode == GLFW.GLFW_KEY_LEFT) {
             this.cursorPosition = MathHelper.clamp(this.cursorPosition - 1, 0, this.text.length());
@@ -551,7 +556,7 @@ public class MultilineEditor extends ClickableWidget {
     }
     
     @Override
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(CharInput input) {
         if (!this.isFocused() || !this.editable) {
             return false;
         }
@@ -559,29 +564,29 @@ public class MultilineEditor extends ClickableWidget {
         if (!ConfigManager.getConfig().doSuggestions) showSuggestions = false;
         
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-            ActionResult result = entrypoint.onCharTyped(chr, modifiers);
+            ActionResult result = entrypoint.onCharTyped(input);
             if (result == ActionResult.FAIL) {
                 return true;
             }
         }
         
-        if (chr >= 32 && chr != 127) {
-            this.text = this.text.substring(0, this.cursorPosition) + chr + this.text.substring(this.cursorPosition);
-            this.cursorPosition++;
-            this.onTextChanged();
-            updateCursorX();
-            
-            if (chr != ',' && chr != '\n' && chr != '\r') {
-                updateSuggestions();
-            } else {
-                hideSuggestions();
-            }
-
-            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-                entrypoint.onType(chr, 0, modifiers);
-            }
-            return true;
-        }
+//        if (chr >= 32 && chr != 127) {
+//            this.text = this.text.substring(0, this.cursorPosition) + chr + this.text.substring(this.cursorPosition);
+//            this.cursorPosition++;
+//            this.onTextChanged();
+//            updateCursorX();
+//            
+//            if (chr != ',' && chr != '\n' && chr != '\r') {
+//                updateSuggestions();
+//            } else {
+//                hideSuggestions();
+//            }
+//
+//            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+//                entrypoint.onType(0, input.modifiers);
+//            }
+//            return true;
+//        }
         return false;
     }
 
@@ -760,19 +765,19 @@ public class MultilineEditor extends ClickableWidget {
         return end;
     }
 
-    private void copyToClipboard() {
-        MinecraftClient.getInstance().keyboard.setClipboard(this.text);
-    }
-
-    private void pasteFromClipboard() {
-        String clipboardText = MinecraftClient.getInstance().keyboard.getClipboard();
-        if (clipboardText != null) {
-            this.text = this.text.substring(0, this.cursorPosition) + clipboardText + this.text.substring(this.cursorPosition);
-            this.cursorPosition += clipboardText.length();
-            this.onTextChanged();
-            updateCursorX();
-        }
-    }
+//    private void copyToClipboard() {
+//        MinecraftClient.getInstance().keyboard.setClipboard(this.text);
+//    }
+//
+//    private void pasteFromClipboard() {
+//        String clipboardText = MinecraftClient.getInstance().keyboard.getClipboard();
+//        if (clipboardText != null) {
+//            this.text = this.text.substring(0, this.cursorPosition) + clipboardText + this.text.substring(this.cursorPosition);
+//            this.cursorPosition += clipboardText.length();
+//            this.onTextChanged();
+//            updateCursorX();
+//        }
+//    }
     
     public void insertTextAtCursor(String text) {
         this.text = this.text.substring(0, this.cursorPosition) + text + this.text.substring(this.cursorPosition);
@@ -910,10 +915,10 @@ public class MultilineEditor extends ClickableWidget {
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
         if (isDraggingHorizontalScroll) {
             int visibleWidth = this.width - 20;
-            int dragDeltaX = (int) mouseX - dragStartX;
+            int dragDeltaX = (int) click.x() - dragStartX;
             int scrollRange = Math.max(0, maxLineWidth - visibleWidth);
             
             if (scrollRange > 0) {
@@ -923,15 +928,15 @@ public class MultilineEditor extends ClickableWidget {
             }
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(click, offsetX, offsetY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(Click click) {
         if (isDraggingHorizontalScroll) {
             isDraggingHorizontalScroll = false;
             return true;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(click);
     }
 }

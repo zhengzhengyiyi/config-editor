@@ -17,9 +17,11 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.input.KeyInput;
 
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -73,7 +75,7 @@ public class EditorScreen extends Screen {
         themeToggleButton = ButtonWidget.builder(
                 Text.translatable(getThemeButtonText()),
                 button -> toggleTheme())
-                .dimensions(this.width - 350, 5, 45, 16)
+                .dimensions(this.width - 50, 5, 45, 16)
                 .build();
         this.addDrawableChild(themeToggleButton);
         
@@ -125,7 +127,7 @@ public class EditorScreen extends Screen {
         backupButton = ButtonWidget.builder(
                 Text.translatable("configeditor.button.backup"), 
                 button -> BackupHelper.backupEntireConfigDirectory())
-                .dimensions(0, 0, 70, 20)
+                .dimensions(this.width - 260, this.height - 30, 80, 20)
                 .build();
 
         openFolderButton = ButtonWidget.builder(
@@ -137,11 +139,11 @@ public class EditorScreen extends Screen {
         exitButton = ButtonWidget.builder(
                 Text.translatable("configeditor.button.close"),
                 button -> this.close())
-                .dimensions(0, this.height - 25, 80, 20)
+                .dimensions(0, 0, 80, 20)
                 .build();
         
         diffButton = ButtonWidget.builder(
-            Text.literal("Different"),
+            Text.literal("Diff"),
             button -> {
                 if (!showDiffView) {
                     originalText = multilineEditor.getText();
@@ -151,29 +153,35 @@ public class EditorScreen extends Screen {
                 }
                 showDiffView = !showDiffView;
             }
-        ).dimensions(this.width - 40, 0, 40, 16).build();
+        ).dimensions(this.width - 100, 5, 45, 16).build();
         this.addDrawableChild(diffButton);
         
-        searchField = new TextFieldWidget(textRenderer, this.width - 250, 5, 120, 16, Text.translatable("configeditor.search.placeholder"));
-        searchField.setVisible(false);
-        
-        searchNextButton = ButtonWidget.builder(Text.translatable("configeditor.search.next"), button -> {
+        searchField = new TextFieldWidget(textRenderer, this.width - 300, 5, 150, 16, Text.translatable("configeditor.search.placeholder"));
+        searchField.setChangedListener(text -> {
+            if (!text.trim().isEmpty()) {
+                multilineEditor.startSearch(text.trim());
+            }
+        });
+        searchField.setVisible(true);
+
+        searchNextButton = ButtonWidget.builder(Text.literal("↓"), button -> {
             if (multilineEditor != null) {
                 multilineEditor.findNext();
             }
-        }).dimensions(this.width - 125, 5, 50, 16).build();
-        searchNextButton.visible = false;
+        }).dimensions(this.width - 145, 5, 20, 16).build();
+        searchNextButton.visible = true;
         
-        searchPrevButton = ButtonWidget.builder(Text.translatable("configeditor.search.prev"), button -> {
+        searchPrevButton = ButtonWidget.builder(Text.literal("↑"), button -> {
             if (multilineEditor != null) {
                 multilineEditor.findPrevious();
             }
-        }).dimensions(this.width - 70, 5, 50, 16).build();
-        searchPrevButton.visible = false;
+        }).dimensions(this.width - 165, 5, 20, 16).build();
+        searchPrevButton.visible = true;
         
-        ButtonWidget searchButton = ButtonWidget.builder(Text.translatable("configeditor.button.search"), button -> {
-            toggleSearch();
-        }).dimensions(this.width - 300, 5, 45, 16).build();
+        ButtonWidget closeSearchButton = ButtonWidget.builder(Text.literal("✕"), button -> {
+            searchField.setText("");
+            multilineEditor.endSearch();
+        }).dimensions(this.width - 120, 5, 20, 16).build();
         
         this.addDrawableChild(saveButton);
         this.addDrawableChild(backupButton);
@@ -181,8 +189,8 @@ public class EditorScreen extends Screen {
         this.addDrawableChild(searchField);
         this.addDrawableChild(searchNextButton);
         this.addDrawableChild(searchPrevButton);
+        this.addDrawableChild(closeSearchButton);
         this.addDrawableChild(exitButton);
-        this.addDrawableChild(searchButton);
         this.addDrawableChild(multilineEditor);
         
         this.setInitialFocus(multilineEditor);
@@ -521,36 +529,36 @@ public class EditorScreen extends Screen {
     }
     
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-    	if (keyCode == GLFW.GLFW_KEY_Q && hasControlDown() && hasAltDown()) {
+    public boolean keyPressed(KeyInput input) {
+    	if (input.getKeycode() == GLFW.GLFW_KEY_Q && input.hasCtrl() && input.hasAlt()) {
             this.client.setScreen(null);
             LOGGER.info("Config editor force closed by user shortcut");
             return true;
         }
     	
-        if (multilineEditor == null) return super.keyPressed(keyCode, scanCode, modifiers);
+        if (multilineEditor == null) return super.keyPressed(input);
         
         if (searchVisible) {
-            if (keyCode == GLFW.GLFW_KEY_ENTER) {
+            if (input.getKeycode() == GLFW.GLFW_KEY_ENTER) {
                 multilineEditor.startSearch(searchField.getText());
                 return true;
             }
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            if (input.getKeycode() == GLFW.GLFW_KEY_ESCAPE) {
                 toggleSearch();
                 return true;
             }
-            if (keyCode == GLFW.GLFW_KEY_F3) {
+            if (input.getKeycode() == GLFW.GLFW_KEY_F3) {
                 multilineEditor.findNext();
                 return true;
             }
         }
         
-        if (keyCode == GLFW.GLFW_KEY_F && hasControlDown()) {
+        if (input.getKeycode() == GLFW.GLFW_KEY_F && input.hasCtrl()) {
             toggleSearch();
             return true;
         }
         
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(input);
     }
     
     private void toggleTheme() {
@@ -582,7 +590,7 @@ public class EditorScreen extends Screen {
         int y = this.height - panelHeight - 10;
         
         context.fill(x, y, x + panelWidth, y + panelHeight, 0xCC000000);
-        context.drawBorder(x, y, panelWidth, panelHeight, 0xFFFFFFFF);
+//        context.drawBorder(x, y, panelWidth, panelHeight, 0xFFFFFFFF);
         
         int startY = y + 5;
         context.drawText(textRenderer, "Line Changes", x + 5, startY, 0xFFFFFF00, false);
@@ -613,19 +621,19 @@ public class EditorScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         if (showDiffView && currentDiff != null) {
             int panelWidth = 200;
             int panelHeight = 80;
             int x = this.width - panelWidth - 10;
             int y = this.height - panelHeight - 10;
             
-            if (isMouseOverPanel((int)mouseX, (int)mouseY, x, y, panelWidth, panelHeight)) {
+            if (isMouseOverPanel((int)click.x(), (int)click.y(), x, y, panelWidth, panelHeight)) {
                 showDiffView = false;
                 return true;
             }
         }
         
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 }

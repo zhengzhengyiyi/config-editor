@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import io.github.zhengzhengyiyi.ConfigEditorClient;
 import io.github.zhengzhengyiyi.gui.EditorScreen;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.input.CharInput;
 import net.minecraft.util.ActionResult;
 
 /**
@@ -57,15 +58,12 @@ public interface ApiEntrypoint {
 
     /**
      * Called when a key is typed on the keyboard.
-     * @param keyCode The key code of the typed key.
-     * @param scanCode The scan code of the typed key.
-     * @param modifiers The keyboard modifiers pressed at the time of typing.
      */
     default ActionResult onType(int keyCode, int scanCode, int modifiers) {
     	return ActionResult.SUCCESS;
     }
     
-    default ActionResult onCharTyped(char charactor, int modifiers) {
+    default ActionResult onCharTyped(CharInput input) {
     	return ActionResult.SUCCESS;
     }
 

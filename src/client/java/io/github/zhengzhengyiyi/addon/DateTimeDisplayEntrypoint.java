@@ -34,16 +34,6 @@ public class DateTimeDisplayEntrypoint implements ApiEntrypoint {
     public void onMouseScroll() {}
 
     @Override
-    public ActionResult onType(int keyCode, int scanCode, int modifiers) {
-        return ActionResult.PASS;
-    }
-
-    @Override
-    public ActionResult onCharTyped(char chr, int modifiers) {
-        return ActionResult.PASS;
-    }
-
-    @Override
     public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
         if (!enabled || editor == null) return;
 

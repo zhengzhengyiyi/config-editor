@@ -31,7 +31,7 @@ public class ConfigEditorClient implements ClientModInitializer {
 			"zhengzhengyiyi.key.open_gui",
 			InputUtil.Type.KEYSYM,
 			GLFW.GLFW_KEY_UNKNOWN,
-			"key.category.zhengzhengyiyi"
+			KeyBinding.Category.GAMEPLAY
 	));
 	/**
 	 * The Logger for the other mod's entry point, usually for printing errors.
