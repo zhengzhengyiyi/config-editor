@@ -6,7 +6,8 @@ import org.slf4j.LoggerFactory;
 
 import io.github.zhengzhengyiyi.addon.*;
 import io.github.zhengzhengyiyi.api.ApiEntrypoint;
-import io.github.zhengzhengyiyi.config.ConfigManager;
+import io.github.zhengzhengyiyi.api.config.ConfigManager;
+import io.github.zhengzhengyiyi.config.ModConfigData;
 import io.github.zhengzhengyiyi.gui.EditorScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -18,10 +19,12 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 
 import java.util.List;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class ConfigEditorClient implements ClientModInitializer {
 	public static String MOD_ID = "config_editor";
+	public static ConfigManager<ModConfigData> configManager = new ConfigManager<>(Paths.get("config", "editor_config.json"), new ModConfigData(), ModConfigData.class);
 	
 	/**
 	 * The keybinding for open the configure
@@ -66,8 +69,6 @@ public class ConfigEditorClient implements ClientModInitializer {
             }
         });
 		
-		ConfigManager.init();
-		
 		ENTRYPOINTS.add(new UndoRedoEntrypoint());
 		ENTRYPOINTS.add(new TextStatsEntrypoint());
 		ENTRYPOINTS.add(new DateTimeDisplayEntrypoint());
@@ -81,7 +82,7 @@ public class ConfigEditorClient implements ClientModInitializer {
 		});
 		
 		ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
-            ConfigManager.shutdown();
+            configManager.shutdown();
         });
 		
 //		testLanguageResources();

@@ -1,7 +1,10 @@
 package io.github.zhengzhengyiyi.addon;
 
 import io.github.zhengzhengyiyi.gui.EditorScreen;
+import io.github.zhengzhengyiyi.gui.widget.GeneralMultilineEditor;
+import io.github.zhengzhengyiyi.gui.widget.MultilineEditor;
 import io.github.zhengzhengyiyi.api.*;
+import net.minecraft.client.gui.widget.ClickableWidget;
 //import net.minecraft.client.gui.screen.Screen;
 //import net.minecraft.client.input.KeyInput;
 import net.minecraft.util.ActionResult;
@@ -26,9 +29,16 @@ public class UndoRedoEntrypoint implements ApiEntrypoint {
     @Override
     public void onEditerOpen(EditorScreen editor) {
         this.editor = editor;
+        ClickableWidget textWidget = editor.getTextWidget();
         resetStacks();
-        if (editor.getTextWidget() != null) {
-            currentText = editor.getTextWidget().getText();
+        if (textWidget != null) {
+        	if (textWidget instanceof MultilineEditor) {
+        		currentText = ((MultilineEditor)textWidget).text;
+            } else if (textWidget instanceof GeneralMultilineEditor) {
+    			currentText = ((GeneralMultilineEditor)textWidget).text;
+    		} else {
+    			LOGGER.error("can not find current text");
+    		}
             saveState();
         }
     }

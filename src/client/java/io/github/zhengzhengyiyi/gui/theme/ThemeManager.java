@@ -1,7 +1,7 @@
 package io.github.zhengzhengyiyi.gui.theme;
 
-import io.github.zhengzhengyiyi.config.ConfigData;
-import io.github.zhengzhengyiyi.config.ConfigManager;
+import io.github.zhengzhengyiyi.ConfigEditorClient;
+import io.github.zhengzhengyiyi.config.ModConfigData;
 
 public class ThemeManager {
     private static ThemeManager instance;
@@ -19,11 +19,11 @@ public class ThemeManager {
     }
     
     public int getBackgroundColor() {
-        ConfigData.ThemeMode theme = ConfigManager.getConfig().theme;
-        if (theme == ConfigData.ThemeMode.AUTO) {
+        ModConfigData.ThemeMode theme = ConfigEditorClient.configManager.getConfig().theme;
+        if (theme == ModConfigData.ThemeMode.AUTO) {
             return isSystemDarkMode() ? DARK_BACKGROUND : LIGHT_BACKGROUND;
         }
-        return theme == ConfigData.ThemeMode.DARK ? DARK_BACKGROUND : LIGHT_BACKGROUND;
+        return theme == ModConfigData.ThemeMode.DARK ? DARK_BACKGROUND : LIGHT_BACKGROUND;
     }
     
     private boolean isSystemDarkMode() {

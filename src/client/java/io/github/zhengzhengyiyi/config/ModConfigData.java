@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
  * Configuration data class that holds all configurable variables for the editor.
  * This class is used for JSON serialization and deserialization.
  */
-public class ConfigData {
+public class ModConfigData extends io.github.zhengzhengyiyi.api.config.ConfigData {
 	/**
 	 * If it is true, you can not edit the files
 	 */

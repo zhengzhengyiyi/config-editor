@@ -1,15 +1,14 @@
 package io.github.zhengzhengyiyi.gui.widget;
 
 import io.github.zhengzhengyiyi.ConfigEditorClient;
-import io.github.zhengzhengyiyi.config.ConfigManager;
 import io.github.zhengzhengyiyi.util.*;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 //import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -22,12 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class MultilineEditor extends ClickableWidget {
+public class MultilineEditor extends AbstractEditor {
     private final TextRenderer textRenderer;
     private boolean isDraggingHorizontalScroll = false;
     private int dragStartX = 0;
     private int dragStartScrollOffset = 0;
-    private String text = "";
+    public String text = "";
     private int scrollOffset = 0;
     private int horizontalScrollOffset = 0;
     public static int maxVisibleLines = 10;
@@ -54,7 +53,7 @@ public class MultilineEditor extends ClickableWidget {
         this.setFocused(false);
         
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            editable = !ConfigManager.getConfig().readonly_mode;
+            editable = !ConfigEditorClient.configManager.getConfig().readonly_mode;
         });
     }
     
@@ -386,18 +385,50 @@ public class MultilineEditor extends ClickableWidget {
                mouseY >= this.getY() + this.height - scrollbarHeight && mouseY <= this.getY() + this.height;
     }
 
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (!this.isFocused() || !this.editable) {
+    @Override
+    public boolean keyPressed(KeyInput input) {
+        if (!this.editable) {
             return false;
         }
         
-        if (!ConfigManager.getConfig().doSuggestions) showSuggestions = false;
+        if (!ConfigEditorClient.configManager.getConfig().doSuggestions) showSuggestions = false;
         
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-            ActionResult result = entrypoint.onType(keyCode, scanCode, modifiers);
+            ActionResult result = entrypoint.onType(input.getKeycode(), input.scancode(), input.modifiers());
             if (result == ActionResult.FAIL) {
                 return true;
             }
+        }
+        
+        int keyCode = input.getKeycode();
+        int scanCode = input.scancode();
+        int modifiers = input.modifiers();
+        
+        if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
+            if (this.cursorPosition > 0) {
+                this.text = this.text.substring(0, this.cursorPosition - 1) + this.text.substring(this.cursorPosition);
+                this.cursorPosition--;
+                this.onTextChanged();
+                updateCursorX();
+                updateSuggestions();
+            }
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(keyCode, scanCode, modifiers);
+            }
+            return true;
+        }
+
+        if (keyCode == GLFW.GLFW_KEY_DELETE) {
+            if (this.cursorPosition < this.text.length()) {
+                this.text = this.text.substring(0, this.cursorPosition) + this.text.substring(this.cursorPosition + 1);
+                this.onTextChanged();
+                updateCursorX();
+                updateSuggestions();
+            }
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(keyCode, scanCode, modifiers);
+            }
+            return true;
         }
 
 //        boolean controlDown = Screen.hasControlDown();
@@ -512,33 +543,6 @@ public class MultilineEditor extends ClickableWidget {
             }
             return true;
         }
-
-        if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
-            if (this.cursorPosition > 0) {
-                this.text = this.text.substring(0, this.cursorPosition - 1) + this.text.substring(this.cursorPosition);
-                this.cursorPosition--;
-                this.onTextChanged();
-                updateCursorX();
-                updateSuggestions();
-            }
-            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-                entrypoint.onType(keyCode, scanCode, modifiers);
-            }
-            return true;
-        }
-
-        if (keyCode == GLFW.GLFW_KEY_DELETE) {
-            if (this.cursorPosition < this.text.length()) {
-                this.text = this.text.substring(0, this.cursorPosition) + this.text.substring(this.cursorPosition + 1);
-                this.onTextChanged();
-                updateCursorX();
-                updateSuggestions();
-            }
-            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-                entrypoint.onType(keyCode, scanCode, modifiers);
-            }
-            return true;
-        }
         
         if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
             this.text = this.text.substring(0, this.cursorPosition) + "\n" + this.text.substring(this.cursorPosition);
@@ -561,7 +565,7 @@ public class MultilineEditor extends ClickableWidget {
             return false;
         }
         
-        if (!ConfigManager.getConfig().doSuggestions) showSuggestions = false;
+        if (!ConfigEditorClient.configManager.getConfig().doSuggestions) showSuggestions = false;
         
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
             ActionResult result = entrypoint.onCharTyped(input);
@@ -570,23 +574,25 @@ public class MultilineEditor extends ClickableWidget {
             }
         }
         
-//        if (chr >= 32 && chr != 127) {
-//            this.text = this.text.substring(0, this.cursorPosition) + chr + this.text.substring(this.cursorPosition);
-//            this.cursorPosition++;
-//            this.onTextChanged();
-//            updateCursorX();
-//            
-//            if (chr != ',' && chr != '\n' && chr != '\r') {
-//                updateSuggestions();
-//            } else {
-//                hideSuggestions();
-//            }
-//
-//            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-//                entrypoint.onType(0, input.modifiers);
-//            }
-//            return true;
-//        }
+        if (input.isValidChar()) {
+            String chr = input.asString();
+            this.text = this.text.substring(0, this.cursorPosition) + chr + this.text.substring(this.cursorPosition);
+            this.cursorPosition++;
+            this.onTextChanged();
+            updateCursorX();
+            
+            if (!chr.equals(",") && !chr.equals("\n") && !chr.equals("\r")) {
+                updateSuggestions();
+            } else {
+                hideSuggestions();
+            }
+
+            for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
+                entrypoint.onType(input.codepoint(), 0, input.modifiers());
+            }
+            return true;
+        }
+        
         return false;
     }
 
@@ -868,7 +874,7 @@ public class MultilineEditor extends ClickableWidget {
     }
     
     private void updateSuggestions() {
-        if (!ConfigManager.getConfig().doSuggestions) {
+        if (!ConfigEditorClient.configManager.getConfig().doSuggestions) {
             hideSuggestions();
             return;
         }
