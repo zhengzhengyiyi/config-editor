@@ -42,7 +42,7 @@ public class EditorScreen extends Screen {
     private int selectedIndex = 0;
     private MultilineEditor multilineEditor;
     private GeneralMultilineEditor universalEditor;
-    private ClickableWidget currentEditor;
+    private AbstractEditor currentEditor;
     private boolean modified = false;
     private ButtonWidget saveButton;
     private ButtonWidget openFolderButton;
@@ -255,7 +255,7 @@ public class EditorScreen extends Screen {
     private void switchFile(int index) {
         loadFile(index);
     }
-
+    
     private void loadFile(int index) {
         if (index < 0 || index >= configFiles.size()) {
             LOGGER.error("Invalid file index: {}", index);
@@ -278,11 +278,9 @@ public class EditorScreen extends Screen {
             if (isJson) {
                 JsonElement json = JsonParser.parseString(content);
                 String formattedContent = GSON.toJson(json);
-                multilineEditor.setText(formattedContent);
-//                LOGGER.info("Successfully loaded JSON config file: {}", file.getFileName());
+                currentEditor.setText(formattedContent);
             } else {
-                universalEditor.setText(content);
-//                LOGGER.info("Successfully loaded text file: {}", file.getFileName());
+                currentEditor.setText(content);
             }
         } catch (Exception e) {
             String text = null;
@@ -294,23 +292,75 @@ public class EditorScreen extends Screen {
             if (text == null) {
                 LOGGER.error("Failed to load config file: {}", file.getFileName(), e);
                 switchEditor(true);
-                multilineEditor.setText("{}");
-                multilineEditor.setEditable(false);
+                currentEditor.setText("{}");
+                currentEditor.setEditable(false);
                 showErrorPopup(Text.translatable("configeditor.error.loadfailed"));
             } else {
                 boolean isJson = checkIfJson(text);
                 isJsonFile = isJson;
                 switchEditor(isJson);
-                if (isJson) {
-                    multilineEditor.setText(text);
-                } else {
-                    universalEditor.setText(text);
-                }
+                currentEditor.setText(text);
             }
         }
         
         updateButtonStates();
     }
+
+//    private void loadFile(int index) {
+//        if (index < 0 || index >= configFiles.size()) {
+//            LOGGER.error("Invalid file index: {}", index);
+//            return;
+//        }
+//        
+//        selectedIndex = index;
+//        modified = false;
+//        Path file = configFiles.get(index);
+//        
+//        try {
+//            String content = Files.readString(file);
+//            buffer = content;
+//            
+//            boolean isJson = checkIfJson(content);
+//            isJsonFile = isJson;
+//            
+//            switchEditor(isJson);
+//            
+//            if (isJson) {
+//                JsonElement json = JsonParser.parseString(content);
+//                String formattedContent = GSON.toJson(json);
+//                multilineEditor.setText(formattedContent);
+////                LOGGER.info("Successfully loaded JSON config file: {}", file.getFileName());
+//            } else {
+//                universalEditor.setText(content);
+////                LOGGER.info("Successfully loaded text file: {}", file.getFileName());
+//            }
+//        } catch (Exception e) {
+//            String text = null;
+//            try {
+//                text = Files.readString(file);
+//            } catch (IOException ioexception) {
+//                LOGGER.error("tried to read file except IOException: ", ioexception.toString());
+//            }
+//            if (text == null) {
+//                LOGGER.error("Failed to load config file: {}", file.getFileName(), e);
+//                switchEditor(true);
+//                multilineEditor.setText("{}");
+//                multilineEditor.setEditable(false);
+//                showErrorPopup(Text.translatable("configeditor.error.loadfailed"));
+//            } else {
+//                boolean isJson = checkIfJson(text);
+//                isJsonFile = isJson;
+//                switchEditor(isJson);
+//                if (isJson) {
+//                    multilineEditor.setText(text);
+//                } else {
+//                    universalEditor.setText(text);
+//                }
+//            }
+//        }
+//        
+//        updateButtonStates();
+//    }
 
     private boolean checkIfJson(String content) {
         if (content == null || content.trim().isEmpty()) {
