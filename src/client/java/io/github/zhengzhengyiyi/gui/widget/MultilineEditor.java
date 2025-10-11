@@ -2,6 +2,7 @@ package io.github.zhengzhengyiyi.gui.widget;
 
 import io.github.zhengzhengyiyi.ConfigEditorClient;
 import io.github.zhengzhengyiyi.util.*;
+import io.github.zhengzhengyiyi.util.highlighter.JsonSyntaxHighlighter;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
@@ -23,6 +24,7 @@ import java.util.function.Consumer;
 
 public class MultilineEditor extends AbstractEditor {
     private final TextRenderer textRenderer;
+    private final JsonSyntaxHighlighter highLighter = new JsonSyntaxHighlighter();
     private boolean isDraggingHorizontalScroll = false;
     private int dragStartX = 0;
     private int dragStartScrollOffset = 0;
@@ -84,7 +86,7 @@ public class MultilineEditor extends AbstractEditor {
                     int yPos = this.getY() + 4 + (i - this.scrollOffset) * lineHeight;
                     String lineNum = String.valueOf(i + 1);
                     context.drawText(textRenderer, lineNum, this.getX() + 2 - horizontalScrollOffset, yPos, 0xFF888888, false);
-                    SyntaxHighlighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4 + 12 - horizontalScrollOffset, yPos, this.editable);
+                    highLighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4 + 12 - horizontalScrollOffset, yPos, this.editable);
                 }
             }
             
@@ -106,7 +108,7 @@ public class MultilineEditor extends AbstractEditor {
                     int remaining = this.cursorPosition;
                     for (int i = 0; i < lines.length; i++) {
                         if (remaining <= lines[i].length()) {
-                            xPos += SyntaxHighlighter.getTextWidthUpToChar(this.textRenderer, lines[i], remaining);
+                            xPos += highLighter.getTextWidthUpToChar(this.textRenderer, lines[i], remaining);
                             lineIndex = i;
                             break;
                         }
@@ -135,7 +137,7 @@ public class MultilineEditor extends AbstractEditor {
     private void calculateMaxLineWidth(String[] lines) {
         maxLineWidth = 0;
         for (String line : lines) {
-            int lineWidth = SyntaxHighlighter.getTextWidth(this.textRenderer, line);
+            int lineWidth = highLighter.getTextWidth(this.textRenderer, line);
             maxLineWidth = Math.max(maxLineWidth, lineWidth);
         }
     }
@@ -222,7 +224,7 @@ public class MultilineEditor extends AbstractEditor {
         int remaining = cursorPosition;
         for (int i = 0; i < lines.length; i++) {
             if (remaining <= lines[i].length()) {
-                xPos += SyntaxHighlighter.getTextWidthUpToChar(textRenderer, lines[i], remaining);
+                xPos += highLighter.getTextWidthUpToChar(textRenderer, lines[i], remaining);
                 lineIndex = i;
                 break;
             }
@@ -311,7 +313,7 @@ public class MultilineEditor extends AbstractEditor {
             
             int clickedX = (int)mouseX - (this.getX() + 4 + 12) + horizontalScrollOffset;
             
-            int charIndex = SyntaxHighlighter.getCharIndexFromTokens(this.textRenderer, line, clickedX);
+            int charIndex = highLighter.getCharIndexFromTokens(this.textRenderer, line, clickedX);
             
             int newPosition = 0;
             for (int i = 0; i < lineIndex; i++) {
@@ -682,8 +684,8 @@ public class MultilineEditor extends AbstractEditor {
                     String errorText = visibleLine.substring(errorStartInLine, errorEndInLine);
                     
                     int textStartX = getX() + 4 + 12;
-                    int beforeErrorWidth = SyntaxHighlighter.getTextWidth(textRenderer, beforeError);
-                    int errorWidth = SyntaxHighlighter.getTextWidth(textRenderer, errorText);
+                    int beforeErrorWidth = highLighter.getTextWidth(textRenderer, beforeError);
+                    int errorWidth = highLighter.getTextWidth(textRenderer, errorText);
                     
                     int xStart = textStartX + beforeErrorWidth - horizontalScrollOffset;
                     
@@ -905,7 +907,7 @@ public class MultilineEditor extends AbstractEditor {
         int remaining = cursorPosition;
         for (int i = 0; i < lines.length; i++) {
             if (remaining <= lines[i].length()) {
-                xPos += SyntaxHighlighter.getTextWidthUpToChar(textRenderer, lines[i], remaining);
+                xPos += highLighter.getTextWidthUpToChar(textRenderer, lines[i], remaining);
                 lineIndex = i;
                 break;
             }

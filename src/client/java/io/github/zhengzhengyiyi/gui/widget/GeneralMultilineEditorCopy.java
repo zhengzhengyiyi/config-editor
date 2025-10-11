@@ -1,8 +1,6 @@
 package io.github.zhengzhengyiyi.gui.widget;
 
-import io.github.zhengzhengyiyi.api.FileType;
 import io.github.zhengzhengyiyi.util.TextSearchEngine;
-import io.github.zhengzhengyiyi.util.highlighter.HighLighter;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
@@ -14,10 +12,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
+import io.github.zhengzhengyiyi.api.*;
 
 import java.util.function.Consumer;
 
-public class GeneralMultilineEditor extends AbstractEditor {
+public class GeneralMultilineEditorCopy extends AbstractEditor {
     private final TextRenderer textRenderer;
     private boolean isDraggingHorizontalScroll = false;
     private int dragStartX = 0;
@@ -38,23 +37,35 @@ public class GeneralMultilineEditor extends AbstractEditor {
     private TextSearchEngine searchEngine = new TextSearchEngine();
     private boolean isSearching = false;
     public String searchQuery = "";
-    private FileType fileType = FileType.TXT;
 
-    public GeneralMultilineEditor(int x, int y, int width, int height, Text message) {
+    public GeneralMultilineEditorCopy(int x, int y, int width, int height, Text message) {
         super(x, y, width, height, message);
         this.textRenderer = MinecraftClient.getInstance().textRenderer;
         this.setFocused(false);
     }
     
     public FileType getFileTypeFromName(String fileName) {
-        String lowerName = fileName.toLowerCase();
-        
-        for (FileType type : FileType.values()) {
-            String extension = "." + type.getExtension();
-            if (lowerName.endsWith(extension)) {
-                return type;
-            }
+    	String lowerName = fileName.toLowerCase();
+        if (lowerName.endsWith(".json")) {
+        	return FileType.JSON;
+        } else if (lowerName.endsWith(".txt")) {
+        	return FileType.TXT;
+        } else if (lowerName.endsWith(".yml")) {
+        	return FileType.YML;
+        } else if (lowerName.endsWith(".yaml")) {
+        	return FileType.YAML;
+        } else if (lowerName.endsWith(".properties")) {
+        	return FileType.PROPERTIES;
+        } else if (lowerName.endsWith(".toml")) {
+        	return FileType.TOML;
+        } else if (lowerName.endsWith(".conf")) {
+        	return FileType.CONF;
+        } else if (lowerName.endsWith(".cfg")) {
+        	return FileType.CFG;
+        } else if (lowerName.endsWith(".ini")) {
+        	return FileType.INI;
         }
+        
         return FileType.UNKNOW;
     }
     
@@ -79,17 +90,14 @@ public class GeneralMultilineEditor extends AbstractEditor {
                 renderSearchHighlights(context, lines, lineHeight, maxVisibleLines);
             }
 
-            HighLighter highlighter = fileType.getHighLighter();
-//            HighLighter highlighter = new PropertiesSyntaxHighlighter();
-            		
-            
             for (int i = 0; i < lines.length; i++) {
                 if (i >= this.scrollOffset && i < this.scrollOffset + maxVisibleLines) {
                     int yPos = this.getY() + 4 + (i - this.scrollOffset) * lineHeight;
                     String lineNum = String.valueOf(i + 1);
                     context.drawText(textRenderer, lineNum, this.getX() + 2 - horizontalScrollOffset, yPos, 0xFF888888, false);
+                    context.drawText(textRenderer, lines[i], this.getX() + 4 + 12 - horizontalScrollOffset, yPos, 0xFFFFFFFF, false);
                     
-                    highlighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4 + 12 - horizontalScrollOffset, yPos, this.editable);
+//                    PropertiesSyntaxHighlighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4 + 12 - horizontalScrollOffset, yPos, this.editable);
                 }
             }
 
@@ -105,7 +113,7 @@ public class GeneralMultilineEditor extends AbstractEditor {
                     int remaining = this.cursorPosition;
                     for (int i = 0; i < lines.length; i++) {
                         if (remaining <= lines[i].length()) {
-                            xPos += highlighter.getTextWidthUpToChar(this.textRenderer, lines[i], remaining);
+                            xPos += textRenderer.getWidth(lines[i].substring(0, remaining));
                             lineIndex = i;
                             break;
                         }
@@ -128,7 +136,7 @@ public class GeneralMultilineEditor extends AbstractEditor {
     private void calculateMaxLineWidth(String[] lines) {
         maxLineWidth = 0;
         for (String line : lines) {
-            int lineWidth = fileType.getHighLighter().getTextWidth(textRenderer, line);
+            int lineWidth = textRenderer.getWidth(line);
             maxLineWidth = Math.max(maxLineWidth, lineWidth);
         }
     }
@@ -174,8 +182,8 @@ public class GeneralMultilineEditor extends AbstractEditor {
                             String beforeMatch = line.substring(0, matchInLine);
                             String matchText = line.substring(matchInLine, matchEndInLine);
                             
-                            int xStart = xBase + fileType.getHighLighter().getTextWidth(textRenderer, beforeMatch);
-                            int highlightWidth = fileType.getHighLighter().getTextWidth(textRenderer, matchText);
+                            int xStart = xBase + textRenderer.getWidth(beforeMatch);
+                            int highlightWidth = textRenderer.getWidth(matchText);
                             int yStart = yPos + textRenderer.fontHeight - 1;
                             
                             boolean isCurrentMatch = matchPos == searchEngine.getCurrentMatchPosition();
@@ -215,7 +223,7 @@ public class GeneralMultilineEditor extends AbstractEditor {
             
             int clickedX = (int)mouseX - (this.getX() + 4 + 12) + horizontalScrollOffset;
             
-            int charIndex = fileType.getHighLighter().getCharIndexFromTokens(textRenderer, line, clickedX);
+            int charIndex = getCharIndexFromClick(line, clickedX);
             
             int newPosition = 0;
             for (int i = 0; i < lineIndex; i++) {
@@ -229,6 +237,21 @@ public class GeneralMultilineEditor extends AbstractEditor {
             this.setFocused(false);
             return false;
         }
+    }
+
+    private int getCharIndexFromClick(String line, int clickedX) {
+        if (line.isEmpty()) return 0;
+        
+        int currentWidth = 0;
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            int charWidth = textRenderer.getWidth(String.valueOf(c));
+            if (clickedX <= currentWidth + charWidth / 2) {
+                return i;
+            }
+            currentWidth += charWidth;
+        }
+        return line.length();
     }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
@@ -375,8 +398,6 @@ public class GeneralMultilineEditor extends AbstractEditor {
         this.cursorPosition = MathHelper.clamp(this.cursorPosition, 0, this.text.length());
         this.onTextChanged();
         updateCursorX();
-        
-//        this.setFileName(text);
     }
     
     public void setEditable(boolean editable) {
@@ -396,7 +417,7 @@ public class GeneralMultilineEditor extends AbstractEditor {
     private void updateCursorX() {
         int lineStart = getLineStart(this.cursorPosition);
         String currentLine = this.text.substring(lineStart, this.cursorPosition);
-        this.lastCursorX = fileType.getHighLighter().getTextWidth(textRenderer, currentLine);
+        this.lastCursorX = this.textRenderer.getWidth(currentLine);
         
         int visibleWidth = this.width - 20;
         if (lastCursorX > horizontalScrollOffset + visibleWidth) {
@@ -437,7 +458,6 @@ public class GeneralMultilineEditor extends AbstractEditor {
     
     public void setFileName(String v) {
         this.filename = v;
-        this.fileType = getFileTypeFromName(v);
     }
     
     public String getFileName() {

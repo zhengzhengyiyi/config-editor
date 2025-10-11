@@ -1,11 +1,11 @@
-package io.github.zhengzhengyiyi.util;
+package io.github.zhengzhengyiyi.util.highlighter;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+
 import java.util.*;
 
-public class SyntaxHighlighter {
-    
+public class JsonSyntaxHighlighter implements HighLighter{
     public enum TokenType {
         BRACE_LEFT, BRACE_RIGHT,
         BRACKET_LEFT, BRACKET_RIGHT,
@@ -29,7 +29,7 @@ public class SyntaxHighlighter {
         }
     }
     
-    public static int getCharIndexFromTokens(TextRenderer textRenderer, String line, int targetX) {
+    public int getCharIndexFromTokens(TextRenderer textRenderer, String line, int targetX) {
         if (line.isEmpty()) return 0;
         
         for (int i = 0; i <= line.length(); i++) {
@@ -41,7 +41,7 @@ public class SyntaxHighlighter {
         return line.length();
     }
     
-    public static int getTextWidthUpToChar(TextRenderer textRenderer, String line, int charIndex) {
+    public int getTextWidthUpToChar(TextRenderer textRenderer, String line, int charIndex) {
         if (line.isEmpty() || charIndex <= 0) return 0;
         
         List<Token> tokens = tokenizeLine(line);
@@ -65,7 +65,7 @@ public class SyntaxHighlighter {
         return totalWidth;
     }
     
-    public static void drawHighlightedText(DrawContext context, TextRenderer textRenderer, String text, int x, int y, boolean editable) {
+    public void drawHighlightedText(DrawContext context, TextRenderer textRenderer, String text, int x, int y, boolean editable) {
         if (text.isEmpty()) return;
         
         List<Token> tokens = tokenizeLine(text);
@@ -78,7 +78,7 @@ public class SyntaxHighlighter {
         }
     }
     
-    private static List<Token> tokenizeLine(String line) {
+    private List<Token> tokenizeLine(String line) {
         List<Token> tokens = new ArrayList<>();
         if (line.isEmpty()) return tokens;
         
@@ -189,7 +189,7 @@ public class SyntaxHighlighter {
         return tokens;
     }
     
-    public static int getTextWidth(TextRenderer textRenderer, String text) {
+    public int getTextWidth(TextRenderer textRenderer, String text) {
         if (text == null || text.isEmpty()) return 0;
         
         List<Token> tokens = tokenizeLine(text);
@@ -202,7 +202,7 @@ public class SyntaxHighlighter {
         return totalWidth;
     }
     
-    private static int getTokenColor(TokenType type, boolean editable) {
+    private int getTokenColor(TokenType type, boolean editable) {
         int defaultColor = editable ? 0xFFFFFFFF : 0xFFAAAAAA;
         
         switch (type) {

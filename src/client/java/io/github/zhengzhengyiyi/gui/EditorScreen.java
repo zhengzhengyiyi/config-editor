@@ -1,6 +1,5 @@
 package io.github.zhengzhengyiyi.gui;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import io.github.zhengzhengyiyi.util.BackupHelper;
@@ -8,8 +7,6 @@ import io.github.zhengzhengyiyi.*;
 import io.github.zhengzhengyiyi.config.ModConfigData;
 import io.github.zhengzhengyiyi.gui.theme.ThemeManager;
 import io.github.zhengzhengyiyi.gui.widget.*;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -35,9 +32,13 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Main configuration editor screen supporting both JSON and text files.
+ * Provides file navigation, editing, and search functionality.
+ */
 public class EditorScreen extends Screen {
     private static final Logger LOGGER = LoggerFactory.getLogger(EditorScreen.class);
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+//    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private List<Path> configFiles;
     private int selectedIndex = 0;
     private MultilineEditor multilineEditor;
@@ -79,10 +80,8 @@ public class EditorScreen extends Screen {
         
         try {
             Path configDir = FabricLoader.getInstance().getConfigDir();
-            configFiles = Files.list(configDir)
-                    .filter(Files::isRegularFile)
-                    .collect(Collectors.toList());
-//            LOGGER.info("Found {} config files", configFiles.size());
+            configFiles = new ArrayList<>();
+            loadConfigFilesRecursively(configDir, configFiles);
         } catch (Exception e) {
             configFiles = new ArrayList<>();
             LOGGER.error("Failed to list config files", e);
@@ -201,6 +200,55 @@ public class EditorScreen extends Screen {
         updateButtonStates();
         updateScrollButtons();
     }
+    
+    /**
+     * Checks if a file is a valid configuration file.
+     * Filters out system files and binary files.
+     */
+    public boolean isConfigFile(Path file) {
+        String fileName = file.getFileName().toString();
+        
+        if (fileName.equals(".DS_Store") || 
+            fileName.startsWith(".") || 
+            fileName.equals("Thumbs.db")) {
+            return false;
+        }
+        
+        String lowerName = fileName.toLowerCase();
+        return lowerName.endsWith(".json") || 
+               lowerName.endsWith(".txt") || 
+               lowerName.endsWith(".yml") || 
+               lowerName.endsWith(".yaml") || 
+               lowerName.endsWith(".properties") || 
+               lowerName.endsWith(".toml") || 
+               lowerName.endsWith(".conf") || 
+               lowerName.endsWith(".cfg") || 
+               lowerName.endsWith(".ini");
+    }
+
+    /**
+     * Formats file path for display in the file list.
+     */
+    private String formatFileName(String filePath) {
+        if (filePath.length() > 22) {
+            int lastSeparator = filePath.lastIndexOf('/');
+            if (lastSeparator != -1) {
+                String folder = filePath.substring(0, lastSeparator);
+                String fileName = filePath.substring(lastSeparator + 1);
+                
+                if (folder.length() > 8) {
+                    folder = folder.substring(0, 12) + "..";
+                }
+                if (fileName.length() > 12) {
+                    fileName = fileName.substring(0, 12) + "..";
+                }
+                return folder + "/" + fileName;
+            } else {
+                return filePath.substring(0, 17) + "...";
+            }
+        }
+        return filePath;
+    }
 
     private void renderFileList() {
         for (ButtonWidget button : fileButtonList) {
@@ -212,10 +260,11 @@ public class EditorScreen extends Screen {
         for (int i = fileListScrollOffset; i < configFiles.size() && i < fileListScrollOffset + 15; i++) {
             int index = i;
             Path file = configFiles.get(i);
-            String fileName = file.getFileName().toString();
+            Path configDir = FabricLoader.getInstance().getConfigDir();
+            String relativePath = configDir.relativize(file).toString();
             
             ButtonWidget button = ButtonWidget.builder(
-                    Text.literal(fileName.length() > 20 ? fileName.substring(0, 17) + "..." : fileName),
+                    Text.literal(formatFileName(relativePath)),
                     _button -> switchFile(index))
                     .dimensions(10, buttonY, 130, 20)
                     .build();
@@ -267,101 +316,67 @@ public class EditorScreen extends Screen {
         Path file = configFiles.get(index);
         
         try {
-            String content = Files.readString(file);
+            String content = readFileWithFallbackEncoding(file);
             buffer = content;
             
             boolean isJson = checkIfJson(content);
             isJsonFile = isJson;
             
-            switchEditor(isJson);
+            switchEditor(isJson, getFileName(file.getFileName()));
+            currentEditor.setText(content);
             
-            if (isJson) {
-                JsonElement json = JsonParser.parseString(content);
-                String formattedContent = GSON.toJson(json);
-                currentEditor.setText(formattedContent);
-            } else {
-                currentEditor.setText(content);
-            }
         } catch (Exception e) {
-            String text = null;
-            try {
-                text = Files.readString(file);
-            } catch (IOException ioexception) {
-                LOGGER.error("tried to read file except IOException: ", ioexception.toString());
-            }
-            if (text == null) {
-                LOGGER.error("Failed to load config file: {}", file.getFileName(), e);
-                switchEditor(true);
-                currentEditor.setText("{}");
-                currentEditor.setEditable(false);
-                showErrorPopup(Text.translatable("configeditor.error.loadfailed"));
-            } else {
-                boolean isJson = checkIfJson(text);
-                isJsonFile = isJson;
-                switchEditor(isJson);
-                currentEditor.setText(text);
-            }
+            LOGGER.error("Failed to load config file: {}", file.getFileName(), e);
+            switchEditor(true, getFileName(file.getFileName()));
+            currentEditor.setText("{}");
+            currentEditor.setEditable(false);
+            showErrorPopup(Text.translatable("configeditor.error.loadfailed"));
         }
         
         updateButtonStates();
     }
+    
+    public static String getFileName(java.nio.file.Path path) {
+        if (path == null) {
+            return "";
+        }
+        
+        return path.getFileName().toString();
+    }
 
-//    private void loadFile(int index) {
-//        if (index < 0 || index >= configFiles.size()) {
-//            LOGGER.error("Invalid file index: {}", index);
-//            return;
-//        }
-//        
-//        selectedIndex = index;
-//        modified = false;
-//        Path file = configFiles.get(index);
-//        
-//        try {
-//            String content = Files.readString(file);
-//            buffer = content;
-//            
-//            boolean isJson = checkIfJson(content);
-//            isJsonFile = isJson;
-//            
-//            switchEditor(isJson);
-//            
-//            if (isJson) {
-//                JsonElement json = JsonParser.parseString(content);
-//                String formattedContent = GSON.toJson(json);
-//                multilineEditor.setText(formattedContent);
-////                LOGGER.info("Successfully loaded JSON config file: {}", file.getFileName());
-//            } else {
-//                universalEditor.setText(content);
-////                LOGGER.info("Successfully loaded text file: {}", file.getFileName());
-//            }
-//        } catch (Exception e) {
-//            String text = null;
-//            try {
-//                text = Files.readString(file);
-//            } catch (IOException ioexception) {
-//                LOGGER.error("tried to read file except IOException: ", ioexception.toString());
-//            }
-//            if (text == null) {
-//                LOGGER.error("Failed to load config file: {}", file.getFileName(), e);
-//                switchEditor(true);
-//                multilineEditor.setText("{}");
-//                multilineEditor.setEditable(false);
-//                showErrorPopup(Text.translatable("configeditor.error.loadfailed"));
-//            } else {
-//                boolean isJson = checkIfJson(text);
-//                isJsonFile = isJson;
-//                switchEditor(isJson);
-//                if (isJson) {
-//                    multilineEditor.setText(text);
-//                } else {
-//                    universalEditor.setText(text);
-//                }
-//            }
-//        }
-//        
-//        updateButtonStates();
-//    }
+    private String readFileWithFallbackEncoding(Path file) throws IOException {
+        try {
+            return Files.readString(file, java.nio.charset.StandardCharsets.UTF_8);
+        } catch (java.nio.charset.MalformedInputException e) {
+            try {
+                return Files.readString(file, java.nio.charset.Charset.defaultCharset());
+            } catch (java.nio.charset.MalformedInputException e2) {
+                return Files.readString(file, java.nio.charset.StandardCharsets.ISO_8859_1);
+            }
+        }
+    }
 
+    private void loadConfigFilesRecursively(Path directory, List<Path> fileList) throws IOException {
+        if (!Files.exists(directory) || !Files.isDirectory(directory)) {
+            return;
+        }
+        
+        try (var stream = Files.list(directory)) {
+            List<Path> entries = stream.collect(Collectors.toList());
+            
+            for (Path entry : entries) {
+                if (Files.isDirectory(entry)) {
+                    loadConfigFilesRecursively(entry, fileList);
+                } else if (Files.isRegularFile(entry) && isConfigFile(entry)) {
+                    fileList.add(entry);
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if content is valid JSON.
+     */
     private boolean checkIfJson(String content) {
         if (content == null || content.trim().isEmpty()) {
             return false;
@@ -380,47 +395,38 @@ public class EditorScreen extends Screen {
         }
     }
 
-    private void switchEditor(boolean useJsonEditor) {
+    private void switchEditor(boolean useJsonEditor, String fileName) {
         if (currentEditor != null) {
-            this.remove(currentEditor);
+            this.remove((ClickableWidget) currentEditor);
         }
         
         if (useJsonEditor) {
+        	multilineEditor.setFileName(fileName);
             currentEditor = multilineEditor;
-            this.addDrawableChild(multilineEditor);
         } else {
+        	universalEditor.setFileName(fileName);
             currentEditor = universalEditor;
-            this.addDrawableChild(universalEditor);
+            ((GeneralMultilineEditor)currentEditor).setFileName(fileName);
         }
         
-        this.setInitialFocus(currentEditor);
+        this.addDrawableChild((ClickableWidget) currentEditor);
+        this.setInitialFocus((ClickableWidget) currentEditor);
     }
 
     private void startSearch(String query) {
-        if (currentEditor instanceof MultilineEditor) {
-            ((MultilineEditor) currentEditor).startSearch(query);
-        }
-        if (currentEditor instanceof GeneralMultilineEditor) {
-            ((GeneralMultilineEditor) currentEditor).startSearch(query);
-        }
+        currentEditor.startSearch(query);
     }
 
     private void findNext() {
-        if (currentEditor instanceof MultilineEditor) {
-            ((MultilineEditor) currentEditor).findNext();
-        }
+        currentEditor.findNext();
     }
 
     private void findPrevious() {
-        if (currentEditor instanceof MultilineEditor) {
-            ((MultilineEditor) currentEditor).findPrevious();
-        }
+        currentEditor.findPrevious();
     }
 
     private void endSearch() {
-        if (currentEditor instanceof MultilineEditor) {
-            ((MultilineEditor) currentEditor).endSearch();
-        }
+        currentEditor.endSearch();
     }
 
     private void saveFile() {
@@ -500,12 +506,7 @@ public class EditorScreen extends Screen {
     }
     
     private String getCurrentEditorText() {
-        if (currentEditor instanceof MultilineEditor) {
-            return ((MultilineEditor) currentEditor).getText();
-        } else if (currentEditor instanceof GeneralMultilineEditor) {
-            return ((GeneralMultilineEditor) currentEditor).getText();
-        }
-        return "";
+        return currentEditor.getText();
     }
     
     private void openConfigFolder() {
@@ -574,7 +575,7 @@ public class EditorScreen extends Screen {
     }
     
     public ClickableWidget getTextWidget() {
-        return this.currentEditor;
+        return (ClickableWidget) this.currentEditor;
     }
     
     private void toggleSearch() {
