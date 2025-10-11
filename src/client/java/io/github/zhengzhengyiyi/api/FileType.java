@@ -7,13 +7,14 @@ import net.minecraft.client.gui.DrawContext;
 public enum FileType {
 	JSON("json", new JsonSyntaxHighlighter()),
 	YML("yml", new DefaultHighlighter()),
-    YAML("yaml", new DefaultHighlighter()),
-    TXT("txt", new DefaultHighlighter()),
+    YAML("yaml", new YamlSyntaxHighlighter()),
+    TXT("txt", new TextSyntaxHighlighter()),
     PROPERTIES("properties", new PropertiesSyntaxHighlighter()),
-    TOML("toml", new DefaultHighlighter()),
+    TOML("toml", new TomlSyntaxHighlighter()),
     CONF("conf", new DefaultHighlighter()),
-    CFG("cfg", new DefaultHighlighter()),
+    CFG("cfg", new CfgSyntaxHighlighter()),
     INI("ini", new DefaultHighlighter()),
+    JSON5("json5", new JsonSyntaxHighlighter()),
 	UNKNOW("UNKNOW", new DefaultHighlighter());
 	
 	private final String extension;
