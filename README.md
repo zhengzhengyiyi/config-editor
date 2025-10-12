@@ -1,112 +1,180 @@
 # Config Editor - Minecraft Mod
 
-A powerful in-game JSON configuration file editor for Minecraft, designed to make mod configuration management easier and more intuitive.
+A professional in-game configuration file editor for Minecraft, providing advanced editing capabilities with syntax highlighting, real-time validation, and extensible plugin system.
 
-![Minecraft](https://img.shields.io/badge/Minecraft-Fabric-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.20.2-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.20.3-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.20.4-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.20.5-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.20.6-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.2-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.3-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.4-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.5-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.6-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.7-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.8-green.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.9-green.svg)
 ![Mod Loader](https://img.shields.io/badge/Mod%20Loader-Fabric-blue.svg)
+![License](https://img.shields.io/badge/License-Apache%20License%202.0-red.svg)
+
+> ### **Thank you for 400+ downloads!**
+> Next version will coming soon. Your support means everything!
+> If you have any ideas, please post on [github discussions](https://github.com/zhengzhengyiyi/config-editor/discussions)
+
+## Known Issues
+- #### Please download version 1.1.3, there is some issue in version under 1.1.3
+- #### May be have some unknown file lock issue.
 
 ## ✨ Features
 
-### 📝 Advanced Text Editing
-- **Syntax Highlighting**: Color-coded JSON syntax for better readability
-- **Real-time Error Checking**: Instant validation with visual error indicators
-- **Multi-line Editing**: Full support for large configuration files
-- **Search & Replace**: Find and navigate through text quickly
+### 📝 Professional Text Editing
+- **Advanced Syntax Highlighting**: Full support for multiple file formats with color-coded syntax highlighting
+- **Multi-Format Support**: JSON, Properties, TOML, YAML, CFG, INI, and plain text files
+- **Real-time Validation**: Instant error checking with visual indicators and tooltips
+- **Multi-line Editor**: Support for large configuration files with scrollable interface
+- **Intelligent Search**: Text search engine with highlight and navigation
 
-### 🎯 User-Friendly Interface
-- **File Browser**: Easy navigation through config directory
-- **One-Click Operations**: Save, backup, and open folder with single clicks
-- **Modification Indicators**: Clear visual cues for unsaved changes
-- **Confirmation Dialogs**: Prevent accidental data loss
+### 🎯 User Experience
+- **File Management**: Browse and switch between configuration files easily
+- **Visual Feedback**: Clear modification indicators and confirmation dialogs
+- **Theme Support**: Dark, Light, and Auto themes with customizable backgrounds
+- **Accessibility**: Full keyboard navigation and screen reader support
 
-### 🔧 Technical Features
-- **Auto-Formatting**: Automatically formats JSON for consistency
-- **Backup System**: Creates automatic backups before saving
-- **Plugin System**: Extensible API for additional functionality
+![a show case of the gui](https://cdn.modrinth.com/data/SHXjjvQ7/images/48a2664240b2ca15a8d4b6944145943320d49060_350.webp)
 
-## 🛠️ Developer API
+### 🔧 Advanced Capabilities
+- **Auto-completion**: Code suggestions based on file structure and common patterns
+- **Backup System**: Automatic backup creation with configurable retention
+- **Performance Monitoring**: Built-in performance tracking for large files
+- **File Navigation**: Easy browsing through config directory with scrollable file list
 
-Config Editor provides a comprehensive API for mod developers to extend functionality:
+<details>
+<summary>🛠️ Developer API</summary>
 
-### ApiEntrypoint Interface
+Config Editor provides a comprehensive API for developers to extend functionality through plugins:
+
+### Core API Interface
+
+build.gradle
+```gradle
+dependencies {
+    implementation("io.github.zhengzhengyiyi:config_editor:project.config_editor_version")
+}
+```
+gradle.properties
+```properties
+config_editor_version=1.1.4+1.21.5
+```
 
 ```java
 public interface ApiEntrypoint {
-    // Required method - initialize your plugin
+    // Plugin initialization
     void init();
-
+    
     // Editor lifecycle events
-    default void onEditerOpen(EditorScreen editor) {}
-    default void onEditerClose(EditorScreen editor) {}
-
-    // Input handling
-    default ActionResult onMouseDown(int x, int y) {
-        return ActionResult.SUCCESS;
-    }
-    default void onMouseScroll() {}
-    default ActionResult onType(int keyCode, int scanCode, int modifiers) {
-        return ActionResult.SUCCESS;
-    }
-    default ActionResult onCharTyped(char character, int modifiers) {
-        return ActionResult.SUCCESS;
-    }
-
-    // Custom rendering
-    default void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {}
+    void onEditerOpen(EditorScreen editor);
+    void onEditerClose(EditorScreen editor);
+    
+    // Input handling with precise control
+    ActionResult onMouseDown(int x, int y);
+    void onMouseScroll();
+    ActionResult onType(int keyCode, int scanCode, int modifiers);
+    ActionResult onCharTyped(char character, int modifiers);
+    
+    // Custom rendering capabilities
+    void renderButton(DrawContext context, int mouseX, int mouseY, float delta);
 }
 ```
 
-### Basic Plugin Example
+### Built-in Plugins Examples
+
+The mod includes several example plugins demonstrating API capabilities:
 
 ```java
-public class ExamplePlugin implements ApiEntrypoint {
+// Auto bracket completion
+public class AutoBracketCompletionEntrypoint implements ApiEntrypoint
+
+// Date-time display in editor
+public class DateTimeDisplayEntrypoint implements ApiEntrypoint
+
+// Text statistics and analytics
+public class TextStatsEntrypoint implements ApiEntrypoint
+
+// Undo/redo functionality
+public class UndoRedoEntrypoint implements ApiEntrypoint
+```
+
+### Advanced Plugin Development
+
+```java
+public class AdvancedPlugin implements ApiEntrypoint {
+    private static final Logger LOGGER = ApiEntrypoint.LOGGER;
+    
     @Override
     public void init() {
-        ApiEntrypoint.LOGGER.info("Example plugin initialized");
+        LOGGER.info("Advanced plugin initialized with custom features");
     }
-
-    @Override
-    public void onEditerOpen(EditorScreen editor) {
-        // Setup when editor opens
-    }
-
+    
     @Override
     public ActionResult onType(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_T) {
-            // Handle custom key binding
+        // Custom keyboard shortcuts
+        if (keyCode == GLFW.GLFW_KEY_F1 && hasControlDown()) {
+            showCustomHelp();
             return ActionResult.FAIL; // Prevent default handling
         }
-        return ActionResult.PASS; // Allow default handling
+        return ActionResult.PASS; // Allow normal processing
     }
-
+    
     @Override
     public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Render custom UI elements
-        context.drawText(...);
+        // Add custom UI elements to editor
+        context.drawText(context.getTextRenderer(), "Custom Plugin", 10, 10, 0xFFFFFF, false);
     }
 }
 ```
 
-### Action Results
-- `SUCCESS`: Event handled successfully
-- `PASS`: Allow other handlers to process the event
-- `FAIL`: Event handled and should stop propagation
+### Action Result System
+- `SUCCESS`: Event handled successfully, continue processing
+- `PASS`: Allow other plugins to handle the event
+- `FAIL`: Event handled completely, stop propagation
 
-### Fabric Mod JSON Registration
+### Registration in fabric.mod.json
 
 ```json
 {
   "entrypoints": {
     "config_editor": [
-      "com.yourmod.YourPluginClass"
+      "com.yourmod.YourCustomPlugin",
+      "com.yourmod.AnotherPlugin"
     ]
   }
 }
 ```
+</details>
 
-## 📁 Supported Files
+## 🔍 Technical Features
+
+### Performance Optimization
+- **Efficient Rendering**: Optimized text rendering for large files
+- **Memory Management**: Smart caching and resource cleanup
+- **Async Operations**: Non-blocking file operations
+
+### File Handling
+- **Safe File Operations**: File locking and conflict detection
+- **Error Recovery**: Automatic recovery from corrupted files
+- **Encoding Support**: Full UTF-8 support with proper encoding detection
+
+## 📁 Supported File Types
 
 - **JSON Configuration Files** (`.json`)
+- **Properties Files** (`.properties`)
+- **TOML Files** (`.toml`)
+- **YAML Files** (`.yml`, `.yaml`)
+- **Configuration Files** (`.cfg`, `.conf`, `.ini`)
+- **Text Files** (`.txt`)
 
 **Happy configuring!** 🎮
 
