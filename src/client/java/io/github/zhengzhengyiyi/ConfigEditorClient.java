@@ -8,7 +8,7 @@ import io.github.zhengzhengyiyi.addon.*;
 import io.github.zhengzhengyiyi.api.ApiEntrypoint;
 import io.github.zhengzhengyiyi.api.config.ConfigManager;
 import io.github.zhengzhengyiyi.config.ModConfigData;
-import io.github.zhengzhengyiyi.gui.EditorScreen;
+import io.github.zhengzhengyiyi.gui.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -36,6 +36,14 @@ public class ConfigEditorClient implements ClientModInitializer {
 			GLFW.GLFW_KEY_UNKNOWN,
 			KeyBinding.Category.GAMEPLAY
 	));
+
+	public static KeyBinding chatkey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+			"zhengzhengyiyi.key.open_chat_gui",
+			InputUtil.Type.KEYSYM,
+			GLFW.GLFW_KEY_UNKNOWN,
+			KeyBinding.Category.GAMEPLAY
+	));
+
 	/**
 	 * The Logger for the other mod's entry point, usually for printing errors.
 	 */
@@ -78,6 +86,9 @@ public class ConfigEditorClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register((client) -> {
 			if (key.isPressed()) {
 				client.setScreen(new EditorScreen());
+			}
+			if (chatkey.isPressed()) {
+				client.setScreen(new AIChatScreen());
 			}
 		});
 		

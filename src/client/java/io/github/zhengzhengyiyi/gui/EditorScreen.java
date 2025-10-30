@@ -520,9 +520,10 @@ public class EditorScreen extends Screen {
     }
 
     private void showErrorPopup(Text message) {
-        client.setScreen(new ConfirmScreen(
+    	client.setScreen(new ConfirmScreen(
             result -> {
-                this.client.setScreen(this);
+                this.close();
+                this.client.setScreen(null);
             },
             Text.translatable("configeditor.confirm.title"),
             message
@@ -598,6 +599,13 @@ public class EditorScreen extends Screen {
     @Override
     public void close() {
         super.close();
+        
+        configFiles = null;
+        fileButtonList.clear();
+        fileButtonList = null;
+        
+//        System.gc();
+        
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
             entrypoint.onEditerClose(this);
         }
