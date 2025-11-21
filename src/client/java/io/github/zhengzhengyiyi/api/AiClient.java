@@ -108,12 +108,53 @@ public class AiClient {
      */
     private String extractContentFromResponse(String jsonResponse) {
         try {
-            int contentIndex = jsonResponse.indexOf("\"content\":\"");
-            if (contentIndex == -1) return "Unable to parse AI response";
-            
-            contentIndex += 11;
-            int endIndex = jsonResponse.indexOf("\"", contentIndex);
-            return jsonResponse.substring(contentIndex, endIndex).replace("\\n", "\n");
+            int idx = jsonResponse.indexOf("\"content\":\"");
+            if (idx == -1) return "Unable to parse AI response";
+            int i = idx + 11;
+            StringBuilder sb = new StringBuilder();
+            boolean escape = false;
+            for (; i < jsonResponse.length(); i++) {
+                char c = jsonResponse.charAt(i);
+                if (escape) {
+                    switch (c) {
+                        case 'n': sb.append('\n'); break;
+                        case 'r': sb.append('\r'); break;
+                        case 't': sb.append('\t'); break;
+                        case 'b': sb.append('\b'); break;
+                        case 'f': sb.append('\f'); break;
+                        case '\\': sb.append('\\'); break;
+                        case '"': sb.append('"'); break;
+                        case '/': sb.append('/'); break;
+                        case 'u':
+                            if (i + 4 < jsonResponse.length()) {
+                                String hex = jsonResponse.substring(i + 1, i + 5);
+                                try {
+                                    int code = Integer.parseInt(hex, 16);
+                                    sb.append((char) code);
+                                    i += 4;
+                                } catch (Exception e) {
+                                    sb.append('\\');
+                                    sb.append('u');
+                                }
+                            } else {
+                                sb.append('\\');
+                                sb.append('u');
+                            }
+                            break;
+                        default: sb.append(c); break;
+                    }
+                    escape = false;
+                } else {
+                    if (c == '\\') {
+                        escape = true;
+                    } else if (c == '"') {
+                        break;
+                    } else {
+                        sb.append(c);
+                    }
+                }
+            }
+            return sb.toString();
         } catch (Exception e) {
             return "Error parsing response";
         }
