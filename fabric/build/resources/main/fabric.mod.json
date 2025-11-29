@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "config_editor",
+  "version": "1.1.8",
+  "name": "ConfigEditor",
+  "description": "A simple mod to edit configs in-game.",
+  "authors": [
+    "zhengzhengyiyi"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/config_editor/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.zhengzhengyiyi.fabric.FabricEntryPoint"
+    ],
+    "client": [
+      "io.github.zhengzhengyiyi.fabric.client.ExampleModFabricClient"
+    ]
+  },
+  "mixins": [
+    "config_editor.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "~1.21.10",
+    "java": ">=21",
+    "architectury": ">=18.0.6",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

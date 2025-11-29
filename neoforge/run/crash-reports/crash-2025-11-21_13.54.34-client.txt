@@ -1,0 +1,119 @@
+---- Minecraft Crash Report ----
+// Hi. I'm Minecraft, and I'm a crashaholic.
+
+Time: 2025-11-21 13:54:34
+Description: Initializing game
+
+java.lang.NullPointerException: Initializing game
+	at java.base/java.util.Objects.requireNonNull(Objects.java:233) ~[?:?] {}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.ResourceReloader$Store.getOrThrow(ResourceReloader.java:44) ~[client-extra.jar:?] {}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.client.render.model.BakedModelManager.reload(BakedModelManager.java:109) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.SimpleResourceReload$Factory.method_67579(SimpleResourceReload.java:146) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.SimpleResourceReload.startAsync(SimpleResourceReload.java:87) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.SimpleResourceReload.start(SimpleResourceReload.java:51) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.SimpleResourceReload.create(SimpleResourceReload.java:34) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.SimpleResourceReload.start(SimpleResourceReload.java:141) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.ReloadableResourceManagerImpl.reload(ReloadableResourceManagerImpl.java:50) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.client.MinecraftClient.<init>(MinecraftClient.java:688) [client-extra.jar:?] {neoforge:access_transformer,neoforge:access_transformer,neoforge:mixin[APP:architectury.mixins.json:MixinMinecraft from mod architectury],unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.client.main.Main.main(Main.java:214) [client-extra.jar:?] {unprotect:processor}
+	at net.neoforged.fml.startup.Client.main(Client.java:19) [loader-10.0.29.jar:10.0] {}
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?] {}
+	at dev.architectury.transformer.TransformerRuntime.main(TransformerRuntime.java:220) [architectury-transformer-5.2.87-runtime.jar:5.2.87] {}
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at java.base/java.util.Objects.requireNonNull(Objects.java:233) ~[?:?] {}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.ResourceReloader$Store.getOrThrow(ResourceReloader.java:44) ~[client-extra.jar:?] {}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.client.render.model.BakedModelManager.reload(BakedModelManager.java:109) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.SimpleResourceReload$Factory.method_67579(SimpleResourceReload.java:146) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.SimpleResourceReload.startAsync(SimpleResourceReload.java:87) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.SimpleResourceReload.start(SimpleResourceReload.java:51) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.SimpleResourceReload.create(SimpleResourceReload.java:34) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.SimpleResourceReload.start(SimpleResourceReload.java:141) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.resource.ReloadableResourceManagerImpl.reload(ReloadableResourceManagerImpl.java:50) ~[client-extra.jar:?] {unprotect:processor}
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.client.MinecraftClient.<init>(MinecraftClient.java:688) ~[client-extra.jar:?] {neoforge:access_transformer,neoforge:access_transformer,neoforge:mixin[APP:architectury.mixins.json:MixinMinecraft from mod architectury],unprotect:processor}
+-- Initialization --
+Details:
+	Modules: 
+Stacktrace:
+	at TRANSFORMER/minecraft@1.21.10/net.minecraft.client.main.Main.main(Main.java:214) [client-extra.jar:?] {unprotect:processor}
+	at net.neoforged.fml.startup.Client.main(Client.java:19) [loader-10.0.29.jar:10.0] {}
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?] {}
+	at dev.architectury.transformer.TransformerRuntime.main(TransformerRuntime.java:220) [architectury-transformer-5.2.87-runtime.jar:5.2.87] {}
+
+
+-- System Details --
+Details:
+	Minecraft Version: 1.21.10
+	Minecraft Version ID: 1.21.10
+	Operating System: Mac OS X (x86_64) version 12.7.6
+	Java Version: 21.0.5, Eclipse Adoptium
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode), Eclipse Adoptium
+	Memory: 658505728 bytes (628 MiB) / 1650458624 bytes (1574 MiB) up to 4294967296 bytes (4096 MiB)
+	CPUs: 4
+	Processor Vendor: GenuineIntel
+	Processor Name: Intel(R) Core(TM) i5-5287U CPU @ 2.90GHz
+	Identifier: Intel64 Family 6 Model 61 Stepping 4
+	Microarchitecture: Broadwell (Client)
+	Frequency (GHz): 2.90
+	Number of physical packages: 1
+	Number of physical CPUs: 2
+	Number of logical CPUs: 4
+	Graphics card #0 name: Intel Iris Graphics 6100
+	Graphics card #0 vendor: Intel
+	Graphics card #0 VRAM (MiB): 1536.00
+	Graphics card #0 deviceId: 0x162b
+	Graphics card #0 versionInfo: Revision ID: 0x0009
+	Memory slot #0 capacity (MiB): 8192.00
+	Memory slot #0 clockSpeed (GHz): 1.87
+	Memory slot #0 type: DDR3
+	Memory slot #1 capacity (MiB): 8192.00
+	Memory slot #1 clockSpeed (GHz): 1.87
+	Memory slot #1 type: DDR3
+	Virtual memory max (MiB): 19456.00
+	Virtual memory used (MiB): 14005.73
+	Swap memory total (MiB): 3072.00
+	Swap memory used (MiB): 2644.50
+	Space in storage for jna.tmpdir (MiB): <path not set>
+	Space in storage for org.lwjgl.system.SharedLibraryExtractPath (MiB): <path not set>
+	Space in storage for io.netty.native.workdir (MiB): <path not set>
+	Space in storage for java.io.tmpdir (MiB): available: 87374.20, total: 476902.03
+	Space in storage for workdir (MiB): available: 87374.20, total: 476902.03
+	JVM Flags: 0 total; 
+	Debug Flags: 0 total; 
+	Launched Version: 21.10.50-beta
+	Backend library: LWJGL version 3.3.3+5
+	Backend API: Intel(R) Iris(TM) Graphics 6100 GL version 4.1 INTEL-18.8.16, Intel Inc.
+	Window size: <not initialized>
+	GFLW Platform: cocoa
+	Render Extensions: 
+	GL debug messages: <debugging unavailable>
+	Is Modded: Definitely; Client brand changed to 'neoforge'
+	Universe: 404
+	Type: Client (map_client.txt)
+	Locale: en_CA
+	System encoding: UTF-8
+	File encoding: UTF-8
+	CPU: 4x Intel(R) Core(TM) i5-5287U CPU @ 2.90GHz
+	Class Processors: 
+		00.00%: neoforge:neoforge_dev_dist_cleaner
+		00.00%: neoforge:computing_frames (marker)
+		00.00%: neoforge:runtime_enum_extender
+		03.10%: neoforge:access_transformer
+		00.32%: neoforge:mixin
+		00.00%: neoforge:simple_processors_default (marker)
+		00.00%: neoforge.coremods:field_to_getter.net.minecraft.world.level.biome.biome
+		00.00%: neoforge.coremods:field_to_getter.net.minecraft.world.level.block.flowerpotblock
+		00.00%: neoforge.coremods:field_to_getter.net.minecraft.world.level.levelgen.structure.structure
+		00.00%: neoforge.coremods:method_redirector
+		87.46%: unprotect:processor
+	Mod List: 
+		architectury-neoforge-5ba93e7e-18.0.6.jar         |Architectury                  |architectury                  |18.0.6              |Manifest: 81c082a09d37ad202153313b99dd6eb6dd2ee6e1070cdf9a8a328933f028522a
+		8302505754161898221.jar                           |generated_3b23f9a             |generated_3b23f9a             |1                   |Manifest: a6a0b39115a5fbedaa231f290ba13609462e0ef77b90be5f333e7d55555d3392
+		client-extra.jar                                  |Minecraft                     |minecraft                     |1.21.10             |Manifest: NOSIGNATURE
+		neoforge-21.10.50-beta-minecraft-merged-1.21.10-lo|NeoForge                      |neoforge                      |21.10.50-beta       |Manifest: NOSIGNATURE

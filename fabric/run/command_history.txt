@@ -1,0 +1,11 @@
+/gamemode
+/gamemode creative
+/gamerule keepInventory true
+/clear
+/tp Player765 0 ~ 0
+/clear
+/setblock 7 70 111 minecraft:dispenser[facing=up,triggered=true]{Items:[{Slot:0b,count:1,id:"minecraft:cherry_leaves"}],components:{}}
+/clear
+/give Player765 minecraft:water_bucket
+/clear
+/summon minecraft:sheep

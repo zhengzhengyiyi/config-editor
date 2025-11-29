@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"io.github.zhengzhengyiyi.neoforge","l":"NeoForgeEntryPoint"}];updateSearchResults();

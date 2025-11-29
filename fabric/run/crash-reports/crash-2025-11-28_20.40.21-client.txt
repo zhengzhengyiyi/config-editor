@@ -1,0 +1,201 @@
+---- Minecraft Crash Report ----
+// I feel sad now :(
+
+Time: 2025-11-28 20:40:21
+Description: Unexpected error
+
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.get(Optional.java:143)
+	at knot//io.github.zhengzhengyiyi.gui.NbtEditorScreen.init(NbtEditorScreen.java:45)
+	at knot//net.minecraft.client.gui.screen.Screen.init(Screen.java:341)
+	at knot//net.minecraft.client.MinecraftClient.setScreen(MinecraftClient.java:1240)
+	at knot//io.github.zhengzhengyiyi.NbtSaver.lambda$openEditor$0(NbtSaver.java:65)
+	at knot//net.minecraft.util.thread.ThreadExecutor.execute(ThreadExecutor.java:110)
+	at knot//io.github.zhengzhengyiyi.NbtSaver.openEditor(NbtSaver.java:65)
+	at knot//io.github.zhengzhengyiyi.NbtSaver.saveAndOpenEditor(NbtSaver.java:24)
+	at knot//io.github.zhengzhengyiyi.fabric.client.ExampleModFabricClient.lambda$onInitializeClient$1(ExampleModFabricClient.java:81)
+	at knot//net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.lambda$static$2(ClientTickEvents.java:43)
+	at knot//net.minecraft.client.MinecraftClient.handler$zjb000$fabric-lifecycle-events-v1$onEndTick(MinecraftClient.java:4101)
+	at knot//net.minecraft.client.MinecraftClient.tick(MinecraftClient.java:1964)
+	at knot//net.minecraft.client.MinecraftClient.render(MinecraftClient.java:1345)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:969)
+	at knot//net.minecraft.client.main.Main.main(Main.java:250)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:514)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+	at dev.architectury.transformer.TransformerRuntime.main(TransformerRuntime.java:220)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at java.base/java.util.Optional.get(Optional.java:143)
+	at knot//io.github.zhengzhengyiyi.gui.NbtEditorScreen.init(NbtEditorScreen.java:45)
+	at knot//net.minecraft.client.gui.screen.Screen.init(Screen.java:341)
+	at knot//net.minecraft.client.MinecraftClient.setScreen(MinecraftClient.java:1240)
+	at knot//io.github.zhengzhengyiyi.NbtSaver.lambda$openEditor$0(NbtSaver.java:65)
+	at knot//net.minecraft.util.thread.ThreadExecutor.execute(ThreadExecutor.java:110)
+	at knot//io.github.zhengzhengyiyi.NbtSaver.openEditor(NbtSaver.java:65)
+	at knot//io.github.zhengzhengyiyi.NbtSaver.saveAndOpenEditor(NbtSaver.java:24)
+	at knot//io.github.zhengzhengyiyi.fabric.client.ExampleModFabricClient.lambda$onInitializeClient$1(ExampleModFabricClient.java:81)
+	at knot//net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.lambda$static$2(ClientTickEvents.java:43)
+	at knot//net.minecraft.client.MinecraftClient.handler$zjb000$fabric-lifecycle-events-v1$onEndTick(MinecraftClient.java:4101)
+
+-- Uptime --
+Details:
+	JVM uptime: 145.120s
+	Wall uptime: 104.500s
+	High-res time: 97.056s
+	Client ticks: 1498 ticks / 74.900s
+Stacktrace:
+	at knot//net.minecraft.client.MinecraftClient.addDetailsToCrashReport(MinecraftClient.java:2434)
+	at knot//net.minecraft.client.MinecraftClient.printCrashReport(MinecraftClient.java:1038)
+	at knot//net.minecraft.client.MinecraftClient.run(MinecraftClient.java:993)
+	at knot//net.minecraft.client.main.Main.main(Main.java:250)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:514)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+	at dev.architectury.transformer.TransformerRuntime.main(TransformerRuntime.java:220)
+
+-- Affected level --
+Details:
+	All players: 1 total; ClientPlayerEntity{name=Player363, id=1, pos=(245.50539263732708, 71.0, 79.3154798168899), mode=CREATIVE, permission=4}
+	Chunk stats: 1225, 841
+	Level dimension: minecraft:overworld
+	Level spawn location: World: (0,80,0), Section: (at 0,0,0 in 0,5,0; chunk contains blocks 0,-64,0 to 15,319,15), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,-64,0 to 511,319,511)
+	Level time: 16940 game time, 6000 day time
+	Server brand: fabric
+	Server type: Integrated singleplayer server
+	Tracked entity count: 1
+
+-- Last reload --
+Details:
+	Reload number: 1
+	Reload reason: initial
+	Finished: Yes
+	Packs: vanilla, fabric, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-view-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v1, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-item-group-api-v1, fabric-key-binding-api-v1, fabric-lifecycle-events-v1, fabric-loot-api-v2, fabric-loot-api-v3, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-screen-handler-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader
+
+-- System Details --
+Details:
+	Minecraft Version: 1.21.10
+	Minecraft Version ID: 1.21.10
+	Operating System: Mac OS X (x86_64) version 12.7.6
+	Java Version: 21.0.5, Eclipse Adoptium
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode), Eclipse Adoptium
+	Memory: 118346336 bytes (112 MiB) / 1329594368 bytes (1268 MiB) up to 4294967296 bytes (4096 MiB)
+	CPUs: 4
+	Processor Vendor: GenuineIntel
+	Processor Name: Intel(R) Core(TM) i5-5287U CPU @ 2.90GHz
+	Identifier: Intel64 Family 6 Model 61 Stepping 4
+	Microarchitecture: Broadwell (Client)
+	Frequency (GHz): 2.90
+	Number of physical packages: 1
+	Number of physical CPUs: 2
+	Number of logical CPUs: 4
+	Graphics card #0 name: Intel Iris Graphics 6100
+	Graphics card #0 vendor: Intel
+	Graphics card #0 VRAM (MiB): 1536.00
+	Graphics card #0 deviceId: 0x162b
+	Graphics card #0 versionInfo: Revision ID: 0x0009
+	Memory slot #0 capacity (MiB): 8192.00
+	Memory slot #0 clockSpeed (GHz): 1.87
+	Memory slot #0 type: DDR3
+	Memory slot #1 capacity (MiB): 8192.00
+	Memory slot #1 clockSpeed (GHz): 1.87
+	Memory slot #1 type: DDR3
+	Virtual memory max (MiB): 18432.00
+	Virtual memory used (MiB): 12236.04
+	Swap memory total (MiB): 2048.00
+	Swap memory used (MiB): 1413.25
+	Space in storage for jna.tmpdir (MiB): <path not set>
+	Space in storage for org.lwjgl.system.SharedLibraryExtractPath (MiB): <path not set>
+	Space in storage for io.netty.native.workdir (MiB): <path not set>
+	Space in storage for java.io.tmpdir (MiB): available: 90315.83, total: 476902.03
+	Space in storage for workdir (MiB): available: 90315.83, total: 476902.03
+	JVM Flags: 0 total; 
+	Debug Flags: 0 total; 
+	Fabric Mods: 
+		architectury: Architectury 18.0.6
+		config_editor: ConfigEditor 1.1.8
+		fabric-api: Fabric API 0.138.3+1.21.10
+		fabric-api-base: Fabric API Base 1.0.0+14b92d896f
+		fabric-api-lookup-api-v1: Fabric API Lookup API (v1) 1.6.106+d17682156f
+		fabric-biome-api-v1: Fabric Biome API (v1) 16.1.0+c2417d4f6f
+		fabric-block-api-v1: Fabric Block API (v1) 1.1.5+d17682156f
+		fabric-block-view-api-v2: Fabric BlockView API (v2) 1.0.34+e4fd1b926f
+		fabric-client-gametest-api-v1: Fabric Client Game Test API (v1) 4.2.13+14b92d896f
+		fabric-command-api-v2: Fabric Command API (v2) 2.4.0+c0ab2d5d6f
+		fabric-content-registries-v0: Fabric Content Registries (v0) 10.2.6+b6a242646f
+		fabric-convention-tags-v1: Fabric Convention Tags 2.1.49+7f945d5b6f
+		fabric-convention-tags-v2: Fabric Convention Tags (v2) 2.17.0+ff7bc77d6f
+		fabric-crash-report-info-v1: Fabric Crash Report Info (v1) 0.3.18+33df5e6e6f
+		fabric-data-attachment-api-v1: Fabric Data Attachment API (v1) 1.8.33+cd3b9e596f
+		fabric-data-generation-api-v1: Fabric Data Generation API (v1) 23.2.27+d8b85ef16f
+		fabric-dimensions-v1: Fabric Dimensions API (v1) 4.0.22+38b9cc196f
+		fabric-entity-events-v1: Fabric Entity Events (v1) 2.1.13+fde3702c6f
+		fabric-events-interaction-v0: Fabric Events Interaction (v0) 4.0.36+5ba217126f
+		fabric-game-rule-api-v1: Fabric Game Rule API (v1) 1.1.1+e47eaae56f
+		fabric-gametest-api-v1: Fabric Game Test API (v1) 3.1.21+33df5e6e6f
+		fabric-item-api-v1: Fabric Item API (v1) 11.5.11+9bce411b6f
+		fabric-item-group-api-v1: Fabric Item Group API (v1) 4.2.27+86b3ae576f
+		fabric-key-binding-api-v1: Fabric Key Binding API (v1) 1.1.1+b3ba9c486f
+		fabric-lifecycle-events-v1: Fabric Lifecycle Events (v1) 2.6.9+33df5e6e6f
+		fabric-loot-api-v2: Fabric Loot API (v2) 3.0.67+3f89f5a56f
+		fabric-loot-api-v3: Fabric Loot API (v3) 2.0.14+d17682156f
+		fabric-message-api-v1: Fabric Message API (v1) 6.1.7+3154c1c86f
+		fabric-model-loading-api-v1: Fabric Model Loading API (v1) 6.0.4+3ffd6ef06f
+		fabric-networking-api-v1: Fabric Networking API (v1) 5.1.0+b095d8db6f
+		fabric-object-builder-api-v1: Fabric Object Builder API (v1) 21.1.28+9bce411b6f
+		fabric-particles-v1: Fabric Particles (v1) 4.2.3+a0ee59a46f
+		fabric-recipe-api-v1: Fabric Recipe API (v1) 8.2.0+39709ef06f
+		fabric-registry-sync-v0: Fabric Registry Sync (v0) 6.1.42+679c8c5c6f
+		fabric-renderer-api-v1: Fabric Renderer API (v1) 7.2.2+3706cdf36f
+		fabric-renderer-indigo: Fabric Renderer - Indigo 4.1.3+d7df91576f
+		fabric-rendering-fluids-v1: Fabric Rendering Fluids (v1) 3.1.38+86b3ae576f
+		fabric-rendering-v1: Fabric Rendering (v1) 16.2.0+bee81f016f
+		fabric-resource-conditions-api-v1: Fabric Resource Conditions API (v1) 5.0.28+33df5e6e6f
+		fabric-resource-loader-v0: Fabric Resource Loader (v0) 3.3.1+d4d4122a6f
+		fabric-resource-loader-v1: Fabric Resource Loader (v1) 1.0.4+14959b836f
+		fabric-screen-api-v1: Fabric Screen API (v1) 3.1.0+9c82a7986f
+		fabric-screen-handler-api-v1: Fabric Screen Handler API (v1) 1.3.151+d17682156f
+		fabric-serialization-api-v1: Fabric Serialization API (v1) 1.0.0+d857c9766f
+		fabric-sound-api-v1: Fabric Sound API (v1) 1.0.45+328a75ba6f
+		fabric-tag-api-v1: Fabric Tag API (v1) 1.2.13+2fa446b26f
+		fabric-transfer-api-v1: Fabric Transfer API (v1) 6.0.15+79ec2c126f
+		fabric-transitive-access-wideners-v1: Fabric Transitive Access Wideners (v1) 6.5.3+41eb43436f
+		fabricloader: Fabric Loader 0.18.1
+		generated_b72392e: Generated Mod (Please Ignore) 1.0.0
+		java: OpenJDK 64-Bit Server VM 21
+		minecraft: Minecraft 1.21.10
+		mixinextras: MixinExtras 0.5.0
+	Launched Version: Fabric
+	Backend library: LWJGL version 3.3.3-snapshot
+	Backend API: Intel(R) Iris(TM) Graphics 6100 GL version 4.1 INTEL-18.8.16, Intel Inc.
+	Window size: 1708x960
+	GFLW Platform: cocoa
+	Render Extensions: 
+	GL debug messages: <debugging unavailable>
+	Is Modded: Definitely; Client brand changed to 'fabric'; Server brand changed to 'fabric'
+	Universe: 400921fb54442d18
+	Type: Integrated Server (map_client.txt)
+	Graphics mode: fast
+	Render Distance: 14/14 chunks
+	Resource Packs: vanilla, fabric, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-view-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v1, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-item-group-api-v1, fabric-key-binding-api-v1, fabric-lifecycle-events-v1, fabric-loot-api-v2, fabric-loot-api-v3, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-screen-handler-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader
+	Current Language: en_us
+	Locale: en_CA
+	System encoding: UTF-8
+	File encoding: UTF-8
+	CPU: 4x Intel(R) Core(TM) i5-5287U CPU @ 2.90GHz
+	Server Running: true
+	Player Count: 1 / 8; [ServerPlayerEntity['Player363'/1, l='ServerLevel[New World]', x=245.51, y=71.00, z=79.32]]
+	Active Data Packs: vanilla, fabric, fabric-convention-tags-v2, fabric-gametest-api-v1
+	Available Data Packs: fabric, fabric-convention-tags-v2, fabric-gametest-api-v1, minecart_improvements, redstone_experiments, trade_rebalance, vanilla
+	Enabled Feature Flags: minecraft:vanilla
+	World Generation: Stable
+	World Seed: -5378751510977320181
+	Suppressed Exceptions: ~~NONE~~
