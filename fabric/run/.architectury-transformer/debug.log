@@ -1,5 +1,5 @@
 [Architectury Transformer] Architectury Runtime 5.2.87
-[Architectury Transformer DEBUG] Closed File Systems for /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.8-dev.jar
+[Architectury Transformer DEBUG] Closed File Systems for /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.9-dev.jar
 [Architectury Transformer DEBUG] Preparing tiny remapper prepared transformer: dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Provided 120 classpath jar(s):
 [Architectury Transformer DEBUG]  - /Users/JunxiangZheng/.gradle/caches/modules-2/files-2.1/dev.architectury/architectury-injectables/1.0.10/62db2a366d662606d1b23ad02ccc3212ed37ec3/architectury-injectables-1.0.10.jar
@@ -122,15 +122,15 @@
 [Architectury Transformer DEBUG]  - /Users/JunxiangZheng/Desktop/config_editor_multi/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-serialization-api-v1-5c847788/1.0.0+d857c9766f/fabric-serialization-api-v1-5c847788-1.0.0+d857c9766f.jar
 [Architectury Transformer DEBUG]  - /Users/JunxiangZheng/Desktop/config_editor_multi/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-sound-api-v1-5c847788/1.0.45+328a75ba6f/fabric-sound-api-v1-5c847788-1.0.45+328a75ba6f.jar
 [Architectury Transformer DEBUG]  - /Users/JunxiangZheng/Desktop/config_editor_multi/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-transitive-access-wideners-v1-5c847788/6.5.3+41eb43436f/fabric-transitive-access-wideners-v1-5c847788-6.5.3+41eb43436f.jar
-[Architectury Transformer] Read classpath in 2.671 s
-[Architectury Transformer DEBUG] Closed File Systems for /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.8-dev.jar
-[Architectury Transformer DEBUG] Transforming 5 transformer(s) from /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.8-dev.jar to /var/folders/d2/kkprk53n2376fxf520276h_h0000gn/T/16873012952754320513.jar: 
+[Architectury Transformer] Read classpath in 5.080 s
+[Architectury Transformer DEBUG] Closed File Systems for /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.9-dev.jar
+[Architectury Transformer DEBUG] Transforming 5 transformer(s) from /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.9-dev.jar to /var/folders/d2/kkprk53n2376fxf520276h_h0000gn/T/13653735529066956261.jar: 
 [Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.RuntimeMixinRefmapDetector@3c19aaa5
 [Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.GenerateFakeFabricMod@3349e9bb
 [Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformExpectPlatform@409bf450
 [Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.RemapInjectables@38d8f54a
 [Architectury Transformer DEBUG]  - dev.architectury.transformer.transformers.TransformPlatformOnly@49e53c76
-[Architectury Transformer DEBUG] Transforming from /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.8-dev.jar to /var/folders/d2/kkprk53n2376fxf520276h_h0000gn/T/16873012952754320513.jar with 5 transformer(s) on dev.architectury.transformer.handler.SimpleTransformerHandler
+[Architectury Transformer DEBUG] Transforming from /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.9-dev.jar to /var/folders/d2/kkprk53n2376fxf520276h_h0000gn/T/13653735529066956261.jar with 5 transformer(s) on dev.architectury.transformer.handler.SimpleTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/util/FileLockUtil with maxs=true frames=true
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/util/JSONValidator with maxs=true frames=true
@@ -188,65 +188,57 @@
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/NbtSaver with maxs=true frames=true
 [Architectury Transformer DEBUG] Checking whether /config_editor-common-common-refmap.json is a mixin config.
 [Architectury Transformer DEBUG] Checking whether /config_editor.mixins.json is a mixin config.
-[Architectury Transformer DEBUG] Closed File Systems for /var/folders/d2/kkprk53n2376fxf520276h_h0000gn/T/16873012952754320513.jar
-[Architectury Transformer] Listening at /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.8-dev.jar
-[Architectury Transformer DEBUG] Temporary jar [/var/folders/d2/kkprk53n2376fxf520276h_h0000gn/T/16873012952754320513.jar] contains packages: io.github.zhengzhengyiyi.config, io.github.zhengzhengyiyi.util.highlighter, io.github.zhengzhengyiyi, io.github.zhengzhengyiyi.addon, io.github.zhengzhengyiyi.gui, io.github.zhengzhengyiyi.gui.widget, io.github.zhengzhengyiyi.mixin.client, io.github.zhengzhengyiyi.gui.theme, io.github.zhengzhengyiyi.util, io.github.zhengzhengyiyi.api, io.github.zhengzhengyiyi.api.config
-[Architectury Transformer DEBUG] Closed File Systems for /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.8-dev.jar
+[Architectury Transformer DEBUG] Closed File Systems for /var/folders/d2/kkprk53n2376fxf520276h_h0000gn/T/13653735529066956261.jar
+[Architectury Transformer] Listening at /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.9-dev.jar
+[Architectury Transformer DEBUG] Temporary jar [/var/folders/d2/kkprk53n2376fxf520276h_h0000gn/T/13653735529066956261.jar] contains packages: io.github.zhengzhengyiyi.config, io.github.zhengzhengyiyi.util.highlighter, io.github.zhengzhengyiyi, io.github.zhengzhengyiyi.addon, io.github.zhengzhengyiyi.gui, io.github.zhengzhengyiyi.gui.widget, io.github.zhengzhengyiyi.mixin.client, io.github.zhengzhengyiyi.gui.theme, io.github.zhengzhengyiyi.util, io.github.zhengzhengyiyi.api, io.github.zhengzhengyiyi.api.config
+[Architectury Transformer DEBUG] Closed File Systems for /Users/JunxiangZheng/Desktop/config_editor_multi/common/build/devlibs/config_editor-common-1.1.9-dev.jar
 [Architectury Transformer DEBUG] Classpath entry [/Users/JunxiangZheng/Desktop/config_editor_multi/fabric/build/classes/java/main] contains packages: io.github.zhengzhengyiyi.fabric, io.github.zhengzhengyiyi.fabric.client
 [Architectury Transformer DEBUG] Classpath entry [/Users/JunxiangZheng/Desktop/config_editor_multi/fabric/build/resources/main] contains packages: 
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/gui/EditorScreen.class to io/github/zhengzhengyiyi/gui/EditorScreen.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/gui/EditorScreen with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/gui/EditorScreen in 15.28 ms
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/gui/EditorScreen in 17.29 ms
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/gui/AIChatScreen.class to io/github/zhengzhengyiyi/gui/AIChatScreen.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/gui/AIChatScreen with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/gui/AIChatScreen in 8.085 ms
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/gui/AIChatScreen in 6.423 ms
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/addon/UndoRedoEntrypoint.class to io/github/zhengzhengyiyi/addon/UndoRedoEntrypoint.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/addon/UndoRedoEntrypoint with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/addon/UndoRedoEntrypoint in 12.05 ms
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/addon/UndoRedoEntrypoint in 1.744 ms
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/api/ApiEntrypoint.class to io/github/zhengzhengyiyi/api/ApiEntrypoint.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/api/ApiEntrypoint with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/api/ApiEntrypoint in 793.9 μs
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/api/ApiEntrypoint in 696.0 μs
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/CommonEntryPoint.class to io/github/zhengzhengyiyi/CommonEntryPoint.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/CommonEntryPoint with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/CommonEntryPoint in 1.410 ms
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/CommonEntryPoint in 2.336 ms
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/api/config/ConfigData.class to io/github/zhengzhengyiyi/api/config/ConfigData.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/api/config/ConfigData with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/api/config/ConfigData in 979.8 μs
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/api/config/ConfigData in 568.9 μs
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/config/ModConfigData.class to io/github/zhengzhengyiyi/config/ModConfigData.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/config/ModConfigData with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/config/ModConfigData in 1.167 ms
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/config/ModConfigData in 796.3 μs
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/api/config/ConfigManager.class to io/github/zhengzhengyiyi/api/config/ConfigManager.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/api/config/ConfigManager with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/api/config/ConfigManager in 5.534 ms
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/api/config/ConfigManager in 2.879 ms
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/config/ModConfigData$ThemeMode.class to io/github/zhengzhengyiyi/config/ModConfigData$ThemeMode.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/config/ModConfigData$ThemeMode with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/config/ModConfigData$ThemeMode in 34.84 ms
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/config/ModConfigData$ThemeMode in 1.220 ms
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/addon/TextStatsEntrypoint.class to io/github/zhengzhengyiyi/addon/TextStatsEntrypoint.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/addon/TextStatsEntrypoint with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/addon/TextStatsEntrypoint in 6.899 ms
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/addon/TextStatsEntrypoint in 1.198 ms
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/addon/DateTimeDisplayEntrypoint.class to io/github/zhengzhengyiyi/addon/DateTimeDisplayEntrypoint.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/addon/DateTimeDisplayEntrypoint with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/addon/DateTimeDisplayEntrypoint in 864.6 μs
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/addon/DateTimeDisplayEntrypoint in 785.8 μs
 [Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/addon/AutoBracketCompletionEntrypoint.class to io/github/zhengzhengyiyi/addon/AutoBracketCompletionEntrypoint.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
 [Architectury Transformer DEBUG] Found class transformer
 [Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/addon/AutoBracketCompletionEntrypoint with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/addon/AutoBracketCompletionEntrypoint in 709.2 μs
-[Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/NbtSaver.class to io/github/zhengzhengyiyi/NbtSaver.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
-[Architectury Transformer DEBUG] Found class transformer
-[Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/NbtSaver with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/NbtSaver in 3.376 ms
-[Architectury Transformer DEBUG] Transforming from io/github/zhengzhengyiyi/gui/NbtEditorScreen.class to io/github/zhengzhengyiyi/gui/NbtEditorScreen.class with 5 transformer(s) on dev.architectury.transformer.handler.TinyRemapperPreparedTransformerHandler
-[Architectury Transformer DEBUG] Found class transformer
-[Architectury Transformer DEBUG] Writing io/github/zhengzhengyiyi/gui/NbtEditorScreen with maxs=true frames=true
-[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/gui/NbtEditorScreen in 2.608 ms
+[Architectury Transformer DEBUG] Transformed io/github/zhengzhengyiyi/addon/AutoBracketCompletionEntrypoint in 1.051 ms

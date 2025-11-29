@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"io.github.zhengzhengyiyi.fabric"},{"l":"io.github.zhengzhengyiyi.fabric.client"}];updateSearchResults();

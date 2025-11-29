@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"io.github.zhengzhengyiyi.fabric.client","l":"ExampleModFabricClient"},{"p":"io.github.zhengzhengyiyi.fabric","l":"FabricEntryPoint"}];updateSearchResults();

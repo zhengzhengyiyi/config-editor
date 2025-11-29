@@ -31,6 +31,9 @@ repositories {
     }
 }
 
+loom {
+}
+
 dependencies {
     neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
 
@@ -45,7 +48,8 @@ processResources {
     inputs.property 'version', project.version
 
     filesMatching('META-INF/neoforge.mods.toml') {
-        expand version: inputs.properties.version
+        // expand version: inputs.properties.version
+        expand "version": project.version
     }
 }
 

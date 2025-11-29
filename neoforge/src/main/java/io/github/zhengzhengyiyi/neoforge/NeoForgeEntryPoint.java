@@ -43,6 +43,7 @@ public final class NeoForgeEntryPoint {
 
     public NeoForgeEntryPoint() {
         CommonEntryPoint.init();
+        System.out.println("aaa");
     }
 
     @SubscribeEvent
@@ -52,7 +53,7 @@ public final class NeoForgeEntryPoint {
         }
 
         if (openAiChatKey.get().wasPressed()) {
-            MinecraftClient.getInstance().setScreen(new EditorScreen());
+            MinecraftClient.getInstance().setScreen(new AIChatScreen());
         }
         
         if (displayNbtKey.get().wasPressed()) {
