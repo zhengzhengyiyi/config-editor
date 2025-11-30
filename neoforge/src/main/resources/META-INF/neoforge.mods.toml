@@ -1,0 +1,38 @@
+modLoader = "javafml"
+loaderVersion = "[10,)"
+#issueTrackerURL = ""
+license = "The Apache License, Version 2.0"
+
+[[mods]]
+modId = "config_editor"
+version = "${version}"
+displayName = "ConfigEditor"
+authors = "zhengzhengyiyi"
+description = '''
+A mod that allows editing of config files in-game.
+'''
+#logoFile = ""
+
+[[dependencies.config_editor]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.10,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.config_editor]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.10,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.config_editor]]
+modId = "architectury"
+type = "required"
+versionRange = "[18.0.6,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[mixins]]
+config = "config_editor.mixins.json"
