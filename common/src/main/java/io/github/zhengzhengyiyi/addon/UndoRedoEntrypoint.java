@@ -8,6 +8,8 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 //import net.minecraft.client.gui.screen.Screen;
 //import net.minecraft.client.input.KeyInput;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Identifier;
+
 //import org.lwjgl.glfw.GLFW;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -140,6 +142,11 @@ public class UndoRedoEntrypoint implements ApiEntrypoint {
 //        currentText = nextText;
 //        isRedoing = false;
 //    }
+    
+    @Override
+    public Identifier getIdentifier() {
+    	return Identifier.of("zhengzhengyiyi", "redo_undo");
+    }
 
     private void resetStacks() {
         undoStack.clear();

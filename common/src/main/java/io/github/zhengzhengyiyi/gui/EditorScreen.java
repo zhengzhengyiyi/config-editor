@@ -52,6 +52,7 @@ public class EditorScreen extends Screen {
     private TextFieldWidget searchField;
     private ButtonWidget searchNextButton;
     private ButtonWidget searchPrevButton;
+    private ButtonWidget managePluginsButton;
     private ButtonWidget exitButton;
     private boolean searchVisible = false;
     private ThemeManager themeManager;
@@ -96,13 +97,20 @@ public class EditorScreen extends Screen {
                 .dimensions(140, this.height - 45, 20, 20)
                 .build();
         
+        managePluginsButton = ButtonWidget.builder(Text.of("plugin Manager"),
+        		button -> client.setScreen(new PluginManagerScreen(this)))
+                .dimensions(this.width-20, this.height-20, 20, 20)
+                .build();
+        
         this.addDrawableChild(scrollUpButton);
         this.addDrawableChild(scrollDownButton);
+        
+        this.addDrawableChild(managePluginsButton);
         
         renderFileList();
         
         multilineEditor = new MultilineEditor(
-                170, 20, 
+                170, 20,
                 this.width - 180, this.height - 60,
                 Text.translatable("configeditor.editor"));
         multilineEditor.setChangedListener(text -> {

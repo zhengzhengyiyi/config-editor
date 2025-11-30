@@ -1,0 +1,35 @@
+{
+  "configeditor.title": "Config Editor",
+  "configeditor.editor": "JSON Editor",
+  
+  "configeditor.button.save": "Save",
+  "configeditor.button.backup": "Backup",
+  "configeditor.button.openfolder": "Open Folder",
+  "configeditor.button.close": "Close",
+  "configeditor.button.search": "Search",
+  
+  "configeditor.search.placeholder": "Search text...",
+  "configeditor.search.next": "Next",
+  "configeditor.search.prev": "Prev",
+  
+  "configeditor.confirm.title": "Confirmation",
+  "configeditor.confirm.unsaved": "You have unsaved changes. Save before switching?",
+  "configeditor.confirm.unsavedclose": "You have unsaved changes. Save before closing?",
+  
+  "configeditor.error.title": "Error",
+  "configeditor.error.loadfailed": "Failed to load config file",
+  "configeditor.error.savefailed": "Failed to save config file",
+  "configeditor.error.invalidjson": "Invalid JSON syntax",
+  
+  "configeditor.message.title": "Information",
+  "configeditor.message.saved": "File saved successfully",
+  
+  "configeditor.theme.dark": "dark",
+  "configeditor.theme.light": "light",
+  "configeditor.theme.auto": "auto",
+  
+  "configEditor.test": "test",
+  
+  "button.zhengzhengyiyi.enable": "enabled",
+  "button.zhengzhengyiyi.disable": "disabled"
+}

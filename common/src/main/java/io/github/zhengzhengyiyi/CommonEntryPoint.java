@@ -42,6 +42,8 @@ public class CommonEntryPoint {
 		ENTRYPOINTS.add(new AutoBracketCompletionEntrypoint());
 		ENTRYPOINTS.add(new TextStatsEntrypoint());
 		
+		System.out.println(CommonEntryPoint.ENTRYPOINTS.size() + " plugins found.");
+		
 //		testLanguageResources();
 	}
 	

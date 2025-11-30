@@ -1,7 +1,5 @@
 package io.github.zhengzhengyiyi.fabric.client;
 
-import java.util.List;
-
 import org.lwjgl.glfw.GLFW;
 
 import io.github.zhengzhengyiyi.CommonEntryPoint;
@@ -46,16 +44,14 @@ public final class ExampleModFabricClient implements ClientModInitializer {
 			KeyBinding.Category.GAMEPLAY
 	));
 	
-	public static List<ApiEntrypoint> ENTRYPOINTS = new java.util.ArrayList<ApiEntrypoint>();
-	
     @Override
     public void onInitializeClient() {
     	System.out.println("Initializing Config Editor Fabric Client...");
-    	ENTRYPOINTS.add(new UndoRedoEntrypoint());
-		ENTRYPOINTS.add(new TextStatsEntrypoint());
-		ENTRYPOINTS.add(new DateTimeDisplayEntrypoint());
-		ENTRYPOINTS.add(new AutoBracketCompletionEntrypoint());
-		ENTRYPOINTS.add(new TextStatsEntrypoint());
+    	CommonEntryPoint.ENTRYPOINTS.add(new UndoRedoEntrypoint());
+    	CommonEntryPoint.ENTRYPOINTS.add(new TextStatsEntrypoint());
+    	CommonEntryPoint.ENTRYPOINTS.add(new DateTimeDisplayEntrypoint());
+    	CommonEntryPoint.ENTRYPOINTS.add(new AutoBracketCompletionEntrypoint());
+    	CommonEntryPoint.ENTRYPOINTS.add(new TextStatsEntrypoint());
 		
     	FabricLoader.getInstance()
         .getEntrypointContainers(CommonEntryPoint.MOD_ID, ApiEntrypoint.class)
@@ -64,7 +60,7 @@ public final class ExampleModFabricClient implements ClientModInitializer {
             try {
             	entrypoint.getEntrypoint().init();
             	
-            	ENTRYPOINTS.add(entrypoint.getEntrypoint());
+            	CommonEntryPoint.ENTRYPOINTS.add(entrypoint.getEntrypoint());
             } catch (Throwable e) {
             	e.printStackTrace();
             }

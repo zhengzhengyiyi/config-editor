@@ -7,6 +7,7 @@ import io.github.zhengzhengyiyi.gui.widget.MultilineEditor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.util.Identifier;
 
 public class TextStatsEntrypoint implements ApiEntrypoint {
     private boolean enabled = true;
@@ -16,6 +17,11 @@ public class TextStatsEntrypoint implements ApiEntrypoint {
 
     @Override
     public void init() {}
+    
+    @Override
+    public Identifier getIdentifier() {
+    	return Identifier.of("zhengzhengyiyi", "text_stats_display");
+    }
 
     @Override
     public void onEditerOpen(EditorScreen editor) {

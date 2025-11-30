@@ -4,6 +4,7 @@ import io.github.zhengzhengyiyi.gui.EditorScreen;
 import io.github.zhengzhengyiyi.api.*;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Identifier;
 import net.minecraft.client.MinecraftClient;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,6 +33,11 @@ public class DateTimeDisplayEntrypoint implements ApiEntrypoint {
 
     @Override
     public void onMouseScroll() {}
+    
+    @Override
+    public Identifier getIdentifier() {
+    	return Identifier.of("zhengzhengyiyi", "datetime_display");
+    }
 
     @Override
     public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
