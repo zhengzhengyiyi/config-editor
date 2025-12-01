@@ -26,17 +26,19 @@ public class PluginManagerScreen extends Screen {
 
         int y = 40;
         
-        for (ApiEntrypoint plugin : CommonEntryPoint.ENTRYPOINTS) {
+        for (ApiEntrypoint plugin : CommonEntryPoint.TOTAL_ENTRYPOINTS) {
             Identifier pluginId = plugin.getIdentifier();
             String pluginName = pluginId.getPath();
-            pluginStates.put(plugin, true);
+            pluginStates.put(plugin, CommonEntryPoint.ENTRYPOINTS.contains(plugin));
+            
+//            System.out.println("Loading plugin: " + pluginName + "Enabled: " + pluginStates.get(plugin));
 
             this.addDrawableChild(ButtonWidget.builder(Text.literal(pluginName), button -> {})
                 .dimensions(this.width / 2 - 120, y, 150, 20)
                 .build());
 
             ButtonWidget toggleButton = ButtonWidget.builder(
-                Text.translatable("button.zhengzhengyiyi.disable"),
+            	CommonEntryPoint.ENTRYPOINTS.contains(plugin) ? Text.translatable("button.zhengzhengyiyi.enable") : Text.translatable("button.zhengzhengyiyi.disable"),
                 button -> togglePlugin(plugin, button)
             ).dimensions(this.width / 2 + 40, y, 80, 20).build();
 
@@ -50,16 +52,15 @@ public class PluginManagerScreen extends Screen {
     }
 
     private void togglePlugin(ApiEntrypoint plugin, ButtonWidget button) {
-        boolean currentState = pluginStates.get(plugin);
-        pluginStates.put(plugin, !currentState);
-        
-        if (currentState) {
-            button.setMessage(Text.translatable("button.zhengzhengyiyi.enable"));
-            if (!CommonEntryPoint.ENTRYPOINTS.contains(plugin)) CommonEntryPoint.ENTRYPOINTS.add(plugin);
-        } else {
-            button.setMessage(Text.translatable("button.zhengzhengyiyi.disable"));
-            if (CommonEntryPoint.ENTRYPOINTS.contains(plugin)) CommonEntryPoint.ENTRYPOINTS.remove(plugin);
-        }
+            if (CommonEntryPoint.ENTRYPOINTS.contains(plugin)) {
+            	button.setMessage(Text.translatable("button.zhengzhengyiyi.disable"));
+//            	CommonEntryPoint.DISABLED_ENTRYPOINTS.add(plugin);
+            	CommonEntryPoint.ENTRYPOINTS.remove(plugin);
+            } else {
+            	button.setMessage(Text.translatable("button.zhengzhengyiyi.enable"));
+//            	CommonEntryPoint.DISABLED_ENTRYPOINTS.remove(plugin);
+            	CommonEntryPoint.ENTRYPOINTS.add(plugin);
+            }
     }
 
     @Override

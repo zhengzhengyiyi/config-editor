@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class DateTimeDisplayEntrypoint implements ApiEntrypoint {
-    private boolean enabled = true;
     private EditorScreen editor;
 
     @Override
@@ -28,7 +27,7 @@ public class DateTimeDisplayEntrypoint implements ApiEntrypoint {
 
     @Override
     public ActionResult onMouseDown(int x, int y) {
-        return ActionResult.SUCCESS;
+        return ActionResult.PASS;
     }
 
     @Override
@@ -36,30 +35,27 @@ public class DateTimeDisplayEntrypoint implements ApiEntrypoint {
     
     @Override
     public Identifier getIdentifier() {
-    	return Identifier.of("zhengzhengyiyi", "datetime_display");
+        return Identifier.of("zhengzhengyiyi", "datetime_display");
     }
 
     @Override
     public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (!enabled || editor == null) return;
-
+        if (editor == null) return;
+        
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd_HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String timeText = now.format(formatter);
 
-        int textWidth = MinecraftClient.getInstance().textRenderer.getWidth(timeText);
-        int xPos = editor.width - textWidth - 10;
-        int yPos = 10;
+//        int textWidth = MinecraftClient.getInstance().textRenderer.getWidth(timeText);
+        int xPos = 180;
+        int yPos = 5;
 
-        context.drawText(MinecraftClient.getInstance().textRenderer, 
-                       timeText, 
-                       xPos,
-                       yPos, 
-                       0xFFFFFF00,
-                       false);
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+        context.drawTextWithShadow(
+            MinecraftClient.getInstance().textRenderer, 
+            timeText, 
+            xPos,
+            yPos, 
+            0xFFFFFF
+        );
     }
 }

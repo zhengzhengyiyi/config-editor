@@ -35,6 +35,16 @@ public class CommonEntryPoint {
 	 */
 	public static final List<ApiEntrypoint> ENTRYPOINTS = new ArrayList<>();
 	
+	public static final List<ApiEntrypoint> DISABLED_ENTRYPOINTS = new ArrayList<>();
+	
+	public static final List<ApiEntrypoint> TOTAL_ENTRYPOINTS = new ArrayList<>();
+	
+	static {
+		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+			LOGGER.error("Uncaught exception in thread " + thread.getName(), throwable);
+		});
+	}
+	
 	public static void init() {
 		ENTRYPOINTS.add(new UndoRedoEntrypoint());
 		ENTRYPOINTS.add(new TextStatsEntrypoint());
@@ -42,13 +52,32 @@ public class CommonEntryPoint {
 		ENTRYPOINTS.add(new AutoBracketCompletionEntrypoint());
 		ENTRYPOINTS.add(new TextStatsEntrypoint());
 		
-		System.out.println(CommonEntryPoint.ENTRYPOINTS.size() + " plugins found.");
+		for (ApiEntrypoint entrypoint : ENTRYPOINTS) {
+			TOTAL_ENTRYPOINTS.add(entrypoint);
+		}
+		
+		new Thread(() -> {
+			while (true) {
+				try {
+					Thread.sleep(100);
+					for (ApiEntrypoint entrypoint : DISABLED_ENTRYPOINTS) {
+						if (ENTRYPOINTS.contains(entrypoint)) {
+							ENTRYPOINTS.remove(entrypoint);
+						}
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 		
 //		testLanguageResources();
 	}
 	
 	public static void fabric_init() {
-		
+		for (ApiEntrypoint entrypoint : ENTRYPOINTS) {
+			TOTAL_ENTRYPOINTS.add(entrypoint);
+		}
 	}
 	
 	public static void testLanguageResources() {

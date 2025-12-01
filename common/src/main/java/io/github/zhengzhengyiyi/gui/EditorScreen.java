@@ -12,13 +12,11 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.input.KeyInput;
-
+import net.minecraft.client.gui.widget.ClickableWidget;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
@@ -32,18 +30,11 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Main configuration editor screen supporting both JSON and text files.
- * Provides file navigation, editing, and search functionality.
- */
 public class EditorScreen extends Screen {
     private static final Logger LOGGER = LoggerFactory.getLogger(EditorScreen.class);
-//    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private List<Path> configFiles;
     private int selectedIndex = 0;
-    private MultilineEditor multilineEditor;
-    private GeneralMultilineEditor universalEditor;
-    private AbstractEditor currentEditor;
+    private GeneralMultilineEditor editor;
     private boolean modified = false;
     private ButtonWidget saveButton;
     private ButtonWidget openFolderButton;
@@ -61,7 +52,6 @@ public class EditorScreen extends Screen {
     private ButtonWidget scrollUpButton;
     private ButtonWidget scrollDownButton;
     private List<ButtonWidget> fileButtonList;
-    private boolean isJsonFile = true;
 
     public EditorScreen() {
         super(Text.translatable("configeditor.title"));
@@ -97,36 +87,22 @@ public class EditorScreen extends Screen {
                 .dimensions(140, this.height - 45, 20, 20)
                 .build();
         
-        managePluginsButton = ButtonWidget.builder(Text.of("plugin Manager"),
+        managePluginsButton = ButtonWidget.builder(Text.of("plugins"),
         		button -> client.setScreen(new PluginManagerScreen(this)))
-                .dimensions(this.width-20, this.height-20, 20, 20)
+                .dimensions(this.width-30, this.height-20, 20, 30)
                 .build();
         
         this.addDrawableChild(scrollUpButton);
         this.addDrawableChild(scrollDownButton);
-        
         this.addDrawableChild(managePluginsButton);
         
         renderFileList();
         
-        multilineEditor = new MultilineEditor(
+        editor = new GeneralMultilineEditor(
                 170, 20,
                 this.width - 180, this.height - 60,
                 Text.translatable("configeditor.editor"));
-        multilineEditor.setChangedListener(text -> {
-            if (!buffer.equals(text)) {
-                modified = true;
-                updateButtonStates();
-            } else {
-                modified = false;
-            }
-        });
-
-        universalEditor = new GeneralMultilineEditor(
-                170, 20,
-                this.width - 180, this.height - 60,
-                Text.translatable("configeditor.editor"));
-        universalEditor.setChangedListener(text -> {
+        editor.setChangedListener(text -> {
             if (!buffer.equals(text)) {
                 modified = true;
                 updateButtonStates();
@@ -167,14 +143,12 @@ public class EditorScreen extends Screen {
         });
         searchField.setVisible(true);
 
-        searchNextButton = ButtonWidget.builder(Text.literal("↓"), button -> {
-            findNext();
-        }).dimensions(this.width - 145, 5, 20, 16).build();
+        searchNextButton = ButtonWidget.builder(Text.literal("↓"), button -> findNext())
+                .dimensions(this.width - 145, 5, 20, 16).build();
         searchNextButton.visible = true;
         
-        searchPrevButton = ButtonWidget.builder(Text.literal("↑"), button -> {
-            findPrevious();
-        }).dimensions(this.width - 165, 5, 20, 16).build();
+        searchPrevButton = ButtonWidget.builder(Text.literal("↑"), button -> findPrevious())
+                .dimensions(this.width - 165, 5, 20, 16).build();
         searchPrevButton.visible = true;
         
         ButtonWidget closeSearchButton = ButtonWidget.builder(Text.literal("✕"), button -> {
@@ -190,14 +164,15 @@ public class EditorScreen extends Screen {
         this.addDrawableChild(searchPrevButton);
         this.addDrawableChild(closeSearchButton);
         this.addDrawableChild(exitButton);
+        this.addDrawableChild(editor);
         
-        this.setInitialFocus(multilineEditor);
+        this.setInitialFocus(editor);
 
         if (!configFiles.isEmpty()) {
             loadFile(selectedIndex);
         } else {
-            multilineEditor.setText("{}");
-            multilineEditor.setEditable(false);
+            editor.setText("{}");
+            editor.setEditable(false);
             LOGGER.warn("No config files found in config directory");
         }
         
@@ -209,10 +184,6 @@ public class EditorScreen extends Screen {
         updateScrollButtons();
     }
     
-    /**
-     * Checks if a file is a valid configuration file.
-     * Filters out system files and binary files.
-     */
     public boolean isConfigFile(Path file) {
         String fileName = file.getFileName().toString();
         
@@ -234,9 +205,6 @@ public class EditorScreen extends Screen {
                lowerName.endsWith(".ini");
     }
 
-    /**
-     * Formats file path for display in the file list.
-     */
     private String formatFileName(String filePath) {
         if (filePath.length() > 22) {
             int lastSeparator = filePath.lastIndexOf('/');
@@ -327,28 +295,27 @@ public class EditorScreen extends Screen {
             String content = readFileWithFallbackEncoding(file);
             buffer = content;
             
-            boolean isJson = checkIfJson(content);
-            isJsonFile = isJson;
-            
-            switchEditor(isJson, getFileName(file.getFileName()));
-            currentEditor.setText(content);
+//            boolean isJson = checkIfJson(content);
+            editor.setFileName(getFileName(file.getFileName()));
+//            editor.setJsonMode(isJson);
+            editor.setText(content);
             
         } catch (Exception e) {
             LOGGER.error("Failed to load config file: {}", file.getFileName(), e);
-            switchEditor(true, getFileName(file.getFileName()));
-            currentEditor.setText("{}");
-            currentEditor.setEditable(false);
+            editor.setFileName(getFileName(file.getFileName()));
+//            editor.setJsonMode(true);
+            editor.setText("{}");
+            editor.setEditable(false);
             showErrorPopup(Text.translatable("configeditor.error.loadfailed"));
         }
         
         updateButtonStates();
     }
     
-    public static String getFileName(java.nio.file.Path path) {
+    public static String getFileName(Path path) {
         if (path == null) {
             return "";
         }
-        
         return path.getFileName().toString();
     }
 
@@ -382,10 +349,7 @@ public class EditorScreen extends Screen {
         }
     }
 
-    /**
-     * Checks if content is valid JSON.
-     */
-    private boolean checkIfJson(String content) {
+    public boolean checkIfJson(String content) {
         if (content == null || content.trim().isEmpty()) {
             return false;
         }
@@ -403,38 +367,20 @@ public class EditorScreen extends Screen {
         }
     }
 
-    private void switchEditor(boolean useJsonEditor, String fileName) {
-        if (currentEditor != null) {
-            this.remove((ClickableWidget) currentEditor);
-        }
-        
-        if (useJsonEditor) {
-        	multilineEditor.setFileName(fileName);
-            currentEditor = multilineEditor;
-        } else {
-        	universalEditor.setFileName(fileName);
-            currentEditor = universalEditor;
-            ((GeneralMultilineEditor)currentEditor).setFileName(fileName);
-        }
-        
-        this.addDrawableChild((ClickableWidget) currentEditor);
-        this.setInitialFocus((ClickableWidget) currentEditor);
-    }
-
     private void startSearch(String query) {
-        currentEditor.startSearch(query);
+        editor.startSearch(query);
     }
 
     private void findNext() {
-        currentEditor.findNext();
+        editor.findNext();
     }
 
     private void findPrevious() {
-        currentEditor.findPrevious();
+        editor.findPrevious();
     }
 
     private void endSearch() {
-        currentEditor.endSearch();
+        editor.endSearch();
     }
 
     private void saveFile() {
@@ -445,17 +391,17 @@ public class EditorScreen extends Screen {
         if (configFiles.isEmpty()) return;
         
         Path file = configFiles.get(selectedIndex);
-        String content = getCurrentEditorText();
+        String content = editor.getText();
         
-        if (isJsonFile) {
-            try {
-                JsonParser.parseString(content);
-            } catch (JsonSyntaxException e) {
-                LOGGER.warn("Invalid JSON syntax in file: {}", file.getFileName());
-                showErrorPopup(Text.translatable("configeditor.error.invalidjson"));
-                return;
-            }
-        }
+//        if (editor.isJsonMode()) {
+//            try {
+//                JsonParser.parseString(content);
+//            } catch (JsonSyntaxException e) {
+//                LOGGER.warn("Invalid JSON syntax in file: {}", file.getFileName());
+//                showErrorPopup(Text.translatable("configeditor.error.invalidjson"));
+//                return;
+//            }
+//        }
         
         new Thread(() -> {
             int retryCount = 0;
@@ -478,8 +424,6 @@ public class EditorScreen extends Screen {
                                     client.execute(this::updateButtonStates);
                                 }
                                 return;
-                            } catch (Exception e) {
-                                LOGGER.error(e.toString());
                             } finally {
                                 lock.release();
                             }
@@ -511,10 +455,6 @@ public class EditorScreen extends Screen {
             });
             
         }).start();
-    }
-    
-    private String getCurrentEditorText() {
-        return currentEditor.getText();
     }
     
     private void openConfigFolder() {
@@ -551,14 +491,20 @@ public class EditorScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (CommonEntryPoint.configManager.getConfig().doRenderBackground) context.fill(0, 0, this.width, this.height, themeManager.getBackgroundColor());
+        if (CommonEntryPoint.configManager.getConfig().doRenderBackground) {
+            context.fill(0, 0, this.width, this.height, themeManager.getBackgroundColor());
+        }
         super.render(context, mouseX, mouseY, delta);
         
         if (!configFiles.isEmpty()) {
             String status = modified ? "* " + configFiles.get(selectedIndex).getFileName().toString() : 
                 configFiles.get(selectedIndex).getFileName().toString();
-            String editorType = isJsonFile ? " [JSON]" : " [Text]";
+            String editorType = "[File]";
             context.drawText(this.textRenderer, status + editorType, 170, 5, modified ? 0xFFFF00 : 0xFFFFFF, false);
+        }
+        
+        for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : CommonEntryPoint.ENTRYPOINTS) {
+            entrypoint.renderButton(context, mouseX, mouseY, delta);
         }
     }
 
@@ -584,7 +530,7 @@ public class EditorScreen extends Screen {
     }
     
     public ClickableWidget getTextWidget() {
-        return (ClickableWidget) this.currentEditor;
+        return editor;
     }
     
     private void toggleSearch() {
@@ -612,8 +558,6 @@ public class EditorScreen extends Screen {
         fileButtonList.clear();
         fileButtonList = null;
         
-//        System.gc();
-        
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : CommonEntryPoint.ENTRYPOINTS) {
             entrypoint.onEditerClose(this);
         }
@@ -634,7 +578,7 @@ public class EditorScreen extends Screen {
             return true;
         }
         
-        if (currentEditor == null) return super.keyPressed(input);
+        if (editor == null) return super.keyPressed(input);
         
         if (searchVisible) {
             if (input.getKeycode() == GLFW.GLFW_KEY_ENTER) {
@@ -676,10 +620,5 @@ public class EditorScreen extends Screen {
             case LIGHT -> "configeditor.theme.light";
             case AUTO -> "configeditor.theme.auto";
         };
-    }
-
-    @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
-        return super.mouseClicked(click, doubled);
     }
 }
