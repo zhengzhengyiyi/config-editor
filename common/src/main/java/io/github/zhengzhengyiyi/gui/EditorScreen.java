@@ -41,6 +41,9 @@ public class EditorScreen extends Screen {
     private ButtonWidget backupButton;
     private String buffer = "";
     private TextFieldWidget searchField;
+    private ButtonWidget visualEditButton;
+    private ButtonWidget aiChatButton;
+    private ButtonWidget validateJsonButton;
     private ButtonWidget searchNextButton;
     private ButtonWidget searchPrevButton;
     private ButtonWidget managePluginsButton;
@@ -65,7 +68,7 @@ public class EditorScreen extends Screen {
         themeToggleButton = ButtonWidget.builder(
                 Text.translatable(getThemeButtonText()),
                 button -> toggleTheme())
-                .dimensions(this.width - 50, 5, 45, 16)
+                .dimensions(this.width - 55, 5, 50, 20)
                 .build();
         this.addDrawableChild(themeToggleButton);
         
@@ -81,15 +84,16 @@ public class EditorScreen extends Screen {
         fileButtonList = new ArrayList<>();
         
         scrollUpButton = ButtonWidget.builder(Text.literal("↑"), button -> scrollUp())
-                .dimensions(140, 25, 20, 20)
+                .dimensions(145, 25, 20, 20)
                 .build();
         scrollDownButton = ButtonWidget.builder(Text.literal("↓"), button -> scrollDown())
-                .dimensions(140, this.height - 45, 20, 20)
+                .dimensions(145, this.height - 45, 20, 20)
                 .build();
         
-        managePluginsButton = ButtonWidget.builder(Text.of("plugins"),
-        		button -> client.setScreen(new PluginManagerScreen(this)))
-                .dimensions(this.width-30, this.height-20, 20, 30)
+        managePluginsButton = ButtonWidget.builder(
+                Text.translatable("configeditor.button.plugins"),
+                button -> client.setScreen(new PluginManagerScreen(this)))
+                .dimensions(this.width - 85, this.height - 30, 80, 20)
                 .build();
         
         this.addDrawableChild(scrollUpButton);
@@ -111,59 +115,115 @@ public class EditorScreen extends Screen {
             }
         });
 
-        saveButton = ButtonWidget.builder(
-                Text.translatable("configeditor.button.save"),
-                button -> saveFile())
-                .dimensions(this.width - 170, this.height - 30, 80, 20)
-                .build();
+        int bottomY = this.height - 30;
+        int centerX = this.width / 2;
         
         backupButton = ButtonWidget.builder(
                 Text.translatable("configeditor.button.backup"), 
                 button -> BackupHelper.backupEntireConfigDirectory())
-                .dimensions(this.width - 260, this.height - 30, 80, 20)
+                .dimensions(centerX - 200, bottomY, 80, 20)
                 .build();
 
+        saveButton = ButtonWidget.builder(
+                Text.translatable("configeditor.button.save"),
+                button -> saveFile())
+                .dimensions(centerX - 110, bottomY, 80, 20)
+                .build();
+        
+        visualEditButton = ButtonWidget.builder(
+                Text.translatable("configeditor.button.visual"),
+                button -> openVisualEditor())
+                .dimensions(centerX + 10, bottomY, 100, 20)
+                .build();
+//        visualEditButton.active = false;
+        
         openFolderButton = ButtonWidget.builder(
                 Text.translatable("configeditor.button.openfolder"),
                 button -> openConfigFolder())
-                .dimensions(this.width - 80, this.height - 30, 70, 20)
+                .dimensions(0, 0, 80, 20)
                 .build();
         
         exitButton = ButtonWidget.builder(
                 Text.translatable("configeditor.button.close"),
                 button -> this.close())
-                .dimensions(0, 0, 80, 20)
+                .dimensions(this.width - 30, bottomY, 30, 20)
                 .build();
         
-        searchField = new TextFieldWidget(textRenderer, this.width - 300, 5, 150, 16, Text.translatable("configeditor.search.placeholder"));
+        int searchX = this.width - 320;
+        searchField = new TextFieldWidget(
+            textRenderer, 
+            searchX, 
+            5, 
+            150, 
+            20, 
+            Text.translatable("configeditor.search.placeholder")
+        );
         searchField.setChangedListener(text -> {
             if (!text.trim().isEmpty()) {
                 startSearch(text.trim());
+            } else {
+                endSearch();
             }
         });
         searchField.setVisible(true);
 
-        searchNextButton = ButtonWidget.builder(Text.literal("↓"), button -> findNext())
-                .dimensions(this.width - 145, 5, 20, 16).build();
-        searchNextButton.visible = true;
-        
-        searchPrevButton = ButtonWidget.builder(Text.literal("↑"), button -> findPrevious())
-                .dimensions(this.width - 165, 5, 20, 16).build();
+        searchPrevButton = ButtonWidget.builder(
+            Text.translatable("configeditor.search.prev"), 
+            button -> findPrevious())
+            .dimensions(searchX + 155, 5, 40, 20)
+            .build();
+        searchPrevButton.active = false;
         searchPrevButton.visible = true;
         
-        ButtonWidget closeSearchButton = ButtonWidget.builder(Text.literal("✕"), button -> {
-            searchField.setText("");
-            endSearch();
-        }).dimensions(this.width - 120, 5, 20, 16).build();
+        searchNextButton = ButtonWidget.builder(
+            Text.translatable("configeditor.search.next"), 
+            button -> findNext())
+            .dimensions(searchX + 195, 5, 40, 20)
+            .build();
+        searchNextButton.active = false;
+        searchNextButton.visible = true;
         
-        this.addDrawableChild(saveButton);
+        ButtonWidget closeSearchButton = ButtonWidget.builder(
+            Text.literal("×"), 
+            button -> {
+                searchField.setText("");
+                endSearch();
+            })
+            .dimensions(searchX + 235, 5, 20, 20)
+            .build();
+        closeSearchButton.visible = true;
+        
+        int quickButtonX = this.width - 180;
+        int quickButtonY = 20;
+        int quickButtonWidth = 170;
+        int quickButtonHeight = 20;
+        
+        aiChatButton = ButtonWidget.builder(
+            Text.translatable("configeditor.button.aichat"),
+            button -> openAiChat())
+            .dimensions(quickButtonX, quickButtonY, quickButtonWidth, quickButtonHeight)
+            .build();
+        
+        validateJsonButton = ButtonWidget.builder(
+            Text.translatable("configeditor.button.validate"),
+            button -> validateCurrentJson())
+            .dimensions(quickButtonX, quickButtonY + 25, quickButtonWidth, quickButtonHeight)
+            .build();
+        
         this.addDrawableChild(backupButton);
+        this.addDrawableChild(saveButton);
+        this.addDrawableChild(visualEditButton);
         this.addDrawableChild(openFolderButton);
-        this.addDrawableChild(searchField);
-        this.addDrawableChild(searchNextButton);
-        this.addDrawableChild(searchPrevButton);
-        this.addDrawableChild(closeSearchButton);
         this.addDrawableChild(exitButton);
+        
+        this.addDrawableChild(searchField);
+        this.addDrawableChild(searchPrevButton);
+        this.addDrawableChild(searchNextButton);
+        this.addDrawableChild(closeSearchButton);
+        
+        this.addDrawableChild(aiChatButton);
+        this.addDrawableChild(validateJsonButton);
+        
         this.addDrawableChild(editor);
         
         this.setInitialFocus(editor);
@@ -387,6 +447,15 @@ public class EditorScreen extends Screen {
         saveFileAsync(null);
     }
     
+    public void setEditorText(String text) {
+        if (editor != null) {
+            editor.setText(text);
+            buffer = text;
+            modified = true;
+            updateButtonStates();
+        }
+    }
+    
     private void saveFileAsync(Runnable callback) {
         if (configFiles.isEmpty()) return;
         
@@ -477,6 +546,24 @@ public class EditorScreen extends Screen {
             message
         ));
     }
+    
+    private void openVisualEditor() {
+		this.client.setScreen(new JsonVisualEditorScreen(this.editor.getText()));
+	}
+
+	private void openAiChat() {
+		new AIChatScreen();
+	}
+
+	private void validateCurrentJson() {
+		String content = editor.getText();
+		try {
+			JsonParser.parseString(content);
+			showMessagePopup(Text.translatable("configeditor.message.jsonvalid"));
+		} catch (JsonSyntaxException e) {
+			showMessagePopup(Text.translatable("configeditor.message.jsoninvalid"));
+		}
+	}
 
     public void showMessagePopup(Text message) {
         client.setScreen(new ConfirmScreen(

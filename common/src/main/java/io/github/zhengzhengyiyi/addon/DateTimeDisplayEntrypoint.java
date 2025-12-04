@@ -11,6 +11,8 @@ import java.time.format.DateTimeFormatter;
 
 public class DateTimeDisplayEntrypoint implements ApiEntrypoint {
     private EditorScreen editor;
+    private int xPos;
+    private int yPos;
 
     @Override
     public void init() {}
@@ -18,6 +20,8 @@ public class DateTimeDisplayEntrypoint implements ApiEntrypoint {
     @Override
     public void onEditerOpen(EditorScreen editor) {
         this.editor = editor;
+        
+        yPos = 1;
     }
 
     @Override
@@ -40,22 +44,22 @@ public class DateTimeDisplayEntrypoint implements ApiEntrypoint {
 
     @Override
     public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (editor == null) return;
-        
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String timeText = now.format(formatter);
-
-//        int textWidth = MinecraftClient.getInstance().textRenderer.getWidth(timeText);
-        int xPos = 180;
-        int yPos = 5;
-
-        context.drawTextWithShadow(
+        
+        int textWidth = MinecraftClient.getInstance().textRenderer.getWidth(timeText);
+        xPos = editor.width / 2 + textWidth / 2;
+        
+        System.out.println("Rendering date/time at: " + xPos + ", " + yPos);
+        
+        context.drawText(
             MinecraftClient.getInstance().textRenderer, 
-            timeText, 
+            timeText,
             xPos,
-            yPos, 
-            0xFFFFFF
+            yPos,
+            0xFFFFFF00,
+            false
         );
     }
 }
