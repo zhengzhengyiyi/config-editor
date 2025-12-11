@@ -1,8 +1,6 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 	id 'maven-publish'
-	id "com.modrinth.minotaur" version "2.8.10"
-	id 'signing'
 }
 
 version = project.mod_version
@@ -13,19 +11,23 @@ base {
 }
 
 repositories {
-	// maven { url "https://maven.shedaniel.me/" }
-	// maven { url "https://maven.terraformersmc.com/releases/" }
+	// Add repositories to retrieve artifacts from in here.
+	// You should only use this when depending on other mods because
+	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
+	// for more information about repositories.
 }
 
 loom {
 	splitEnvironmentSourceSets()
 
 	mods {
-		"config_editor" {
+		"aaa" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}
 	}
+
 }
 
 dependencies {
@@ -37,7 +39,6 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	// modApi "com.terraformersmc:modmenu:10.0.0"
 }
 
 processResources {
@@ -57,7 +58,6 @@ java {
 	// if it is present.
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
-	withJavadocJar()
 
 	sourceCompatibility = JavaVersion.VERSION_21
 	targetCompatibility = JavaVersion.VERSION_21
@@ -77,75 +77,14 @@ publishing {
 		create("mavenJava", MavenPublication) {
 			artifactId = project.archives_base_name
 			from components.java
-			
-			pom {
-                name = project.archives_base_name
-                description = 'A Minecraft mod for editing configuration files'
-                url = 'http://modrinth.com/mod/config-editor'
-                
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
-                    }
-                }
-                
-                developers {
-                    developer {
-                        id = 'zhengzhengyiyi'
-                        name = 'zhengzhengyiyi'
-                        email = 'zhengzhengyiyiminecraft@gmail.com'
-                    }
-                }
-                
-                scm {
-                    connection = 'scm:git:git://github.com/zhengzhengyiyi/config-editor.git'
-                    developerConnection = 'scm:git:https://zhengzhengyiyi.github.io'
-                    url = 'http://modrinth.com/mod/config-editor'
-                }
-            }
 		}
 	}
 
 	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
 	repositories {
-		maven {
-			// url = layout.buildDirectory.dir('repo')
-			url = System.getProperty('user.home') + '/Desktop/repo'
-		}
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in the top level.
+		// The repositories here will be used for publishing your artifact, not for
+		// retrieving dependencies.
 	}
-}
-
-modrinth {
-    token = System.getenv("MODRINTH_TOKEN")
-    projectId = "config-editor"
-    versionType = "release"
-    gameVersions = ["${project.minecraft_version}"]
-    loaders = ["fabric"]
-    versionNumber = "${project.mod_version}"
-    uploadFile = remapJar
-    dependencies {
-    	required.project "fabric-api"
-    }
-    additionalFiles = [
-        tasks.named("javadocJar").get().outputs.files.singleFile,
-        tasks.named("sourcesJar").get().outputs.files.singleFile
-    ]
-}
-
-javadoc {
-    source += sourceSets.client.java.srcDirs
-    classpath += sourceSets.client.compileClasspath
-    options.encoding = 'UTF-8'
-    options {
-    	// links = [
-    	// 	"https://maven.fabricmc.net/docs/yarn-1.21.5+build.1/"
-    	// ]
-    }
-}
-
-signing {
-    useGpgCmd()
-    
-    sign publishing.publications.mavenJava
 }

@@ -25,24 +25,6 @@ import java.util.ArrayList;
 public class ConfigEditorClient implements ClientModInitializer {
 	public static String MOD_ID = "config_editor";
 	public static ConfigManager<ModConfigData> configManager = new ConfigManager<>(Paths.get("config", "editor_config.json"), new ModConfigData(), ModConfigData.class);
-	
-	/**
-	 * The keybinding for open the configure
-	 * @see KeyBinding
-	 */
-	public static KeyBinding key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-			"zhengzhengyiyi.key.open_gui",
-			InputUtil.Type.KEYSYM,
-			GLFW.GLFW_KEY_UNKNOWN,
-			KeyBinding.Category.GAMEPLAY
-	));
-
-	public static KeyBinding chatkey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-			"zhengzhengyiyi.key.open_chat_gui",
-			InputUtil.Type.KEYSYM,
-			GLFW.GLFW_KEY_UNKNOWN,
-			KeyBinding.Category.GAMEPLAY
-	));
 
 	/**
 	 * The Logger for the other mod's entry point, usually for printing errors.
@@ -62,6 +44,35 @@ public class ConfigEditorClient implements ClientModInitializer {
 	 */
 	public static final List<ApiEntrypoint> ENTRYPOINTS = new ArrayList<>();
 	
+	/**
+	 * The keybinding for open the configure
+	 * @see KeyBinding
+	 */
+	public static KeyBinding key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+			"zhengzhengyiyi.key.open_gui",
+			InputUtil.Type.KEYSYM,
+			GLFW.GLFW_KEY_UNKNOWN,
+			KeyBinding.Category.GAMEPLAY
+	));
+
+	public static KeyBinding chatkey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+			"zhengzhengyiyi.key.open_chat_gui",
+			InputUtil.Type.KEYSYM,
+			GLFW.GLFW_KEY_UNKNOWN,
+			KeyBinding.Category.GAMEPLAY
+	));
+	
+	public static KeyBinding nbtDisplayKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+			"zhengzhengyiyi.key.nbtDisplay",
+			InputUtil.Type.KEYSYM,
+			GLFW.GLFW_KEY_UNKNOWN,
+			KeyBinding.Category.GAMEPLAY
+	));
+	
+	public static final List<ApiEntrypoint> DISABLED_ENTRYPOINTS = new ArrayList<>();
+	
+	public static final List<ApiEntrypoint> TOTAL_ENTRYPOINTS = new ArrayList<>();
+	
 	@Override
 	public void onInitializeClient() {
 		FabricLoader.getInstance()
@@ -77,6 +88,12 @@ public class ConfigEditorClient implements ClientModInitializer {
             }
         });
 		
+		TOTAL_ENTRYPOINTS.add(new UndoRedoEntrypoint());
+		TOTAL_ENTRYPOINTS.add(new TextStatsEntrypoint());
+		TOTAL_ENTRYPOINTS.add(new DateTimeDisplayEntrypoint());
+		TOTAL_ENTRYPOINTS.add(new AutoBracketCompletionEntrypoint());
+		TOTAL_ENTRYPOINTS.add(new TextStatsEntrypoint());
+		
 		ENTRYPOINTS.add(new UndoRedoEntrypoint());
 		ENTRYPOINTS.add(new TextStatsEntrypoint());
 		ENTRYPOINTS.add(new DateTimeDisplayEntrypoint());
@@ -89,6 +106,9 @@ public class ConfigEditorClient implements ClientModInitializer {
 			}
 			if (chatkey.isPressed()) {
 				client.setScreen(new AIChatScreen());
+			}
+			if (nbtDisplayKey.isPressed()) {
+				new NbtSaver().saveAndOpenEditor();
 			}
 		});
 		

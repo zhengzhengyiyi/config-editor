@@ -7,6 +7,7 @@ import io.github.zhengzhengyiyi.gui.EditorScreen;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.input.CharInput;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Identifier;
 
 /**
  * The entry point for other mods to interact with the config editor.
@@ -26,6 +27,10 @@ public interface ApiEntrypoint {
      * during its initialization phase. It is the only required method to be implemented.
      */
     void init();
+    
+    default Identifier getIdentifier() {
+    	return Identifier.of("config_editor", "plugin");
+    }
 
     /**
      * Called when the editor screen is opened.

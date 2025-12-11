@@ -1,32 +1,53 @@
 {
   "configeditor.title": "Config Editor",
-  "configeditor.editor": "JSON Editor",
-  
   "configeditor.button.save": "Save",
-  "configeditor.button.backup": "Backup",
-  "configeditor.button.openfolder": "Open Folder",
   "configeditor.button.close": "Close",
-  "configeditor.button.search": "Search",
-  
-  "configeditor.search.placeholder": "Search text...",
-  "configeditor.search.next": "Next",
+  "configeditor.button.plugins": "Plugins",
+  "configeditor.button.openfolder": "Open Folder",
+  "configeditor.button.backup": "Backup",
+  "configeditor.button.visual": "Visual Edit",
+  "configeditor.button.aichat": "AI Chat",
+  "configeditor.button.validate": "Validate JSON",
+  "configeditor.search.placeholder": "Search...",
   "configeditor.search.prev": "Prev",
+  "configeditor.search.next": "Next",
   
-  "configeditor.confirm.title": "Confirmation",
-  "configeditor.confirm.unsaved": "You have unsaved changes. Save before switching?",
-  "configeditor.confirm.unsavedclose": "You have unsaved changes. Save before closing?",
+  "configeditor.visual.title": "JSON Visual Editor",
+  "configeditor.visual.key": "Key",
+  "configeditor.visual.value": "Value",
+  "configeditor.visual.addfield": "Add Field",
+  "configeditor.visual.addobject": "Add Object",
+  "configeditor.visual.rawedit": "Raw Edit",
+  "configeditor.visual.fieldcount": "Fields: %s",
+  "configeditor.visual.empty": "No fields. Click 'Add Field' to start.",
+  "configeditor.visual.newfield": "new_field",
   
-  "configeditor.error.title": "Error",
+  "configeditor.visual.type.string": "String",
+  "configeditor.visual.type.number": "Number",
+  "configeditor.visual.type.boolean": "Boolean",
+  "configeditor.visual.type.null": "Null",
+  "configeditor.visual.type.unknown": "Unknown",
+  
+  "configeditor.visual.tooltip.type": "Type: %s",
+  "configeditor.visual.tooltip.delete": "Delete this field",
+  "configeditor.visual.tooltip.error": "Invalid value for current type",
+  
+  "configeditor.confirm.title": "Confirm",
+  "configeditor.confirm.unsavedclose": "You have unsaved changes. Are you sure you want to close?",
+  
+  "configeditor.message.saved": "Successfully saved!",
+  "configeditor.message.jsonvalid": "JSON is valid!",
+  "configeditor.message.jsoninvalid": "JSON is invalid!",
+  
   "configeditor.error.loadfailed": "Failed to load config file",
-  "configeditor.error.savefailed": "Failed to save config file",
-  "configeditor.error.invalidjson": "Invalid JSON syntax",
+  "configeditor.error.savefailed": "Failed to save file",
+  "configeditor.error.fileretryfailed": "Failed to save after multiple attempts",
+  "configeditor.error.invalidjson": "Invalid JSON format",
   
-  "configeditor.message.title": "Information",
-  "configeditor.message.saved": "File saved successfully",
+  "configeditor.theme.dark": "Dark",
+  "configeditor.theme.light": "Light",
+  "configeditor.theme.auto": "Auto",
   
-  "configeditor.theme.dark": "dark",
-  "configeditor.theme.light": "light",
-  "configeditor.theme.auto": "auto",
-  
-  "configEditor.test": "test"
+  "button.zhengzhengyiyi.disable": "Disabled",
+  "button.zhengzhengyiyi.enable": "Enabled"
 }

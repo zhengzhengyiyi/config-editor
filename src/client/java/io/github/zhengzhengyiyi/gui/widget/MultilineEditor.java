@@ -10,7 +10,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.input.CharInput;
 import net.minecraft.client.input.KeyInput;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -54,9 +53,16 @@ public class MultilineEditor extends AbstractEditor {
         this.textRenderer = MinecraftClient.getInstance().textRenderer;
         this.setFocused(false);
         
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            editable = !ConfigEditorClient.configManager.getConfig().readonly_mode;
-        });
+        new Thread(() -> {
+        	while (true) {
+	        	try {
+		        	Thread.sleep(500);
+		            editable = !ConfigEditorClient.configManager.getConfig().readonly_mode;
+	            } catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+        	}
+		}).start();
     }
     
     @Override
@@ -200,7 +206,7 @@ public class MultilineEditor extends AbstractEditor {
         }
     }
     
-    private void renderErrorTooltips(DrawContext context, int mouseX, int mouseY, String[] lines, int lineHeight, int maxVisibleLines) {
+    public void renderErrorTooltips(DrawContext context, int mouseX, int mouseY, String[] lines, int lineHeight, int maxVisibleLines) {
         hoveredError = null;
         
         if (isMouseOver(mouseX, mouseY)) {
@@ -215,7 +221,9 @@ public class MultilineEditor extends AbstractEditor {
         }
     }
     
-    private void renderSuggestions(DrawContext context, int mouseX, int mouseY) {
+    public void renderSuggestions(DrawContext context, int mouseX, int mouseY) {
+//    	System.out.println("Rendering suggestions...");
+    	
         int lineHeight = textRenderer.fontHeight + 2;
         String[] lines = text.split("\n", -1);
         

@@ -2,11 +2,11 @@ package io.github.zhengzhengyiyi.addon;
 
 import io.github.zhengzhengyiyi.api.ApiEntrypoint;
 import io.github.zhengzhengyiyi.gui.*;
-import io.github.zhengzhengyiyi.gui.widget.GeneralMultilineEditor;
 import io.github.zhengzhengyiyi.gui.widget.MultilineEditor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.util.Identifier;
 
 public class TextStatsEntrypoint implements ApiEntrypoint {
     private boolean enabled = true;
@@ -16,6 +16,11 @@ public class TextStatsEntrypoint implements ApiEntrypoint {
 
     @Override
     public void init() {}
+    
+    @Override
+    public Identifier getIdentifier() {
+    	return Identifier.of("zhengzhengyiyi", "text_stats_display");
+    }
 
     @Override
     public void onEditerOpen(EditorScreen editor) {
@@ -35,9 +40,7 @@ public class TextStatsEntrypoint implements ApiEntrypoint {
 //        String text = editor.getTextWidget().getText();
         if (textWidget instanceof MultilineEditor) {
     		text = ((MultilineEditor)textWidget).text;
-        } else if (textWidget instanceof GeneralMultilineEditor) {
-			text = ((GeneralMultilineEditor)textWidget).text;
-		} else {
+        } else {
 			LOGGER.error("can not find current text");
 		}
         

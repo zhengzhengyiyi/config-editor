@@ -1,13 +1,14 @@
 package io.github.zhengzhengyiyi.addon;
 
 import io.github.zhengzhengyiyi.gui.EditorScreen;
-import io.github.zhengzhengyiyi.gui.widget.GeneralMultilineEditor;
 import io.github.zhengzhengyiyi.gui.widget.MultilineEditor;
 import io.github.zhengzhengyiyi.api.*;
 import net.minecraft.client.gui.widget.ClickableWidget;
 //import net.minecraft.client.gui.screen.Screen;
 //import net.minecraft.client.input.KeyInput;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Identifier;
+
 //import org.lwjgl.glfw.GLFW;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -34,9 +35,7 @@ public class UndoRedoEntrypoint implements ApiEntrypoint {
         if (textWidget != null) {
         	if (textWidget instanceof MultilineEditor) {
         		currentText = ((MultilineEditor)textWidget).text;
-            } else if (textWidget instanceof GeneralMultilineEditor) {
-    			currentText = ((GeneralMultilineEditor)textWidget).text;
-    		} else {
+            } else {
     			LOGGER.error("can not find current text");
     		}
             saveState();
@@ -140,6 +139,11 @@ public class UndoRedoEntrypoint implements ApiEntrypoint {
 //        currentText = nextText;
 //        isRedoing = false;
 //    }
+    
+    @Override
+    public Identifier getIdentifier() {
+    	return Identifier.of("zhengzhengyiyi", "redo_undo");
+    }
 
     private void resetStacks() {
         undoStack.clear();
