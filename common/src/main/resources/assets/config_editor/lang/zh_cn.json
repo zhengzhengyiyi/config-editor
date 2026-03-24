@@ -1,0 +1,49 @@
+{
+  "configeditor.title": "配置编辑器",
+  "configeditor.button.save": "保存",
+  "configeditor.button.close": "关闭",
+  "configeditor.button.plugins": "插件管理",
+  "configeditor.button.openfolder": "打开文件夹",
+  "configeditor.button.backup": "备份",
+  "configeditor.button.visual": "可视化编辑",
+  "configeditor.button.aichat": "AI助手",
+  "configeditor.button.validate": "验证JSON",
+  "configeditor.search.placeholder": "搜索...",
+  "configeditor.search.prev": "上一个",
+  "configeditor.search.next": "下一个",
+  
+  "configeditor.visual.title": "JSON可视化编辑器",
+  "configeditor.visual.key": "键名",
+  "configeditor.visual.value": "键值",
+  "configeditor.visual.addfield": "添加字段",
+  "configeditor.visual.rawedit": "原始编辑",
+  "configeditor.visual.fieldcount": "字段数: %s",
+  "configeditor.visual.empty": "暂无字段。点击'添加字段'开始编辑。",
+  "configeditor.visual.newfield": "新字段",
+  
+  "configeditor.visual.type.string": "字符串",
+  "configeditor.visual.type.number": "数字",
+  "configeditor.visual.type.boolean": "布尔值",
+  "configeditor.visual.type.null": "空值",
+  "configeditor.visual.type.unknown": "未知",
+  
+  "configeditor.visual.tooltip.type": "类型: %s",
+  "configeditor.visual.tooltip.delete": "删除此字段",
+  "configeditor.visual.tooltip.error": "当前类型的值无效",
+  
+  "configeditor.confirm.title": "确认",
+  "configeditor.confirm.unsavedclose": "您有未保存的更改。确定要关闭吗？",
+  
+  "configeditor.message.saved": "保存成功！",
+  "configeditor.message.jsonvalid": "JSON格式有效！",
+  "configeditor.message.jsoninvalid": "JSON格式无效！",
+  
+  "configeditor.error.loadfailed": "加载配置文件失败",
+  "configeditor.error.savefailed": "保存文件失败",
+  "configeditor.error.fileretryfailed": "多次尝试后仍保存失败",
+  "configeditor.error.invalidjson": "JSON格式无效",
+  
+  "configeditor.theme.dark": "深色",
+  "configeditor.theme.light": "浅色",
+  "configeditor.theme.auto": "自动"
+}
