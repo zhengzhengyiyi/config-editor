@@ -14,9 +14,9 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.nio.file.Paths;
@@ -48,25 +48,25 @@ public class ConfigEditorClient implements ClientModInitializer {
 	 * The keybinding for open the configure
 	 * @see KeyBinding
 	 */
-	public static KeyBinding key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+	public static KeyMapping key = KeyBindingHelper.registerKeyBinding(new KeyMapping(
 			"zhengzhengyiyi.key.open_gui",
-			InputUtil.Type.KEYSYM,
+			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_UNKNOWN,
-			KeyBinding.Category.GAMEPLAY
+			KeyMapping.Category.GAMEPLAY
 	));
 
-	public static KeyBinding chatkey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+	public static KeyMapping chatkey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
 			"zhengzhengyiyi.key.open_chat_gui",
-			InputUtil.Type.KEYSYM,
+			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_UNKNOWN,
-			KeyBinding.Category.GAMEPLAY
+			KeyMapping.Category.GAMEPLAY
 	));
 	
-	public static KeyBinding nbtDisplayKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+	public static KeyMapping nbtDisplayKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
 			"zhengzhengyiyi.key.nbtDisplay",
-			InputUtil.Type.KEYSYM,
+			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_UNKNOWN,
-			KeyBinding.Category.GAMEPLAY
+			KeyMapping.Category.GAMEPLAY
 	));
 	
 	public static final List<ApiEntrypoint> DISABLED_ENTRYPOINTS = new ArrayList<>();
@@ -101,13 +101,13 @@ public class ConfigEditorClient implements ClientModInitializer {
 		ENTRYPOINTS.add(new TextStatsEntrypoint());
 		
 		ClientTickEvents.END_CLIENT_TICK.register((client) -> {
-			if (key.isPressed()) {
+			if (key.consumeClick()) {
 				client.setScreen(new EditorScreen());
 			}
-			if (chatkey.isPressed()) {
+			if (chatkey.consumeClick()) {
 				client.setScreen(new AIChatScreen());
 			}
-			if (nbtDisplayKey.isPressed()) {
+			if (nbtDisplayKey.consumeClick()) {
 				new NbtSaver().saveAndOpenEditor();
 			}
 		});
@@ -120,11 +120,11 @@ public class ConfigEditorClient implements ClientModInitializer {
 	}
 	
 	public static void testLanguageResources() {
-		Text test = Text.translatable("configEditor.test");
+		Component test = Component.translatable("configEditor.test");
 		
 		LOGGER.info("----------------test------------------");
 		LOGGER.info(test.toString());
-		LOGGER.info(test.getLiteralString());
+		LOGGER.info(test.getString());
 		LOGGER.info("--------------test-ended--------------");
 	}
 }

@@ -1,14 +1,14 @@
 package io.github.zhengzhengyiyi.gui;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -33,20 +33,22 @@ public class JsonVisualEditorScreen extends Screen {
     public static final int MARGIN = 10;
     private static final int MAX_VISIBLE_FIELDS = 12;
     private static final int INDENT_WIDTH = 40;
+
+    private Font textRenderer = Minecraft.getInstance().font;
     
-    private ButtonWidget saveButton;
-    private ButtonWidget cancelButton;
-    private ButtonWidget addFieldButton;
-    private ButtonWidget addObjectButton;
-    private ButtonWidget rawEditButton;
-    private ButtonWidget scrollUpButton;
-    private ButtonWidget scrollDownButton;
+    private Button saveButton;
+    private Button cancelButton;
+    private Button addFieldButton;
+    private Button addObjectButton;
+    private Button rawEditButton;
+    private Button scrollUpButton;
+    private Button scrollDownButton;
     
     private final Path filePath;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     
     public JsonVisualEditorScreen(String jsonContent, String fileName) {
-        super(Text.translatable("configeditor.visual.title"));
+        super(Component.translatable("configeditor.visual.title"));
         this.originalJson = jsonContent;
         this.filePath = Path.of(FabricLoader.getInstance().getConfigDir().toString(), fileName);
         
@@ -91,67 +93,68 @@ public class JsonVisualEditorScreen extends Screen {
         int buttonWidth = 100;
         int buttonHeight = 20;
         
-        saveButton = ButtonWidget.builder(
-            Text.translatable("configeditor.button.save"),
+        saveButton = Button.builder(
+            Component.translatable("configeditor.button.save"),
             button -> saveChanges()
         )
-        .dimensions(centerX - 110, height - 30, buttonWidth, buttonHeight)
+        .bounds(centerX - 110, height - 30, buttonWidth, buttonHeight)
         .build();
         
-        cancelButton = ButtonWidget.builder(
-            Text.translatable("configeditor.button.close"),
-            button -> close()
+        cancelButton = Button.builder(
+            Component.translatable("configeditor.button.close"),
+            button -> onClose()
         )
-        .dimensions(centerX + 10, height - 30, buttonWidth, buttonHeight)
+        .bounds(centerX + 10, height - 30, buttonWidth, buttonHeight)
         .build();
         
-        addFieldButton = ButtonWidget.builder(
-            Text.translatable("configeditor.visual.addfield"),
+        addFieldButton = Button.builder(
+            Component.translatable("configeditor.visual.addfield"),
             button -> addNewField("")
         )
-        .dimensions(centerX - buttonWidth - 5, height - 60, buttonWidth, buttonHeight)
+        .bounds(centerX - buttonWidth - 5, height - 60, buttonWidth, buttonHeight)
         .build();
         
-        addObjectButton = ButtonWidget.builder(
-            Text.translatable("configeditor.visual.addobject"),
+        addObjectButton = Button.builder(
+            Component.translatable("configeditor.visual.addobject"),
             button -> addNewObject("")
         )
-        .dimensions(centerX + 5, height - 60, buttonWidth, buttonHeight)
+        .bounds(centerX + 5, height - 60, buttonWidth, buttonHeight)
         .build();
         
-        rawEditButton = ButtonWidget.builder(
-            Text.translatable("configeditor.visual.rawedit"),
+        rawEditButton = Button.builder(
+            Component.translatable("configeditor.visual.rawedit"),
             button -> returnToRawEditor()
         )
-        .dimensions(width - 110, 10, 100, buttonHeight)
+        .bounds(width - 110, 10, 100, buttonHeight)
         .build();
         
-        scrollUpButton = ButtonWidget.builder(
-            Text.literal("↑"),
+        scrollUpButton = Button.builder(
+            Component.literal("↑"),
             button -> scrollUp()
         )
-        .dimensions(width - 40, 50, 30, 20)
+        .bounds(width - 40, 50, 30, 20)
         .build();
         
-        scrollDownButton = ButtonWidget.builder(
-            Text.literal("↓"),
+        scrollDownButton = Button.builder(
+            Component.literal("↓"),
             button -> scrollDown()
         )
-        .dimensions(width - 40, height - 120, 30, 20)
+        .bounds(width - 40, height - 120, 30, 20)
         .build();
         
-        addDrawableChild(saveButton);
-        addDrawableChild(cancelButton);
-        addDrawableChild(addFieldButton);
-        addDrawableChild(addObjectButton);
-        addDrawableChild(rawEditButton);
-        addDrawableChild(scrollUpButton);
-        addDrawableChild(scrollDownButton);
+        addRenderableWidget(saveButton);
+        addRenderableWidget(cancelButton);
+        addRenderableWidget(addFieldButton);
+        addRenderableWidget(addObjectButton);
+        addRenderableWidget(rawEditButton);
+        addRenderableWidget(scrollUpButton);
+        addRenderableWidget(scrollDownButton);
         
         rebuildFieldEntries();
         updateScrollButtons();
     }
     
+    @SuppressWarnings("null")
     private void rebuildFieldEntries() {
         fieldEntries.clear();
         
@@ -179,19 +182,19 @@ public class JsonVisualEditorScreen extends Screen {
             fieldEntry.width = 420 - indent;
             fieldEntry.height = FIELD_HEIGHT;
             
-            TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+            Font textRenderer = Minecraft.getInstance().font;
             
-            fieldEntry.keyField = new TextFieldWidget(
+            fieldEntry.keyField = new EditBox(
                 textRenderer,
                 fieldEntry.x + 5,
                 fieldEntry.y + 5,
                 fieldEntry.width / 2 - 40,
                 20,
-                Text.translatable("configeditor.visual.key")
+                Component.translatable("configeditor.visual.key")
             );
-            fieldEntry.keyField.setText(fieldEntry.displayKey);
+            fieldEntry.keyField.setValue(fieldEntry.displayKey);
             fieldEntry.keyField.setMaxLength(100);
-            fieldEntry.keyField.setChangedListener(text -> {
+            fieldEntry.keyField.setResponder(text -> {
                 String oldFullKey = fieldEntry.fullKey;
                 String newDisplayKey = text;
                 String newFullKey = getParentPath(oldFullKey) + (getParentPath(oldFullKey).isEmpty() ? "" : ".") + newDisplayKey;
@@ -206,25 +209,25 @@ public class JsonVisualEditorScreen extends Screen {
                 }
             });
             
-            fieldEntry.valueField = new TextFieldWidget(
+            fieldEntry.valueField = new EditBox(
                 textRenderer,
                 fieldEntry.x + fieldEntry.width / 2 + 5,
                 fieldEntry.y + 5,
                 fieldEntry.width / 2 - 100,
                 20,
-                Text.translatable("configeditor.visual.value")
+                Component.translatable("configeditor.visual.value")
             );
             
             if (value instanceof NestedObject) {
-                fieldEntry.valueField.setText("{...}");
+                fieldEntry.valueField.setValue("{...}");
                 fieldEntry.valueField.setEditable(false);
             } else {
-                fieldEntry.valueField.setText(value == null ? "null" : String.valueOf(value));
+                fieldEntry.valueField.setValue(value == null ? "null" : String.valueOf(value));
                 fieldEntry.valueField.setEditable(true);
             }
             
             fieldEntry.valueField.setMaxLength(500);
-            fieldEntry.valueField.setChangedListener(text -> {
+            fieldEntry.valueField.setResponder(text -> {
                 if (!(fieldEntry.value instanceof NestedObject)) {
                     fieldEntry.value = parseValue(text, fieldEntry.getCurrentType());
                     fieldValues.put(fieldEntry.fullKey, fieldEntry.value);
@@ -234,30 +237,30 @@ public class JsonVisualEditorScreen extends Screen {
             fieldEntry.updateTypeButton();
             
             if (value instanceof NestedObject) {
-                fieldEntry.expandButton = ButtonWidget.builder(
-                    Text.literal("▶"),
+                fieldEntry.expandButton = Button.builder(
+                    Component.literal("▶"),
                     button -> toggleObjectExpansion(fieldEntry)
                 )
-                .dimensions(fieldEntry.x - 20, fieldEntry.y + 5, 15, 20)
+                .bounds(fieldEntry.x - 20, fieldEntry.y + 5, 15, 20)
                 .build();
-                addDrawableChild(fieldEntry.expandButton);
+                addRenderableWidget(fieldEntry.expandButton);
             }
             
-            fieldEntry.deleteButton = ButtonWidget.builder(
-                Text.literal("×"),
+            fieldEntry.deleteButton = Button.builder(
+                Component.literal("×"),
                 button -> {
                     fieldValues.remove(fieldEntry.fullKey);
                     removeChildEntries(fieldEntry.fullKey);
                     rebuildFieldEntries();
                 }
             )
-            .dimensions(fieldEntry.x + fieldEntry.width - 65, fieldEntry.y + 5, 20, 20)
+            .bounds(fieldEntry.x + fieldEntry.width - 65, fieldEntry.y + 5, 20, 20)
             .build();
             
-            addDrawableChild(fieldEntry.keyField);
-            addDrawableChild(fieldEntry.valueField);
-            addDrawableChild(fieldEntry.typeButton);
-            addDrawableChild(fieldEntry.deleteButton);
+            addRenderableWidget(fieldEntry.keyField);
+            addRenderableWidget(fieldEntry.valueField);
+            addRenderableWidget(fieldEntry.typeButton);
+            addRenderableWidget(fieldEntry.deleteButton);
             
             fieldEntries.add(fieldEntry);
             yPos += FIELD_HEIGHT + 5;
@@ -300,7 +303,7 @@ public class JsonVisualEditorScreen extends Screen {
     private void toggleObjectExpansion(FieldEntry entry) {
         if (entry.value instanceof NestedObject nestedObj) {
             nestedObj.expanded = !nestedObj.expanded;
-            entry.expandButton.setMessage(Text.literal(nestedObj.expanded ? "▼" : "▶"));
+            entry.expandButton.setMessage(Component.literal(nestedObj.expanded ? "▼" : "▶"));
             rebuildFieldEntries();
         }
     }
@@ -339,24 +342,25 @@ public class JsonVisualEditorScreen extends Screen {
         scrollDownButton.active = scrollOffset < Math.max(0, fieldValues.size() - MAX_VISIBLE_FIELDS);
     }
     
+    @SuppressWarnings("null")
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         int centerX = width / 2;
         
-        context.drawCenteredTextWithShadow(
+        context.centeredText(
             textRenderer,
-            Text.translatable("configeditor.visual.title"),
+            Component.translatable("configeditor.visual.title"),
             centerX,
             20,
             0xFFFFFF
         );
         
-        String fieldCountText = Text.translatable(
+        String fieldCountText = Component.translatable(
             "configeditor.visual.fieldcount", 
             fieldValues.size()
         ).getString();
         
-        context.drawTextWithShadow(
+        context.text(
             textRenderer,
             fieldCountText,
             centerX - 150,
@@ -365,7 +369,7 @@ public class JsonVisualEditorScreen extends Screen {
         );
         
         if (scrollOffset > 0) {
-            context.drawTextWithShadow(
+            context.text(
                 textRenderer,
                 "... ↑ ...",
                 centerX - 150,
@@ -376,7 +380,7 @@ public class JsonVisualEditorScreen extends Screen {
         
         if (scrollOffset + MAX_VISIBLE_FIELDS < fieldValues.size()) {
             int bottomTextY = 50 + (MAX_VISIBLE_FIELDS * (FIELD_HEIGHT + 5));
-            context.drawTextWithShadow(
+            context.text(
                 textRenderer,
                 "... ↓ ...",
                 centerX - 150,
@@ -389,7 +393,7 @@ public class JsonVisualEditorScreen extends Screen {
             int bgColor = entry.hasError ? 0x30FF5555 : 0x20FFFFFF;
             context.fill(entry.x, entry.y, entry.x + entry.width, entry.y + entry.height, bgColor);
             
-            context.drawTextWithShadow(
+            context.text(
                 textRenderer,
                 ":",
                 entry.x + entry.width / 2 - 10,
@@ -399,7 +403,7 @@ public class JsonVisualEditorScreen extends Screen {
             
             for (int i = 0; i < entry.depth; i++) {
                 int lineX = entry.x - INDENT_WIDTH * (entry.depth - i) + 5;
-                context.drawTextWithShadow(
+                context.text(
                     textRenderer,
                     "│",
                     lineX,
@@ -409,7 +413,7 @@ public class JsonVisualEditorScreen extends Screen {
             }
             
             if (entry.depth > 0) {
-                context.drawTextWithShadow(
+                context.text(
                     textRenderer,
                     "├─",
                     entry.x - 15,
@@ -420,7 +424,7 @@ public class JsonVisualEditorScreen extends Screen {
             
             String typeLabel = entry.getTypeLabel();
             int typeColor = entry.getTypeColor();
-            context.drawTextWithShadow(
+            context.text(
                 textRenderer,
                 typeLabel,
                 entry.x + entry.width - 40,
@@ -433,12 +437,12 @@ public class JsonVisualEditorScreen extends Screen {
             }
         }
         
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
         
         if (fieldEntries.isEmpty()) {
-            context.drawCenteredTextWithShadow(
+            context.centeredText(
                 textRenderer,
-                Text.translatable("configeditor.visual.empty"),
+                Component.translatable("configeditor.visual.empty"),
                 centerX,
                 height / 2,
                 0x888888
@@ -446,16 +450,16 @@ public class JsonVisualEditorScreen extends Screen {
         }
     }
     
-    private void renderFieldTooltip(DrawContext context, int mouseX, int mouseY, FieldEntry entry) {
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+    private void renderFieldTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY, FieldEntry entry) {
+        Font textRenderer = Minecraft.getInstance().font;
         if (entry.typeButton.isMouseOver(mouseX, mouseY)) {
-            context.drawTooltip(textRenderer, Text.translatable("configeditor.visual.tooltip.type", entry.getTypeLabel()), mouseX, mouseY);
+            context.setTooltipForNextFrame(textRenderer, Component.translatable("configeditor.visual.tooltip.type", entry.getTypeLabel()), mouseX, mouseY);
         } else if (entry.deleteButton.isMouseOver(mouseX, mouseY)) {
-            context.drawTooltip(textRenderer, Text.translatable("configeditor.visual.tooltip.delete"), mouseX, mouseY);
+            context.setTooltipForNextFrame(textRenderer, Component.translatable("configeditor.visual.tooltip.delete"), mouseX, mouseY);
         } else if (entry.hasError) {
-            context.drawTooltip(textRenderer, Text.translatable("configeditor.visual.tooltip.error"), mouseX, mouseY);
+            context.setTooltipForNextFrame(textRenderer, Component.translatable("configeditor.visual.tooltip.error"), mouseX, mouseY);
         } else if (entry.value instanceof NestedObject && entry.expandButton != null && entry.expandButton.isMouseOver(mouseX, mouseY)) {
-            context.drawTooltip(textRenderer, Text.translatable("configeditor.visual.tooltip.expand"), mouseX, mouseY);
+            context.setTooltipForNextFrame(textRenderer, Component.translatable("configeditor.visual.tooltip.expand"), mouseX, mouseY);
         }
     }
     
@@ -481,16 +485,16 @@ public class JsonVisualEditorScreen extends Screen {
                 Files.createDirectories(filePath.getParent());
                 Files.writeString(filePath, finalJson, StandardCharsets.UTF_8);
                 
-                MinecraftClient.getInstance().execute(() -> {
-                    if (client != null) {
-                        client.setScreen(null);
+                Minecraft.getInstance().execute(() -> {
+                    if (minecraft != null) {
+                        minecraft.setScreen(null);
                     }
                 });
                 
             } catch (Exception e) {
-                MinecraftClient.getInstance().execute(() -> {
-                    if (client != null) {
-                        client.setScreen(null);
+                Minecraft.getInstance().execute(() -> {
+                    if (minecraft != null) {
+                        minecraft.setScreen(null);
                     }
                 });
             }
@@ -536,7 +540,7 @@ public class JsonVisualEditorScreen extends Screen {
     }
     
     private void addNewField(String parentPath) {
-        String baseKey = Text.translatable("configeditor.visual.newfield").getString();
+        String baseKey = Component.translatable("configeditor.visual.newfield").getString();
         String newKey = parentPath.isEmpty() ? baseKey + "_" + (fieldValues.size() + 1) : 
             parentPath + "." + baseKey + "_" + (fieldValues.size() + 1);
         fieldValues.put(newKey, "");
@@ -550,7 +554,7 @@ public class JsonVisualEditorScreen extends Screen {
     }
     
     private void addNewObject(String parentPath) {
-        String baseKey = Text.translatable("configeditor.visual.newobject").getString();
+        String baseKey = Component.translatable("configeditor.visual.newobject").getString();
         String newKey = parentPath.isEmpty() ? baseKey + "_" + (fieldValues.size() + 1) : 
             parentPath + "." + baseKey + "_" + (fieldValues.size() + 1);
         fieldValues.put(newKey, new NestedObject(new JsonObject(), getDepth(newKey)));
@@ -583,23 +587,23 @@ public class JsonVisualEditorScreen extends Screen {
     }
     
     private void returnToRawEditor() {
-        if (client != null) {
-            client.setScreen(new EditorScreen());
+        if (minecraft != null) {
+            minecraft.setScreen(new EditorScreen());
         }
     }
     
     @Override
-    public void close() {
-        if (client != null) {
-            client.setScreen(new EditorScreen());
+    public void onClose() {
+        if (minecraft != null) {
+            minecraft.setScreen(new EditorScreen());
         }
-        super.close();
+        super.onClose();
     }
     
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (input.getKeycode() == 256) {
-            close();
+    public boolean keyPressed(@SuppressWarnings("null") KeyEvent input) {
+        if (input.key() == 256) {
+            onClose();
             return true;
         }
         return super.keyPressed(input);
@@ -614,11 +618,11 @@ public class JsonVisualEditorScreen extends Screen {
         int width;
         int height;
         int depth;
-        TextFieldWidget keyField;
-        TextFieldWidget valueField;
-        ButtonWidget typeButton;
-        ButtonWidget deleteButton;
-        ButtonWidget expandButton;
+        EditBox keyField;
+        EditBox valueField;
+        Button typeButton;
+        Button deleteButton;
+        Button expandButton;
         boolean hasError = false;
         JsonVisualEditorScreen screen;
         
@@ -643,12 +647,12 @@ public class JsonVisualEditorScreen extends Screen {
         
         String getTypeLabel() {
             return switch (getCurrentType()) {
-                case "string" -> Text.translatable("configeditor.visual.type.string").getString();
-                case "number" -> Text.translatable("configeditor.visual.type.number").getString();
-                case "boolean" -> Text.translatable("configeditor.visual.type.boolean").getString();
-                case "null" -> Text.translatable("configeditor.visual.type.null").getString();
-                case "object" -> Text.translatable("configeditor.visual.type.object").getString();
-                default -> Text.translatable("configeditor.visual.type.unknown").getString();
+                case "string" -> Component.translatable("configeditor.visual.type.string").getString();
+                case "number" -> Component.translatable("configeditor.visual.type.number").getString();
+                case "boolean" -> Component.translatable("configeditor.visual.type.boolean").getString();
+                case "null" -> Component.translatable("configeditor.visual.type.null").getString();
+                case "object" -> Component.translatable("configeditor.visual.type.object").getString();
+                default -> Component.translatable("configeditor.visual.type.unknown").getString();
             };
         }
         
@@ -663,15 +667,17 @@ public class JsonVisualEditorScreen extends Screen {
             };
         }
         
+        @SuppressWarnings("null")
         void updateTypeButton() {
-            typeButton = ButtonWidget.builder(
-                Text.literal(getTypeSymbol()),
+            typeButton = Button.builder(
+                Component.literal(getTypeSymbol()),
                 button -> toggleType()
             )
-            .dimensions(x + width - 100, y + 5, 30, 20)
+            .bounds(x + width - 100, y + 5, 30, 20)
             .build();
         }
         
+        @SuppressWarnings("null")
         private void toggleType() {
             String oldType = getCurrentType();
             String newType = switch (oldType) {
@@ -685,10 +691,10 @@ public class JsonVisualEditorScreen extends Screen {
             
             value = parseValueForType(newType);
             if (value instanceof NestedObject) {
-                valueField.setText("{...}");
+                valueField.setValue("{...}");
                 valueField.setEditable(false);
             } else {
-                valueField.setText(value == null ? "null" : String.valueOf(value));
+                valueField.setValue(value == null ? "null" : String.valueOf(value));
                 valueField.setEditable(true);
             }
             updateTypeButton();

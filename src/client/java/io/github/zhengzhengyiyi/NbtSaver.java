@@ -1,39 +1,39 @@
 package io.github.zhengzhengyiyi;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.entity.Entity;
 
 import java.lang.reflect.Field;
 
 import io.github.zhengzhengyiyi.gui.NbtEditorScreen;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class NbtSaver {
-    private final MinecraftClient client = MinecraftClient.getInstance();
+    private final Minecraft client = Minecraft.getInstance();
 
     public void saveAndOpenEditor() {
-        if (client == null || client.player == null || client.world == null) return;
-        NbtCompound tag = readPointedNbt(client.player, client.world);
+        if (client == null || client.player == null || client.level == null) return;
+        CompoundTag tag = readPointedNbt(client.player, client.level);
         openEditor(tag);
     }
 
-    private NbtCompound readPointedNbt(ClientPlayerEntity player, ClientWorld world) {
-        HitResult hit = client.crosshairTarget;
-        if (hit == null) return new NbtCompound();
+    private CompoundTag readPointedNbt(LocalPlayer player, ClientLevel world) {
+        HitResult hit = client.hitResult;
+        if (hit == null) return new CompoundTag();
 
         if (hit.getType() == HitResult.Type.BLOCK) {
             BlockHitResult bhr = (BlockHitResult) hit;
             BlockEntity be = world.getBlockEntity(bhr.getBlockPos());
-            NbtCompound tag = new NbtCompound();
+            CompoundTag tag = new CompoundTag();
             if (be != null) {
-//                tag = be.createNbt(null);
+//                tag = be.saveWithoutMetadata(null);
             } else {
                 BlockState state = world.getBlockState(bhr.getBlockPos());
                 tag.putString("block", state.toString());
@@ -44,13 +44,13 @@ public class NbtSaver {
         if (hit.getType() == HitResult.Type.ENTITY) {
             EntityHitResult ehr = (EntityHitResult) hit;
             Entity e = ehr.getEntity();
-            NbtCompound tag = new NbtCompound();
+            CompoundTag tag = new CompoundTag();
             try {
                 Field nbtField = Entity.class.getDeclaredField("customData");
                 nbtField.setAccessible(true);
                 Object nbtObj = nbtField.get(e);
-                if (nbtObj instanceof NbtCompound) {
-                    tag = (NbtCompound) nbtObj;
+                if (nbtObj instanceof CompoundTag) {
+                    tag = (CompoundTag) nbtObj;
                 }
             } catch (NoSuchFieldException | IllegalAccessException ex) {
                 ex.printStackTrace();
@@ -58,11 +58,10 @@ public class NbtSaver {
             return tag;
         }
 
-        return new NbtCompound();
+        return new CompoundTag();
     }
 
-    private void openEditor(NbtCompound tag) {
+    private void openEditor(CompoundTag tag) {
         client.execute(() -> client.setScreen(new NbtEditorScreen(tag)));
     }
 }
-

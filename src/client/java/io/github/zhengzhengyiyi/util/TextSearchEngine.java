@@ -1,7 +1,7 @@
 package io.github.zhengzhengyiyi.util;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -97,7 +97,7 @@ public class TextSearchEngine {
         currentMatchIndex = -1;
     }
     
-    public void renderHighlights(DrawContext context, TextRenderer textRenderer, String content, int x, int y, int lineHeight, int visibleLines) {
+    public void renderHighlights(GuiGraphicsExtractor context, Font font, String content, int x, int y, int lineHeight, int visibleLines) {
         if (matchPositions.isEmpty()) return;
         
         String[] lines = content.split("\n", -1);
@@ -114,8 +114,8 @@ public class TextSearchEngine {
                         String beforeMatch = line.substring(0, matchInLine);
                         String matchText = line.substring(matchInLine, Math.min(matchInLine + searchText.length(), line.length()));
                         
-                        int xStart = x + textRenderer.getWidth(beforeMatch);
-                        int highlightWidth = textRenderer.getWidth(matchText);
+                        int xStart = x + font.width(beforeMatch);
+                        int highlightWidth = font.width(matchText);
                         
                         if (matchPos == getCurrentMatchPosition()) {
                             context.fill(xStart, yPos, xStart + highlightWidth, yPos + lineHeight, 0x66FFD700);

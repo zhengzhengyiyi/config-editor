@@ -2,7 +2,9 @@ package io.github.zhengzhengyiyi.api.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.client.MinecraftClient;
+
+import net.minecraft.client.Minecraft;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -135,8 +137,8 @@ public class ConfigManager<T extends ConfigData> {
                     isReloading = true;
                     LOGGER.info("Detected config file modification, reloading...");
                     
-                    if (MinecraftClient.getInstance() != null) {
-                        MinecraftClient.getInstance().execute(() -> {
+                    if (Minecraft.getInstance() != null) {
+                        Minecraft.getInstance().execute(() -> {
                             load();
                             isReloading = false;
                         });

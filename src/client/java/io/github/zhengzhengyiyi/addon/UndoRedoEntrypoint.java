@@ -3,11 +3,9 @@ package io.github.zhengzhengyiyi.addon;
 import io.github.zhengzhengyiyi.gui.EditorScreen;
 import io.github.zhengzhengyiyi.gui.widget.MultilineEditor;
 import io.github.zhengzhengyiyi.api.*;
-import net.minecraft.client.gui.widget.ClickableWidget;
-//import net.minecraft.client.gui.screen.Screen;
-//import net.minecraft.client.input.KeyInput;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.resources.Identifier;
 
 //import org.lwjgl.glfw.GLFW;
 import java.util.ArrayDeque;
@@ -30,7 +28,7 @@ public class UndoRedoEntrypoint implements ApiEntrypoint {
     @Override
     public void onEditerOpen(EditorScreen editor) {
         this.editor = editor;
-        ClickableWidget textWidget = editor.getTextWidget();
+        AbstractWidget textWidget = editor.getTextWidget();
         resetStacks();
         if (textWidget != null) {
         	if (textWidget instanceof MultilineEditor) {
@@ -49,8 +47,8 @@ public class UndoRedoEntrypoint implements ApiEntrypoint {
     }
 
     @Override
-    public ActionResult onMouseDown(int x, int y) {
-        return ActionResult.PASS;
+    public InteractionResult onMouseDown(int x, int y) {
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -89,7 +87,7 @@ public class UndoRedoEntrypoint implements ApiEntrypoint {
 //    }
 
     @Override
-    public void renderButton(net.minecraft.client.gui.DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderButton(net.minecraft.client.gui.GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
     }
 
 //    private void checkTextChange() {
@@ -142,7 +140,7 @@ public class UndoRedoEntrypoint implements ApiEntrypoint {
     
     @Override
     public Identifier getIdentifier() {
-    	return Identifier.of("zhengzhengyiyi", "redo_undo");
+    	return Identifier.fromNamespaceAndPath("zhengzhengyiyi", "redo_undo");
     }
 
     private void resetStacks() {

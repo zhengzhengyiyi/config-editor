@@ -3,18 +3,16 @@ package io.github.zhengzhengyiyi.gui.widget;
 import io.github.zhengzhengyiyi.ConfigEditorClient;
 import io.github.zhengzhengyiyi.util.*;
 import io.github.zhengzhengyiyi.util.highlighter.JsonSyntaxHighlighter;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-//import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class MultilineEditor extends AbstractEditor {
-    private final TextRenderer textRenderer;
+    private final Font textRenderer;
     private final JsonSyntaxHighlighter highLighter = new JsonSyntaxHighlighter();
     private boolean isDraggingHorizontalScroll = false;
     private int dragStartX = 0;
@@ -48,9 +46,9 @@ public class MultilineEditor extends AbstractEditor {
     private boolean showSuggestions = false;
     private int maxLineWidth = 0;
 
-    public MultilineEditor(int x, int y, int width, int height, Text message) {
+    public MultilineEditor(int x, int y, int width, int height, Component message) {
         super(x, y, width, height, message);
-        this.textRenderer = MinecraftClient.getInstance().textRenderer;
+        this.textRenderer = Minecraft.getInstance().font;
         this.setFocused(false);
         
         new Thread(() -> {
@@ -65,8 +63,9 @@ public class MultilineEditor extends AbstractEditor {
 		}).start();
     }
     
+    @SuppressWarnings("null")
     @Override
-    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    protected void extractWidgetRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (!this.visible) {
             return;
         }
@@ -78,7 +77,7 @@ public class MultilineEditor extends AbstractEditor {
 //            context.drawBorder(this.getX(), this.getY(), this.width, this.height, 0xFFFFFFFF);
 
             String[] lines = this.text.split("\n", -1);
-            int lineHeight = this.textRenderer.fontHeight + 2;
+            int lineHeight = this.textRenderer.lineHeight + 2;
             int maxVisibleLines = this.height / lineHeight;
 
             calculateMaxLineWidth(lines);
@@ -91,7 +90,7 @@ public class MultilineEditor extends AbstractEditor {
                 if (i >= this.scrollOffset && i < this.scrollOffset + maxVisibleLines) {
                     int yPos = this.getY() + 4 + (i - this.scrollOffset) * lineHeight;
                     String lineNum = String.valueOf(i + 1);
-                    context.drawText(textRenderer, lineNum, this.getX() + 2 - horizontalScrollOffset, yPos, 0xFF888888, false);
+                    context.text(textRenderer, lineNum, this.getX() + 2 - horizontalScrollOffset, yPos, 0xFF888888, false);
                     highLighter.drawHighlightedText(context, this.textRenderer, lines[i], this.getX() + 4 + 12 - horizontalScrollOffset, yPos, this.editable);
                 }
             }
@@ -103,7 +102,7 @@ public class MultilineEditor extends AbstractEditor {
             }
 
             if (this.isFocused() && this.editable) {
-                long currentTime = Util.getMeasuringTimeNano();
+                long currentTime = System.nanoTime();
                 if (currentTime - lastCursorBlinkTime > 500000000) {
                     cursorVisible = !cursorVisible;
                     lastCursorBlinkTime = currentTime;
@@ -123,7 +122,7 @@ public class MultilineEditor extends AbstractEditor {
                     
                     if (lineIndex >= this.scrollOffset && lineIndex < this.scrollOffset + maxVisibleLines) {
                         int yPos = this.getY() + 4 + (lineIndex - this.scrollOffset) * lineHeight;
-                        context.drawVerticalLine(xPos - horizontalScrollOffset, yPos - 1, yPos + this.textRenderer.fontHeight + 1, 0xFFFFFFFF);
+                        context.verticalLine(xPos - horizontalScrollOffset, yPos - 1, yPos + this.textRenderer.lineHeight + 1, 0xFFFFFFFF);
                     }
                 }
             }
@@ -148,7 +147,7 @@ public class MultilineEditor extends AbstractEditor {
         }
     }
 
-    private void renderScrollBars(DrawContext context, int totalLines, int maxVisibleLines) {
+    private void renderScrollBars(GuiGraphicsExtractor context, int totalLines, int maxVisibleLines) {
         int scrollbarWidth = 5;
         
         if (totalLines > maxVisibleLines) {
@@ -169,7 +168,7 @@ public class MultilineEditor extends AbstractEditor {
         }
     }
 
-    private void renderSearchHighlights(DrawContext context, String[] lines, int lineHeight, int maxVisibleLines) {
+    private void renderSearchHighlights(GuiGraphicsExtractor context, String[] lines, int lineHeight, int maxVisibleLines) {
         searchEngine.setScrollOffset(this.scrollOffset);
         
         int currentLineStart = 0;
@@ -189,9 +188,11 @@ public class MultilineEditor extends AbstractEditor {
                             String beforeMatch = line.substring(0, matchInLine);
                             String matchText = line.substring(matchInLine, matchEndInLine);
                             
-                            int xStart = xBase + textRenderer.getWidth(beforeMatch);
-                            int highlightWidth = textRenderer.getWidth(matchText);
-                            int yStart = yPos + textRenderer.fontHeight - 1;
+                            @SuppressWarnings("null")
+                            int xStart = xBase + textRenderer.width(beforeMatch);
+                            @SuppressWarnings("null")
+                            int highlightWidth = textRenderer.width(matchText);
+                            int yStart = yPos + textRenderer.lineHeight - 1;
                             
                             boolean isCurrentMatch = matchPos == searchEngine.getCurrentMatchPosition();
                             int color = isCurrentMatch ? 0x66FFD700 : 0x66FFFF00;
@@ -206,7 +207,8 @@ public class MultilineEditor extends AbstractEditor {
         }
     }
     
-    public void renderErrorTooltips(DrawContext context, int mouseX, int mouseY, String[] lines, int lineHeight, int maxVisibleLines) {
+    @SuppressWarnings("null")
+    public void renderErrorTooltips(GuiGraphicsExtractor context, int mouseX, int mouseY, String[] lines, int lineHeight, int maxVisibleLines) {
         hoveredError = null;
         
         if (isMouseOver(mouseX, mouseY)) {
@@ -214,17 +216,18 @@ public class MultilineEditor extends AbstractEditor {
                 if (isMouseOverError(mouseX, mouseY, error, lines, lineHeight, maxVisibleLines)) {
                     hoveredError = error;
                     String tooltip = "Line " + error.lineNumber + ", Col " + error.columnNumber + ": " + error.message;
-                    context.drawTooltip(textRenderer, Text.literal(tooltip), mouseX, mouseY);
+                    context.setTooltipForNextFrame(textRenderer, Component.literal(tooltip), mouseX, mouseY);
                     break;
                 }
             }
         }
     }
     
-    public void renderSuggestions(DrawContext context, int mouseX, int mouseY) {
+    @SuppressWarnings("null")
+    public void renderSuggestions(GuiGraphicsExtractor context, int mouseX, int mouseY) {
 //    	System.out.println("Rendering suggestions...");
     	
-        int lineHeight = textRenderer.fontHeight + 2;
+        int lineHeight = textRenderer.lineHeight + 2;
         String[] lines = text.split("\n", -1);
         
         int lineIndex = 0;
@@ -239,7 +242,7 @@ public class MultilineEditor extends AbstractEditor {
             remaining -= (lines[i].length() + 1);
         }
         
-        int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight + textRenderer.fontHeight;
+        int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight + textRenderer.lineHeight;
         
         if (yPos + Math.min(currentSuggestions.size(), 5) * lineHeight > getY() + height) {
             yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight - Math.min(currentSuggestions.size(), 5) * lineHeight;
@@ -259,7 +262,7 @@ public class MultilineEditor extends AbstractEditor {
             if (i == selectedSuggestion) {
                 context.fill(xPos, itemY, xPos + suggestionWidth, itemY + lineHeight, 0xFF555555);
             }
-            context.drawText(textRenderer, currentSuggestions.get(i), xPos + 2, itemY + 2, 0xFFFFFFFF, false);
+            context.text(textRenderer, currentSuggestions.get(i), xPos + 2, itemY + 2, 0xFFFFFFFF, false);
         }
     }
 
@@ -267,15 +270,17 @@ public class MultilineEditor extends AbstractEditor {
         int lineIndex = error.lineNumber - 1;
         if (lineIndex >= scrollOffset && lineIndex < scrollOffset + maxVisibleLines) {
             int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight;
-            if (mouseY >= yPos && mouseY <= yPos + textRenderer.fontHeight) {
+            if (mouseY >= yPos && mouseY <= yPos + textRenderer.lineHeight) {
                 String line = lines[lineIndex];
                 int errorStartInLine = Math.min(error.startPosition - getLineStart(error.startPosition), line.length());
                 int errorEndInLine = Math.min(error.endPosition - getLineStart(error.startPosition), line.length());
                 
                 if (errorStartInLine < errorEndInLine) {
                     String beforeError = line.substring(0, errorStartInLine);
-                    int xStart = getX() + 4 + textRenderer.getWidth(beforeError) - horizontalScrollOffset;
-                    int xEnd = xStart + textRenderer.getWidth(line.substring(errorStartInLine, errorEndInLine));
+                    @SuppressWarnings("null")
+                    int xStart = getX() + 4 + textRenderer.width(beforeError) - horizontalScrollOffset;
+                    @SuppressWarnings("null")
+                    int xEnd = xStart + textRenderer.width(line.substring(errorStartInLine, errorEndInLine));
                     
                     return mouseX >= xStart && mouseX <= xEnd;
                 }
@@ -285,7 +290,7 @@ public class MultilineEditor extends AbstractEditor {
     }
     
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(@SuppressWarnings("null") MouseButtonEvent click, boolean doubled) {
         if (showSuggestions) {
             hideSuggestions();
             return true;
@@ -312,9 +317,9 @@ public class MultilineEditor extends AbstractEditor {
         if (this.isMouseOver(mouseX, mouseY) && this.editable) {
             this.setFocused(true);
             
-            int lineHeight = this.textRenderer.fontHeight + 2;
+            int lineHeight = this.textRenderer.lineHeight + 2;
             int clickedY = (int)mouseY - (this.getY() + 4);
-            int lineIndex = MathHelper.clamp(clickedY / lineHeight + this.scrollOffset, 0, this.text.split("\n", -1).length - 1);
+            int lineIndex = Mth.clamp(clickedY / lineHeight + this.scrollOffset, 0, this.text.split("\n", -1).length - 1);
             
             String[] lines = this.text.split("\n", -1);
             String line = lines[lineIndex];
@@ -329,11 +334,11 @@ public class MultilineEditor extends AbstractEditor {
             }
             newPosition += charIndex;
             
-            this.cursorPosition = MathHelper.clamp(newPosition, 0, this.text.length());
+            this.cursorPosition = Mth.clamp(newPosition, 0, this.text.length());
             
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-                ActionResult result = entrypoint.onMouseDown((int)Math.round(mouseX), (int)Math.round(mouseY));
-                if (result == ActionResult.FAIL) {
+                InteractionResult result = entrypoint.onMouseDown((int)Math.round(mouseX), (int)Math.round(mouseY));
+                if (result == InteractionResult.FAIL) {
                     return true;
                 }
             }
@@ -364,15 +369,15 @@ public class MultilineEditor extends AbstractEditor {
 //        if (shiftDown) {
 //            int visibleWidth = this.width - 20;
 //            int newHorizontalScroll = this.horizontalScrollOffset - (int)(amount * 20);
-//            this.horizontalScrollOffset = MathHelper.clamp(newHorizontalScroll, 0, Math.max(0, maxLineWidth - visibleWidth));
+//            this.horizontalScrollOffset = Mth.clamp(newHorizontalScroll, 0, Math.max(0, maxLineWidth - visibleWidth));
 //            return true;
 //        } else {
-            int lineHeight = this.textRenderer.fontHeight + 2;
+            int lineHeight = this.textRenderer.lineHeight + 2;
             int maxLines = this.text.split("\n", -1).length;
             int maxVisibleLines = this.height / lineHeight;
             
             int newScrollOffset = this.scrollOffset - (int)Math.signum(amount);
-            this.scrollOffset = MathHelper.clamp(newScrollOffset, 0, Math.max(0, maxLines - maxVisibleLines));
+            this.scrollOffset = Mth.clamp(newScrollOffset, 0, Math.max(0, maxLines - maxVisibleLines));
             
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
                 entrypoint.onMouseScroll();
@@ -396,7 +401,7 @@ public class MultilineEditor extends AbstractEditor {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(@SuppressWarnings("null") KeyEvent input) {
         if (!this.editable) {
             return false;
         }
@@ -404,13 +409,13 @@ public class MultilineEditor extends AbstractEditor {
         if (!ConfigEditorClient.configManager.getConfig().doSuggestions) showSuggestions = false;
         
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-            ActionResult result = entrypoint.onType(input.getKeycode(), input.scancode(), input.modifiers());
-            if (result == ActionResult.FAIL) {
+            InteractionResult result = entrypoint.onType(input.key(), input.scancode(), input.modifiers());
+            if (result == InteractionResult.FAIL) {
                 return true;
             }
         }
         
-        int keyCode = input.getKeycode();
+        int keyCode = input.key();
         int scanCode = input.scancode();
         int modifiers = input.modifiers();
         
@@ -483,13 +488,13 @@ public class MultilineEditor extends AbstractEditor {
 //        }
         
         if (keyCode == GLFW.GLFW_KEY_LEFT) {
-            this.cursorPosition = MathHelper.clamp(this.cursorPosition - 1, 0, this.text.length());
+            this.cursorPosition = Mth.clamp(this.cursorPosition - 1, 0, this.text.length());
             updateCursorX();
             hideSuggestions();
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_RIGHT) {
-            this.cursorPosition = MathHelper.clamp(this.cursorPosition + 1, 0, this.text.length());
+            this.cursorPosition = Mth.clamp(this.cursorPosition + 1, 0, this.text.length());
             updateCursorX();
             hideSuggestions();
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
@@ -570,7 +575,7 @@ public class MultilineEditor extends AbstractEditor {
     }
     
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(@SuppressWarnings("null") CharacterEvent input) {
         if (!this.isFocused() || !this.editable) {
             return false;
         }
@@ -578,14 +583,14 @@ public class MultilineEditor extends AbstractEditor {
         if (!ConfigEditorClient.configManager.getConfig().doSuggestions) showSuggestions = false;
         
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-            ActionResult result = entrypoint.onCharTyped(input);
-            if (result == ActionResult.FAIL) {
+            InteractionResult result = entrypoint.onCharTyped(input);
+            if (result == InteractionResult.FAIL) {
                 return true;
             }
         }
         
-        if (input.isValidChar()) {
-            String chr = input.asString();
+        if (input.isAllowedChatCharacter()) {
+            String chr = input.codepointAsString();
             this.text = this.text.substring(0, this.cursorPosition) + chr + this.text.substring(this.cursorPosition);
             this.cursorPosition++;
             this.onTextChanged();
@@ -598,7 +603,7 @@ public class MultilineEditor extends AbstractEditor {
             }
 
             for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
-                entrypoint.onType(input.codepoint(), 0, input.modifiers());
+                entrypoint.onType(input.codepoint(), 0, 0);
             }
             return true;
         }
@@ -606,9 +611,10 @@ public class MultilineEditor extends AbstractEditor {
         return false;
     }
 
+    @SuppressWarnings("null")
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
-        this.appendDefaultNarrations(builder);
+    protected void updateWidgetNarration(@SuppressWarnings("null") NarrationElementOutput builder) {
+        this.defaultButtonNarrationText(builder);
     }
 
     public String getText() {
@@ -617,7 +623,7 @@ public class MultilineEditor extends AbstractEditor {
     
     public void setText(String text) {
         this.text = text;
-        this.cursorPosition = MathHelper.clamp(this.cursorPosition, 0, this.text.length());
+        this.cursorPosition = Mth.clamp(this.cursorPosition, 0, this.text.length());
         this.onTextChanged();
         updateCursorX();
         hideSuggestions();
@@ -654,27 +660,27 @@ public class MultilineEditor extends AbstractEditor {
 //                    String beforeError = line.substring(0, errorStartInLine);
 //                    String errorText = line.substring(errorStartInLine, errorEndInLine);
 //                    
-//                    int xStart = getX() + 4 + 12 + textRenderer.getWidth(beforeError) - horizontalScrollOffset;
-//                    int errorWidth = textRenderer.getWidth(errorText);
+//                    int xStart = getX() + 4 + 12 + textRenderer.width(beforeError) - horizontalScrollOffset;
+//                    int errorWidth = textRenderer.width(errorText);
 //                    
 //                    if (errorWidth > 0) {
 //                        for (int i = 0; i < errorWidth; i += 3) {
 //                            int x = xStart + i;
 //                            if (x < getX() + width && i + 2 <= errorWidth) {
-////                                context.drawHorizontalLine(x, x + 2, yPos + textRenderer.fontHeight + 1, 0xFFFF0000);
+////                                context.drawHorizontalLine(x, x + 2, yPos + textRenderer.lineHeight + 1, 0xFFFF0000);
 //                            	context.drawHorizontalLine(x, x + 2, yPos, 0xFFFF0000);
 //                            }
 //                        }
 //                    } else {
 //                        int x = xStart;
-//                        context.drawHorizontalLine(x, x + 5, yPos + textRenderer.fontHeight + 1, 0xFFFF0000);
+//                        context.drawHorizontalLine(x, x + 5, yPos + textRenderer.lineHeight + 1, 0xFFFF0000);
 //                    }
 //                }
 //            }
 //        }
 //    }
     
-    private void renderErrorUnderlines(DrawContext context, String[] lines, int lineHeight, int maxVisibleLines) {
+    private void renderErrorUnderlines(GuiGraphicsExtractor context, String[] lines, int lineHeight, int maxVisibleLines) {
         for (JSONError error : currentErrors) {
             int lineIndex = error.lineNumber - 1;
             if (lineIndex >= scrollOffset && lineIndex < scrollOffset + maxVisibleLines) {
@@ -701,13 +707,13 @@ public class MultilineEditor extends AbstractEditor {
                         for (int i = 0; i < errorWidth; i += 3) {
                             int x = xStart + i;
                             if (x < getX() + width && i + 2 <= errorWidth) {
-                                context.drawHorizontalLine(x, x + 2, yPos, 0xFFFF0000);
+                                context.horizontalLine(x, x + 2, yPos, 0xFFFF0000);
                             }
                         }
                     } else if (errorWidth == 0) {
                         int x = textStartX + beforeErrorWidth - horizontalScrollOffset;
                         if (x >= getX() && x < getX() + width) {
-                            context.drawHorizontalLine(x, x + 5, yPos, 0xFFFF0000);
+                            context.horizontalLine(x, x + 5, yPos, 0xFFFF0000);
                         }
                     }
                 }
@@ -737,13 +743,13 @@ public class MultilineEditor extends AbstractEditor {
 //                    String beforeError = line.substring(0, errorStartInLine);
 //                    String errorText = line.substring(errorStartInLine, errorEndInLine);
 //                    
-//                    int xStart = getX() + 4 + textRenderer.getWidth(beforeError) - horizontalScrollOffset;
-//                    int errorWidth = textRenderer.getWidth(errorText);
+//                    int xStart = getX() + 4 + textRenderer.width(beforeError) - horizontalScrollOffset;
+//                    int errorWidth = textRenderer.width(errorText);
 //                    
 //                    for (int i = 0; i < errorWidth; i += 3) {
 //                        int x = xStart + i;
 //                        if (i + 2 <= errorWidth) {
-//                            context.drawHorizontalLine(x, x + 2 + 12, yPos + textRenderer.fontHeight + 1, 0xFFFF0000);
+//                            context.drawHorizontalLine(x, x + 2 + 12, yPos + textRenderer.lineHeight + 1, 0xFFFF0000);
 //                        }
 //                    }
 //                }
@@ -755,10 +761,11 @@ public class MultilineEditor extends AbstractEditor {
         this.currentErrors = JSONValidator.validateJSON(this.text);
     }
     
+    @SuppressWarnings("null")
     private void updateCursorX() {
         int lineStart = getLineStart(this.cursorPosition);
         String currentLine = this.text.substring(lineStart, this.cursorPosition);
-        this.lastCursorX = this.textRenderer.getWidth(currentLine);
+        this.lastCursorX = this.textRenderer.width(currentLine);
         
         int visibleWidth = this.width - 20;
         if (lastCursorX > horizontalScrollOffset + visibleWidth) {
@@ -782,11 +789,11 @@ public class MultilineEditor extends AbstractEditor {
     }
 
 //    private void copyToClipboard() {
-//        MinecraftClient.getInstance().keyboard.setClipboard(this.text);
+//        Minecraft.getInstance().keyboard.setClipboard(this.text);
 //    }
 //
 //    private void pasteFromClipboard() {
-//        String clipboardText = MinecraftClient.getInstance().keyboard.getClipboard();
+//        String clipboardText = Minecraft.getInstance().keyboard.getClipboard();
 //        if (clipboardText != null) {
 //            this.text = this.text.substring(0, this.cursorPosition) + clipboardText + this.text.substring(this.cursorPosition);
 //            this.cursorPosition += clipboardText.length();
@@ -808,7 +815,7 @@ public class MultilineEditor extends AbstractEditor {
     }
 
     public void setCursorPosition(int position) {
-        this.cursorPosition = MathHelper.clamp(position, 0, this.text.length());
+        this.cursorPosition = Mth.clamp(position, 0, this.text.length());
         updateCursorX();
         hideSuggestions();
     }
@@ -907,7 +914,7 @@ public class MultilineEditor extends AbstractEditor {
     private boolean isMouseOverSuggestion(double mouseX, double mouseY) {
         if (!showSuggestions) return false;
         
-        int lineHeight = textRenderer.fontHeight + 2;
+        int lineHeight = textRenderer.lineHeight + 2;
         String[] lines = text.split("\n", -1);
         
         int lineIndex = 0;
@@ -922,7 +929,7 @@ public class MultilineEditor extends AbstractEditor {
             remaining -= (lines[i].length() + 1);
         }
         
-        int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight + textRenderer.fontHeight;
+        int yPos = getY() + 4 + (lineIndex - scrollOffset) * lineHeight + textRenderer.lineHeight;
         int suggestionHeight = Math.min(currentSuggestions.size(), 5) * lineHeight;
         int suggestionWidth = 200;
         
@@ -930,8 +937,9 @@ public class MultilineEditor extends AbstractEditor {
                mouseY >= yPos && mouseY <= yPos + suggestionHeight;
     }
     
+    @SuppressWarnings("null")
     @Override
-    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+    public boolean mouseDragged(@SuppressWarnings("null") MouseButtonEvent click, double offsetX, double offsetY) {
         if (isDraggingHorizontalScroll) {
             int visibleWidth = this.width - 20;
             int dragDeltaX = (int) click.x() - dragStartX;
@@ -940,15 +948,16 @@ public class MultilineEditor extends AbstractEditor {
             if (scrollRange > 0) {
                 float scrollRatio = (float) dragDeltaX / (float) this.width;
                 int newScrollOffset = dragStartScrollOffset + (int) (scrollRatio * scrollRange);
-                horizontalScrollOffset = MathHelper.clamp(newScrollOffset, 0, scrollRange);
+                horizontalScrollOffset = Mth.clamp(newScrollOffset, 0, scrollRange);
             }
             return true;
         }
         return super.mouseDragged(click, offsetX, offsetY);
     }
 
+    @SuppressWarnings("null")
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(@SuppressWarnings("null") MouseButtonEvent click) {
         if (isDraggingHorizontalScroll) {
             isDraggingHorizontalScroll = false;
             return true;

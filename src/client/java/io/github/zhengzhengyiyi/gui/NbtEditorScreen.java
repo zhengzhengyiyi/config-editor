@@ -5,14 +5,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonObject;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 
 import io.github.zhengzhengyiyi.gui.widget.*;
 
@@ -23,72 +23,74 @@ import java.util.Optional;
 import java.util.Set;
 
 public class NbtEditorScreen extends Screen {
-    private Optional<NbtCompound> nbtData = Optional.empty();
-    private TextFieldWidget nameField;
+    private Optional<CompoundTag> nbtData = Optional.empty();
+    private EditBox nameField;
     private MultilineEditor contentField;
-    private TextFieldWidget renameField;
-    private final MinecraftClient client = MinecraftClient.getInstance();
+    private EditBox renameField;
+    @SuppressWarnings("unused")
+    private final Minecraft client = Minecraft.getInstance();
 
-    public NbtEditorScreen(NbtCompound nbtData) {
-        super(Text.of("NBT Editor"));
+    public NbtEditorScreen(CompoundTag nbtData) {
+        super(Component.literal("NBT Editor"));
         this.nbtData = Optional.ofNullable(nbtData);
     }
 
+    @SuppressWarnings("null")
     @Override
     protected void init() {
         int centerX = width / 2;
         int centerY = height / 2;
 
-        nameField = new TextFieldWidget(textRenderer, centerX - 100, centerY - 80, 200, 20, Text.of("Original Name"));
-        contentField = new MultilineEditor(centerX - 100, centerY - 50, 200, 100, Text.of("NBT Content"));
-        renameField = new TextFieldWidget(textRenderer, centerX - 100, centerY + 70, 200, 20, Text.of("Save File Name"));
+        nameField = new EditBox(font, centerX - 100, centerY - 80, 200, 20, Component.literal("Original Name"));
+        contentField = new MultilineEditor(centerX - 100, centerY - 50, 200, 100, Component.literal("NBT Content"));
+        renameField = new EditBox(font, centerX - 100, centerY + 70, 200, 20, Component.literal("Save File Name"));
 
-        nameField.setText(nbtData.flatMap(nbt -> nbt.getString("Name")).orElse(""));
-        contentField.setText(nbtToJsonString(nbtData.orElse(new NbtCompound())));
-        renameField.setText(nameField.getText());
+        nameField.setValue(nbtData.flatMap(nbt -> nbt.getString("Name")).orElse(""));
+        contentField.setText(nbtToJsonString(nbtData.orElse(new CompoundTag())));
+        renameField.setValue(nameField.getValue());
 
-        addSelectableChild(nameField);
-        addSelectableChild(contentField);
-        addSelectableChild(renameField);
+        addRenderableWidget(nameField);
+        addRenderableWidget(contentField);
+        addRenderableWidget(renameField);
 
-        ButtonWidget saveButton = ButtonWidget.builder(Text.of("Save"), button -> saveNbt())
-                .dimensions(centerX - 110, centerY + 100, 100, 20)
+        Button saveButton = Button.builder(Component.literal("Save"), button -> saveNbt())
+                .bounds(centerX - 110, centerY + 100, 100, 20)
                 .build();
 
-        ButtonWidget closeButton = ButtonWidget.builder(Text.of("Close"), button -> client.setScreen(null))
-                .dimensions(centerX + 10, centerY + 100, 100, 20)
+        Button closeButton = Button.builder(Component.literal("Close"), button -> minecraft.setScreen(null))
+                .bounds(centerX + 10, centerY + 100, 100, 20)
                 .build();
 
-        addDrawableChild(saveButton);
-        addDrawableChild(closeButton);
+        addRenderableWidget(saveButton);
+        addRenderableWidget(closeButton);
     }
 
-    private String nbtToJsonString(NbtCompound nbt) {
+    @SuppressWarnings("null")
+    private String nbtToJsonString(CompoundTag nbt) {
         Gson gson = new GsonBuilder()
-//        		.setPrettyPrinting()
-        		.disableHtmlEscaping()
-        		.create();
+                .disableHtmlEscaping()
+                .create();
         JsonObject jsonObject = new JsonObject();
-        Set<String> keys = nbt.getKeys();
+        Set<String> keys = nbt.keySet();
         for (String key : keys) {
-            NbtElement element = nbt.get(key);
+            @SuppressWarnings("null")
+            Tag element = nbt.get(key);
             jsonObject.addProperty(key, element.toString());
         }
         return gson.toJson(jsonObject);
     }
 
     private void saveNbt() {
-        String fileName = renameField.getText().trim();
+        String fileName = renameField.getValue().trim();
         if (!fileName.isEmpty() && nbtData.isPresent()) {
-            File saveDir = new File(MinecraftClient.getInstance().runDirectory, "saved_nbt");
+            File saveDir = new File(Minecraft.getInstance().gameDirectory, "saved_nbt");
             if (!saveDir.exists()) saveDir.mkdirs();
 
             File outFile = new File(saveDir, fileName + ".json");
             try (FileWriter writer = new FileWriter(outFile)) {
                 Gson gson = new GsonBuilder()
-//                		.setPrettyPrinting()
-                		.disableHtmlEscaping()
-                		.create();
+                        .disableHtmlEscaping()
+                        .create();
                 JsonElement jsonElement = JsonParser.parseString(nbtToJsonString(nbtData.get()));
                 gson.toJson(jsonElement, writer);
             } catch (IOException e) {
@@ -96,14 +98,12 @@ public class NbtEditorScreen extends Screen {
             }
         }
 
-        client.setScreen(null);
+        minecraft.setScreen(null);
     }
 
+    @SuppressWarnings("null")
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        nameField.render(context, mouseX, mouseY, delta);
-        contentField.render(context, mouseX, mouseY, delta);
-        renameField.render(context, mouseX, mouseY, delta);
+    public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
 }

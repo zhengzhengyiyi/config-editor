@@ -1,12 +1,12 @@
 package io.github.zhengzhengyiyi.gui;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
@@ -18,12 +18,12 @@ import org.slf4j.LoggerFactory;
 import io.github.zhengzhengyiyi.api.AiClient;
 
 public class AIChatScreen extends Screen {
-    private TextFieldWidget inputField;
-    private TextFieldWidget pathField;
-    private ButtonWidget sendButton;
-    private ButtonWidget loadButton;
-    private ButtonWidget clearButton;
-    private ButtonWidget settingsButton;
+    private EditBox inputField;
+    private EditBox pathField;
+    private Button sendButton;
+    private Button loadButton;
+    private Button clearButton;
+    private Button settingsButton;
     private List<String> chatHistory;
     private List<String> userInputs;
     private boolean waitingForSendResponse = false;
@@ -31,13 +31,13 @@ public class AIChatScreen extends Screen {
     private boolean serverAvailable = false;
     private boolean checkingServer = true;
     private int chatScrollOffset = 0;
-    private ButtonWidget scrollUpButton;
-    private ButtonWidget scrollDownButton;
+    private Button scrollUpButton;
+    private Button scrollDownButton;
     private static Logger LOGGER = LoggerFactory.getLogger(AIChatScreen.class);
     private AiClient aiClient = new AiClient();
 
     public AIChatScreen() {
-        super(Text.literal("AI Chat"));
+        super(Component.literal("AI Chat"));
         this.chatHistory = new ArrayList<>();
         this.userInputs = new ArrayList<>();
         chatHistory.add("AI: Hello! How can I help you today?");
@@ -54,39 +54,39 @@ public class AIChatScreen extends Screen {
         int panelY = (this.height - panelHeight) / 2 - 20;
         int inputY = panelY + panelHeight + 10;
         int inputWidth = panelWidth - 100;
-        this.inputField = new TextFieldWidget(this.textRenderer, panelX, inputY, inputWidth, 20, Text.literal("Type your message..."));
+        this.inputField = new EditBox(this.font, panelX, inputY, inputWidth, 20, Component.literal("Type your message..."));
         this.inputField.setMaxLength(1024);
         this.inputField.setEditable(false);
-        this.addDrawableChild(this.inputField);
-        this.sendButton = ButtonWidget.builder(Text.literal("Send"), button -> sendMessage())
-            .dimensions(panelX + inputWidth + 5, inputY, 45, 20)
+        this.addRenderableWidget(this.inputField);
+        this.sendButton = Button.builder(Component.literal("Send"), button -> sendMessage())
+            .bounds(panelX + inputWidth + 5, inputY, 45, 20)
             .build();
         this.sendButton.active = false;
-        this.addDrawableChild(this.sendButton);
+        this.addRenderableWidget(this.sendButton);
         int pathY = inputY + 26;
-        this.pathField = new TextFieldWidget(this.textRenderer, panelX, pathY, inputWidth - 50, 20, Text.literal("Enter file or folder path relative to .minecraft or absolute"));
+        this.pathField = new EditBox(this.font, panelX, pathY, inputWidth - 50, 20, Component.literal("Enter file or folder path relative to .minecraft or absolute"));
         this.pathField.setMaxLength(1024);
-        this.addDrawableChild(this.pathField);
-        this.loadButton = ButtonWidget.builder(Text.literal("Load"), button -> loadPathAndSend())
-            .dimensions(panelX + inputWidth - 40, pathY, 45, 20)
+        this.addRenderableWidget(this.pathField);
+        this.loadButton = Button.builder(Component.literal("Load"), button -> loadPathAndSend())
+            .bounds(panelX + inputWidth - 40, pathY, 45, 20)
             .build();
-        this.addDrawableChild(this.loadButton);
-        this.clearButton = ButtonWidget.builder(Text.literal("Clear"), button -> clearChat())
-            .dimensions(panelX + panelWidth - 90, panelY - 25, 45, 20)
+        this.addRenderableWidget(this.loadButton);
+        this.clearButton = Button.builder(Component.literal("Clear"), button -> clearChat())
+            .bounds(panelX + panelWidth - 90, panelY - 25, 45, 20)
             .build();
-        this.addDrawableChild(this.clearButton);
-        this.settingsButton = ButtonWidget.builder(Text.literal("Settings"), button -> openSettings())
-            .dimensions(panelX + panelWidth - 45, panelY - 25, 45, 20)
+        this.addRenderableWidget(this.clearButton);
+        this.settingsButton = Button.builder(Component.literal("Settings"), button -> openSettings())
+            .bounds(panelX + panelWidth - 45, panelY - 25, 45, 20)
             .build();
-        this.addDrawableChild(this.settingsButton);
-        this.scrollUpButton = ButtonWidget.builder(Text.literal("↑"), button -> scrollUp())
-            .dimensions(panelX + panelWidth - 20, panelY + 25, 16, 16)
+        this.addRenderableWidget(this.settingsButton);
+        this.scrollUpButton = Button.builder(Component.literal("↑"), button -> scrollUp())
+            .bounds(panelX + panelWidth - 20, panelY + 25, 16, 16)
             .build();
-        this.addDrawableChild(this.scrollUpButton);
-        this.scrollDownButton = ButtonWidget.builder(Text.literal("↓"), button -> scrollDown())
-            .dimensions(panelX + panelWidth - 20, panelY + panelHeight - 20, 16, 16)
+        this.addRenderableWidget(this.scrollUpButton);
+        this.scrollDownButton = Button.builder(Component.literal("↓"), button -> scrollDown())
+            .bounds(panelX + panelWidth - 20, panelY + panelHeight - 20, 16, 16)
             .build();
-        this.addDrawableChild(this.scrollDownButton);
+        this.addRenderableWidget(this.scrollDownButton);
         this.setInitialFocus(this.inputField);
         updateScrollButtons();
     }
@@ -114,7 +114,7 @@ public class AIChatScreen extends Screen {
             this.inputField.setEditable(serverAvailable && !waitingForSendResponse);
         }
         if (this.sendButton != null) {
-            this.sendButton.active = serverAvailable && !waitingForSendResponse && (this.inputField != null && !this.inputField.getText().trim().isEmpty());
+            this.sendButton.active = serverAvailable && !waitingForSendResponse && (this.inputField != null && !this.inputField.getValue().trim().isEmpty());
         }
         if (this.loadButton != null) {
             this.loadButton.active = serverAvailable && !loadingFile;
@@ -155,7 +155,7 @@ public class AIChatScreen extends Screen {
         StringBuilder currentLine = new StringBuilder();
         for (String word : words) {
             String testLine = currentLine.length() > 0 ? currentLine + " " + word : word;
-            if (this.textRenderer.getWidth(testLine) <= maxWidth) {
+            if (this.font.width(testLine) <= maxWidth) {
                 currentLine.append(currentLine.length() > 0 ? " " + word : word);
             } else {
                 if (currentLine.length() > 0) {
@@ -205,7 +205,7 @@ public class AIChatScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         int panelWidth = Math.min(400, this.width - 40);
         int panelHeight = Math.min(300, this.height - 80);
         int panelX = (this.width - panelWidth) / 2;
@@ -218,14 +218,14 @@ public class AIChatScreen extends Screen {
         } else if (!serverAvailable) {
             title += " (Server Offline)";
         }
-        context.drawText(this.textRenderer, Text.literal(title), this.width / 2 - 70, panelY - 15, 0xFFFFFF, false);
-        context.drawHorizontalLine(panelX + 5, panelX + panelWidth - 5, panelY + 20, 0xFF666666);
+        context.text(this.font, Component.literal(title), this.width / 2 - 70, panelY - 15, 0xFFFFFF, false);
+        context.horizontalLine(panelX + 5, panelX + panelWidth - 5, panelY + 20, 0xFF666666);
         int chatY = panelY + 35;
         int maxVisibleLines = (panelHeight - 50) / 12;
         int textAreaWidth = panelWidth - 30;
         drawScrollBar(context, panelX, panelY, panelWidth, panelHeight);
         updateUIState();
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
         context.enableScissor(panelX + 5, panelY + 25, panelX + panelWidth - 5, panelY + panelHeight - 5);
         int currentLine = 0;
         int visibleLineCount = 0;
@@ -235,7 +235,7 @@ public class AIChatScreen extends Screen {
                 if (currentLine >= chatScrollOffset && visibleLineCount < maxVisibleLines) {
                     int renderY = chatY + visibleLineCount * 12;
                     int color = getMessageColor(message);
-                    context.drawText(this.textRenderer, line, panelX + 10, renderY, color, false);
+                    context.text(this.font, line, panelX + 10, renderY, color, false);
                     visibleLineCount++;
                 }
                 currentLine++;
@@ -244,7 +244,7 @@ public class AIChatScreen extends Screen {
         if ((checkingServer || waitingForSendResponse || loadingFile) && visibleLineCount < maxVisibleLines) {
             int renderY = chatY + visibleLineCount * 12;
             String loadingText = checkingServer ? "Checking server status" : (waitingForSendResponse ? "AI is thinking" : "Loading files...");
-            context.drawText(this.textRenderer, loadingText, panelX + 10, renderY, 0xFFFFFFFF, false);
+            context.text(this.font, loadingText, panelX + 10, renderY, 0xFFFFFFFF, false);
         }
         context.disableScissor();
     }
@@ -253,7 +253,7 @@ public class AIChatScreen extends Screen {
         return 0xFFFFFFFF;
     }
 
-    private void drawScrollBar(DrawContext context, int panelX, int panelY, int panelWidth, int panelHeight) {
+    private void drawScrollBar(GuiGraphicsExtractor context, int panelX, int panelY, int panelWidth, int panelHeight) {
         int scrollBarX = panelX + panelWidth - 18;
         int scrollBarY = panelY + 25;
         int scrollBarHeight = panelHeight - 30;
@@ -267,10 +267,10 @@ public class AIChatScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        int keyCode = input.getKeycode();
+    public boolean keyPressed(KeyEvent input) {
+        int keyCode = input.key();
         if (keyCode == 256) {
-            this.close();
+            this.onClose();
             return true;
         }
         if (keyCode == 257 && this.inputField.isFocused() && !waitingForSendResponse && serverAvailable) {
@@ -281,11 +281,11 @@ public class AIChatScreen extends Screen {
     }
 
     private void sendMessage() {
-        String message = this.inputField.getText().trim();
+        String message = this.inputField.getValue().trim();
         if (!message.isEmpty() && !waitingForSendResponse && serverAvailable) {
             userInputs.add(message);
             chatHistory.add("You: " + message);
-            inputField.setText("");
+            inputField.setValue("");
             waitingForSendResponse = true;
             chatScrollOffset = getMaxScrollOffset();
             updateUIState();
@@ -306,16 +306,16 @@ public class AIChatScreen extends Screen {
     }
 
     private void openSettings() {
-        MinecraftClient.getInstance().setScreen(new EditorScreen());
+        Minecraft.getInstance().setScreen(new EditorScreen());
     }
 
     private void loadPathAndSend() {
-        String rawPath = this.pathField.getText().trim();
+        String rawPath = this.pathField.getValue().trim();
         if (rawPath.isEmpty()) {
             chatHistory.add("System: Path is empty.");
             return;
         }
-        File base = MinecraftClient.getInstance().runDirectory;
+        File base = Minecraft.getInstance().gameDirectory;
         File target = new File(rawPath);
         if (!target.isAbsolute()) {
             target = new File(base, rawPath);
@@ -466,7 +466,7 @@ public class AIChatScreen extends Screen {
     }
 
     @Override
-    public void close() {
-        super.close();
+    public void onClose() {
+        super.onClose();
     }
 }

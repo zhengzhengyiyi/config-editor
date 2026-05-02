@@ -2,16 +2,16 @@ package io.github.zhengzhengyiyi.gui.widget;
 
 import java.util.function.Consumer;
 
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.network.chat.Component;
 
 /**
  * Abstract base class for all editor implementations.
  * Provides common functionality and contract for text editors.
  */
-public abstract class AbstractEditor extends ClickableWidget {
+public abstract class AbstractEditor extends AbstractWidget {
     
-    public AbstractEditor(int x, int y, int width, int height, Text message) {
+    public AbstractEditor(int x, int y, int width, int height, Component message) {
 		super(x, y, width, height, message);
 	}
 

@@ -3,10 +3,10 @@ package io.github.zhengzhengyiyi.addon;
 import io.github.zhengzhengyiyi.api.ApiEntrypoint;
 import io.github.zhengzhengyiyi.gui.*;
 import io.github.zhengzhengyiyi.gui.widget.MultilineEditor;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.resources.Identifier;
 
 public class TextStatsEntrypoint implements ApiEntrypoint {
     private boolean enabled = true;
@@ -19,7 +19,7 @@ public class TextStatsEntrypoint implements ApiEntrypoint {
     
     @Override
     public Identifier getIdentifier() {
-    	return Identifier.of("zhengzhengyiyi", "text_stats_display");
+    	return Identifier.fromNamespaceAndPath("zhengzhengyiyi", "text_stats_display");
     }
 
     @Override
@@ -31,13 +31,12 @@ public class TextStatsEntrypoint implements ApiEntrypoint {
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderButton(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (!enabled || editor == null || editor.getTextWidget() == null) return;
         
         String text = "";
-        ClickableWidget textWidget = editor.getTextWidget();
+        AbstractWidget textWidget = editor.getTextWidget();
         
-//        String text = editor.getTextWidget().getText();
         if (textWidget instanceof MultilineEditor) {
     		text = ((MultilineEditor)textWidget).text;
         } else {
@@ -49,6 +48,6 @@ public class TextStatsEntrypoint implements ApiEntrypoint {
         int lineCount = text.isEmpty() ? 0 : text.split("\n").length;
         
         String stats = "letter: " + charCount + " | words: " + wordCount + " | Lines: " + lineCount;
-        context.drawText(MinecraftClient.getInstance().textRenderer, stats, statsX, statsY, 0xFFFFFF00, false);
+        context.text(Minecraft.getInstance().font, stats, statsX, statsY, 0xFFFFFF00, false);
     }
 }

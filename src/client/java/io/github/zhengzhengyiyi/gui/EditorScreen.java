@@ -8,16 +8,16 @@ import io.github.zhengzhengyiyi.config.ModConfigData;
 import io.github.zhengzhengyiyi.gui.theme.ThemeManager;
 import io.github.zhengzhengyiyi.gui.widget.*;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.gui.components.AbstractWidget;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.io.IOException;
+
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,39 +39,41 @@ public class EditorScreen extends Screen {
     private int selectedIndex = 0;
     private MultilineEditor editor;
     private boolean modified = false;
-    private ButtonWidget saveButton;
-    private ButtonWidget openFolderButton;
-    private ButtonWidget backupButton;
+    private Button saveButton;
+    private Button openFolderButton;
+    private Button backupButton;
     private String buffer = "";
-    private TextFieldWidget searchField;
-    private ButtonWidget visualEditButton;
-    private ButtonWidget aiChatButton;
-    private ButtonWidget searchNextButton;
-    private ButtonWidget searchPrevButton;
-    private ButtonWidget managePluginsButton;
+    private EditBox searchField;
+    private Button visualEditButton;
+    private Button aiChatButton;
+    private Button searchNextButton;
+    private Button searchPrevButton;
+    private Button managePluginsButton;
     private boolean searchVisible = false;
     private ThemeManager themeManager;
-    private ButtonWidget themeToggleButton;
+    private Button themeToggleButton;
     private int fileListScrollOffset = 0;
-    private ButtonWidget scrollUpButton;
-    private ButtonWidget scrollDownButton;
-    private List<ButtonWidget> fileButtonList;
+    private Button scrollUpButton;
+    private Button scrollDownButton;
+    private List<Button> fileButtonList;
+    private Minecraft client = Minecraft.getInstance();
 
     public EditorScreen() {
-        super(Text.translatable("configeditor.title"));
+        super(Component.translatable("configeditor.title"));
     }
 
+    @SuppressWarnings("null")
     @Override
     protected void init() {
         super.init();
         
         themeManager = ThemeManager.getInstance();
-        themeToggleButton = ButtonWidget.builder(
-                Text.translatable(getThemeButtonText()),
+        themeToggleButton = Button.builder(
+                Component.translatable(getThemeButtonText()),
                 button -> toggleTheme())
-                .dimensions(this.width - 55, 5, 50, 20)
+                .bounds(this.width - 55, 5, 50, 20)
                 .build();
-        this.addDrawableChild(themeToggleButton);
+        this.addRenderableWidget(themeToggleButton);
         
         try {
             Path configDir = FabricLoader.getInstance().getConfigDir();
@@ -82,29 +86,29 @@ public class EditorScreen extends Screen {
 
         fileButtonList = new ArrayList<>();
         
-        scrollUpButton = ButtonWidget.builder(Text.literal("↑"), button -> scrollUp())
-                .dimensions(145, 25, 20, 20)
+        scrollUpButton = Button.builder(Component.literal("↑"), button -> scrollUp())
+                .bounds(145, 25, 20, 20)
                 .build();
-        scrollDownButton = ButtonWidget.builder(Text.literal("↓"), button -> scrollDown())
-                .dimensions(145, this.height - 45, 20, 20)
+        scrollDownButton = Button.builder(Component.literal("↓"), button -> scrollDown())
+                .bounds(145, this.height - 45, 20, 20)
                 .build();
         
-        managePluginsButton = ButtonWidget.builder(
-                Text.translatable("configeditor.button.plugins"),
+        managePluginsButton = Button.builder(
+                Component.translatable("configeditor.button.plugins"),
                 button -> client.setScreen(new PluginManagerScreen(this)))
-                .dimensions(this.width - 40, this.height - 30, 40, 20)
+                .bounds(this.width - 40, this.height - 30, 40, 20)
                 .build();
         
-        this.addDrawableChild(scrollUpButton);
-        this.addDrawableChild(scrollDownButton);
-        this.addDrawableChild(managePluginsButton);
+        this.addRenderableWidget(scrollUpButton);
+        this.addRenderableWidget(scrollDownButton);
+        this.addRenderableWidget(managePluginsButton);
         
         renderFileList();
         
         editor = new MultilineEditor(
                 170, 20,
                 this.width - 180, this.height - 55,
-                Text.translatable("configeditor.editor"));
+                Component.translatable("configeditor.editor"));
         editor.setChangedListener(text -> {
             if (!buffer.equals(text)) {
                 modified = true;
@@ -117,41 +121,41 @@ public class EditorScreen extends Screen {
         int bottomY = this.height - 30;
         int centerX = this.width / 2;
         
-        backupButton = ButtonWidget.builder(
-                Text.translatable("configeditor.button.backup"), 
+        backupButton = Button.builder(
+                Component.translatable("configeditor.button.backup"), 
                 button -> BackupHelper.backupEntireConfigDirectory())
-                .dimensions(centerX - 200, bottomY, 80, 20)
+                .bounds(centerX - 200, bottomY, 80, 20)
                 .build();
 
-        saveButton = ButtonWidget.builder(
-                Text.translatable("configeditor.button.save"),
+        saveButton = Button.builder(
+                Component.translatable("configeditor.button.save"),
                 button -> saveFile())
-                .dimensions(centerX - 110, bottomY, 80, 20)
+                .bounds(centerX - 110, bottomY, 80, 20)
                 .build();
         
-        visualEditButton = ButtonWidget.builder(
-                Text.translatable("configeditor.button.visual"),
+        visualEditButton = Button.builder(
+                Component.translatable("configeditor.button.visual"),
                 button -> openVisualEditor())
-                .dimensions(centerX + 10, bottomY, 100, 20)
+                .bounds(centerX + 10, bottomY, 100, 20)
                 .build();
 //        visualEditButton.active = false;
         
-        openFolderButton = ButtonWidget.builder(
-                Text.translatable("configeditor.button.openfolder"),
+        openFolderButton = Button.builder(
+                Component.translatable("configeditor.button.openfolder"),
                 button -> openConfigFolder())
-                .dimensions(0, 0, 80, 20)
+                .bounds(0, 0, 80, 20)
                 .build();
         
         int searchX = this.width - 320;
-        searchField = new TextFieldWidget(
-            textRenderer, 
+        searchField = new EditBox(
+            font, 
             searchX, 
             5, 
             150, 
             20, 
-            Text.translatable("configeditor.search.placeholder")
+            Component.translatable("configeditor.search.placeholder")
         );
-        searchField.setChangedListener(text -> {
+        searchField.setResponder(text -> {
             if (!text.trim().isEmpty()) {
                 startSearch(text.trim());
             } else {
@@ -160,29 +164,29 @@ public class EditorScreen extends Screen {
         });
         searchField.setVisible(true);
 
-        searchPrevButton = ButtonWidget.builder(
-            Text.translatable("configeditor.search.prev"), 
+        searchPrevButton = Button.builder(
+            Component.translatable("configeditor.search.prev"), 
             button -> findPrevious())
-            .dimensions(searchX + 155, 5, 40, 20)
+            .bounds(searchX + 155, 5, 40, 20)
             .build();
         searchPrevButton.active = false;
         searchPrevButton.visible = true;
         
-        searchNextButton = ButtonWidget.builder(
-            Text.translatable("configeditor.search.next"), 
+        searchNextButton = Button.builder(
+            Component.translatable("configeditor.search.next"), 
             button -> findNext())
-            .dimensions(searchX + 195, 5, 40, 20)
+            .bounds(searchX + 195, 5, 40, 20)
             .build();
         searchNextButton.active = false;
         searchNextButton.visible = true;
         
-        ButtonWidget closeSearchButton = ButtonWidget.builder(
-            Text.literal("×"), 
+        Button closeSearchButton = Button.builder(
+            Component.literal("×"), 
             button -> {
-                searchField.setText("");
+                searchField.setValue("");
                 endSearch();
             })
-            .dimensions(searchX + 235, 5, 20, 20)
+            .bounds(searchX + 235, 5, 20, 20)
             .build();
         closeSearchButton.visible = true;
         
@@ -191,25 +195,25 @@ public class EditorScreen extends Screen {
         int quickButtonWidth = 55;
         int quickButtonHeight = 20;
         
-        aiChatButton = ButtonWidget.builder(
-            Text.translatable("configeditor.button.aichat"),
+        aiChatButton = Button.builder(
+            Component.translatable("configeditor.button.aichat"),
             button -> openAiChat())
-            .dimensions(quickButtonX, quickButtonY, quickButtonWidth, quickButtonHeight)
+            .bounds(quickButtonX, quickButtonY, quickButtonWidth, quickButtonHeight)
             .build();
         
-        this.addDrawableChild(backupButton);
-        this.addDrawableChild(saveButton);
-        this.addDrawableChild(visualEditButton);
-        this.addDrawableChild(openFolderButton);
+        this.addRenderableWidget(backupButton);
+        this.addRenderableWidget(saveButton);
+        this.addRenderableWidget(visualEditButton);
+        this.addRenderableWidget(openFolderButton);
         
-        this.addDrawableChild(searchField);
-        this.addDrawableChild(searchPrevButton);
-        this.addDrawableChild(searchNextButton);
-        this.addDrawableChild(closeSearchButton);
+        this.addRenderableWidget(searchField);
+        this.addRenderableWidget(searchPrevButton);
+        this.addRenderableWidget(searchNextButton);
+        this.addRenderableWidget(closeSearchButton);
         
-        this.addDrawableChild(aiChatButton);
+        this.addRenderableWidget(aiChatButton);
         
-        this.addDrawableChild(editor);
+        this.addRenderableWidget(editor);
         
         this.setInitialFocus(editor);
 
@@ -271,9 +275,10 @@ public class EditorScreen extends Screen {
         return filePath;
     }
 
+    @SuppressWarnings("null")
     private void renderFileList() {
-        for (ButtonWidget button : fileButtonList) {
-            this.remove(button);
+        for (Button button : fileButtonList) {
+            this.removeWidget(button);
         }
         fileButtonList.clear();
         
@@ -284,12 +289,13 @@ public class EditorScreen extends Screen {
             Path configDir = FabricLoader.getInstance().getConfigDir();
             String relativePath = configDir.relativize(file).toString();
             
-            ButtonWidget button = ButtonWidget.builder(
-                    Text.literal(formatFileName(relativePath)),
+            @SuppressWarnings("null")
+            Button button = Button.builder(
+                    Component.literal(formatFileName(relativePath)),
                     _button -> switchFile(index))
-                    .dimensions(10, buttonY, 130, 20)
+                    .bounds(10, buttonY, 130, 20)
                     .build();
-            this.addDrawableChild(button);
+            this.addRenderableWidget(button);
             fileButtonList.add(button);
             buttonY += 23;
         }
@@ -351,7 +357,7 @@ public class EditorScreen extends Screen {
 //            editor.setJsonMode(true);
             editor.setText("{}");
             editor.setEditable(false);
-            showErrorPopup(Text.translatable("configeditor.error.loadfailed"));
+            showErrorPopup(Component.translatable("configeditor.error.loadfailed"));
         }
         
         updateButtonStates();
@@ -456,7 +462,7 @@ public class EditorScreen extends Screen {
 //                JsonParser.parseString(content);
 //            } catch (JsonSyntaxException e) {
 //                LOGGER.warn("Invalid JSON syntax in file: {}", file.getFileName());
-//                showErrorPopup(Text.translatable("configeditor.error.invalidjson"));
+//                showErrorPopup(Component.translatable("configeditor.error.invalidjson"));
 //                return;
 //            }
 //        }
@@ -498,85 +504,88 @@ public class EditorScreen extends Screen {
                     if (retryCount > maxRetries) {
                         LOGGER.error("Failed to save file after {} attempts: {}", maxRetries, file.getFileName(), e);
                         client.execute(() -> {
-                            if (this.client.currentScreen != null && this.client.currentScreen.equals(this)) {
-                                showErrorPopup(Text.translatable("configeditor.error.savefailed"));
+                            if (this.minecraft.screen != null && this.minecraft.screen.equals(this)) {
+                                showErrorPopup(Component.translatable("configeditor.error.savefailed"));
                             }
                         });
                     }
                 }
             }
-            
+
             client.execute(() -> {
-                if (this.client.currentScreen != null && this.client.currentScreen.equals(this)) {
-                    showErrorPopup(Text.translatable("configeditor.error.fileretryfailed"));
+                if (this.minecraft.screen != null && this.minecraft.screen.equals(this)) {
+                    showErrorPopup(Component.translatable("configeditor.error.fileretryfailed"));
                 }
             });
             
         }).start();
     }
     
+    @SuppressWarnings("null")
     private void openConfigFolder() {
         try {
             Path configDir = FabricLoader.getInstance().getConfigDir();
             LOGGER.info("Config folder location: {}", configDir);
-            Util.getOperatingSystem().open(configDir.toUri());
+            Util.getPlatform().openUri(configDir.toUri());
         } catch (Exception e) {
             LOGGER.error("Failed to get config folder", e);
         }
     }
 
-    private void showErrorPopup(Text message) {
+    @SuppressWarnings("null")
+    private void showErrorPopup(Component message) {
     	client.setScreen(new ConfirmScreen(
             result -> {
-                this.close();
-                this.client.setScreen(null);
+                this.onClose();
+                this.minecraft.setScreen(null);
             },
-            Text.translatable("configeditor.confirm.title"),
+            Component.translatable("configeditor.confirm.title"),
             message
         ));
     }
     
     private void openVisualEditor() {
-		this.client.setScreen(new JsonVisualEditorScreen(this.editor.getText(), this.editor.getFileName()));
+		this.minecraft.setScreen(new JsonVisualEditorScreen(this.editor.getText(), this.editor.getFileName()));
 	}
 
 	private void openAiChat() {
-		MinecraftClient.getInstance().setScreen(new AIChatScreen());
+		Minecraft.getInstance().setScreen(new AIChatScreen());
 	}
 
 	public void validateCurrentJson() {
 		String content = editor.getText();
 		try {
 			JsonParser.parseString(content);
-			showMessagePopup(Text.translatable("configeditor.message.jsonvalid"));
+			showMessagePopup(Component.translatable("configeditor.message.jsonvalid"));
 		} catch (JsonSyntaxException e) {
-			showMessagePopup(Text.translatable("configeditor.message.jsoninvalid"));
+			showMessagePopup(Component.translatable("configeditor.message.jsoninvalid"));
 		}
 	}
 
-    public void showMessagePopup(Text message) {
+    @SuppressWarnings("null")
+    public void showMessagePopup(Component message) {
         client.setScreen(new ConfirmScreen(
             result -> {
-                this.close();
-                this.client.setScreen(null);
+                this.onClose();
+                this.minecraft.setScreen(null);
             },
-            Text.translatable("configeditor.confirm.title"),
+            Component.translatable("configeditor.confirm.title"),
             message
         ));
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (ConfigEditorClient.configManager.getConfig().doRenderBackground) {
             context.fill(0, 0, this.width, this.height, themeManager.getBackgroundColor());
         }
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
         
         if (!configFiles.isEmpty()) {
             String status = modified ? "* " + configFiles.get(selectedIndex).getFileName().toString() : 
                 configFiles.get(selectedIndex).getFileName().toString();
             String editorType = "[File]";
-            context.drawText(this.textRenderer, status + editorType, 170, 5, modified ? 0xFFFF00 : 0xFFFFFF, false);
+            context.text(this.font, status + editorType, 170, 5, modified ? 0xFFFF00 : 0xFFFFFF, false);
         }
         
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
@@ -590,22 +599,22 @@ public class EditorScreen extends Screen {
             ConfirmScreen confirmScreen = new ConfirmScreen(
                 result -> {
                     if (result) {
-                        saveFileAsync(() -> {this.close(); this.client.setScreen(null);});
+                        saveFileAsync(() -> {this.onClose(); this.minecraft.setScreen(null);});
                     } else {
-                        this.close();
-                        this.client.setScreen(null);
+                        this.onClose();
+                        this.minecraft.setScreen(null);
                     }
                 },
-                Text.translatable("configeditor.confirm.title"),
-                Text.translatable("configeditor.confirm.unsavedclose")
+                Component.translatable("configeditor.confirm.title"),
+                Component.translatable("configeditor.confirm.unsavedclose")
             );
-            this.client.setScreen(confirmScreen);
+            this.minecraft.setScreen(confirmScreen);
             return false;
         }
         return true;
     }
     
-    public ClickableWidget getTextWidget() {
+    public AbstractWidget getTextWidget() {
         return editor;
     }
     
@@ -617,7 +626,7 @@ public class EditorScreen extends Screen {
         
         if (searchVisible) {
             setFocused(searchField);
-            String searchText = searchField.getText();
+            String searchText = searchField.getValue();
             if (searchText != null && !searchText.trim().isEmpty()) {
                 startSearch(searchText);
             }
@@ -627,8 +636,8 @@ public class EditorScreen extends Screen {
     }
 
     @Override
-    public void close() {
-        super.close();
+    public void onClose() {
+        super.onClose();
         
         configFiles = null;
         fileButtonList.clear();
@@ -647,9 +656,9 @@ public class EditorScreen extends Screen {
     }
     
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (input.getKeycode() == GLFW.GLFW_KEY_Q && input.hasCtrl() && input.hasAlt()) {
-            this.client.setScreen(null);
+    public boolean keyPressed(@NonNull KeyEvent input) {
+        if (input.key() == GLFW.GLFW_KEY_Q && input.hasControlDown() && input.hasAltDown()) {
+            this.minecraft.setScreen(null);
             LOGGER.info("Config editor force closed by user shortcut");
             return true;
         }
@@ -657,21 +666,21 @@ public class EditorScreen extends Screen {
         if (editor == null) return super.keyPressed(input);
         
         if (searchVisible) {
-            if (input.getKeycode() == GLFW.GLFW_KEY_ENTER) {
-                startSearch(searchField.getText());
+            if (input.key() == GLFW.GLFW_KEY_ENTER) {
+                startSearch(searchField.getValue());
                 return true;
             }
-            if (input.getKeycode() == GLFW.GLFW_KEY_ESCAPE) {
+            if (input.key() == GLFW.GLFW_KEY_ESCAPE) {
                 toggleSearch();
                 return true;
             }
-            if (input.getKeycode() == GLFW.GLFW_KEY_F3) {
+            if (input.key() == GLFW.GLFW_KEY_F3) {
                 findNext();
                 return true;
             }
         }
         
-        if (input.getKeycode() == GLFW.GLFW_KEY_F && input.hasCtrl()) {
+        if (input.key() == GLFW.GLFW_KEY_F && input.hasControlDown()) {
             toggleSearch();
             return true;
         }
@@ -679,6 +688,7 @@ public class EditorScreen extends Screen {
         return super.keyPressed(input);
     }
     
+    @SuppressWarnings("null")
     private void toggleTheme() {
         ModConfigData config = ConfigEditorClient.configManager.getConfig();
         switch (config.theme) {
@@ -687,7 +697,7 @@ public class EditorScreen extends Screen {
             case AUTO -> config.theme = ModConfigData.ThemeMode.DARK;
         }
         ConfigEditorClient.configManager.save();
-        themeToggleButton.setMessage(Text.translatable(getThemeButtonText()));
+        themeToggleButton.setMessage(Component.translatable(getThemeButtonText()));
     }
     
     private String getThemeButtonText() {

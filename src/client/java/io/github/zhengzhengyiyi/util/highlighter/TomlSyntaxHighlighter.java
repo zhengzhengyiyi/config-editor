@@ -1,7 +1,7 @@
 package io.github.zhengzhengyiyi.util.highlighter;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.*;
 
 public class TomlSyntaxHighlighter implements HighLighter{
@@ -30,11 +30,11 @@ public class TomlSyntaxHighlighter implements HighLighter{
         }
     }
     
-    public int getCharIndexFromTokens(TextRenderer textRenderer, String line, int targetX) {
+    public int getCharIndexFromTokens(Font font, String line, int targetX) {
         if (line.isEmpty()) return 0;
         
         for (int i = 0; i <= line.length(); i++) {
-            int width = getTextWidthUpToChar(textRenderer, line, i);
+            int width = getTextWidthUpToChar(font, line, i);
             if (width >= targetX) {
                 return i;
             }
@@ -42,7 +42,7 @@ public class TomlSyntaxHighlighter implements HighLighter{
         return line.length();
     }
     
-    public int getTextWidthUpToChar(TextRenderer textRenderer, String line, int charIndex) {
+    public int getTextWidthUpToChar(Font font, String line, int charIndex) {
         if (line.isEmpty() || charIndex <= 0) return 0;
         
         List<Token> tokens = tokenizeLine(line);
@@ -54,11 +54,11 @@ public class TomlSyntaxHighlighter implements HighLighter{
             if (currentCharIndex + tokenLength >= charIndex) {
                 int charsInThisToken = charIndex - currentCharIndex;
                 if (charsInThisToken > 0) {
-                    totalWidth += textRenderer.getWidth(token.content.substring(0, charsInThisToken));
+                    totalWidth += font.width(token.content.substring(0, charsInThisToken));
                 }
                 break;
             } else {
-                totalWidth += textRenderer.getWidth(token.content);
+                totalWidth += font.width(token.content);
                 currentCharIndex += tokenLength;
             }
         }
@@ -66,7 +66,7 @@ public class TomlSyntaxHighlighter implements HighLighter{
         return totalWidth;
     }
     
-    public void drawHighlightedText(DrawContext context, TextRenderer textRenderer, String text, int x, int y, boolean editable) {
+    public void drawHighlightedText(GuiGraphicsExtractor context, Font font, String text, int x, int y, boolean editable) {
         if (text.isEmpty()) return;
         
         List<Token> tokens = tokenizeLine(text);
@@ -74,8 +74,8 @@ public class TomlSyntaxHighlighter implements HighLighter{
         
         for (Token token : tokens) {
             int color = getTokenColor(token.type, editable);
-            context.drawText(textRenderer, token.content, currentX, y, color, false);
-            currentX += textRenderer.getWidth(token.content);
+            context.text(font, token.content, currentX, y, color, false);
+            currentX += font.width(token.content);
         }
     }
     
@@ -155,14 +155,14 @@ public class TomlSyntaxHighlighter implements HighLighter{
         return TokenType.VALUE;
     }
     
-    public int getTextWidth(TextRenderer textRenderer, String text) {
+    public int getTextWidth(Font font, String text) {
         if (text == null || text.isEmpty()) return 0;
         
         List<Token> tokens = tokenizeLine(text);
         int totalWidth = 0;
         
         for (Token token : tokens) {
-            totalWidth += textRenderer.getWidth(token.content);
+            totalWidth += font.width(token.content);
         }
         
         return totalWidth;

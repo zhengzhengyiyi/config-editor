@@ -2,10 +2,10 @@ package io.github.zhengzhengyiyi.addon;
 
 import io.github.zhengzhengyiyi.gui.EditorScreen;
 import io.github.zhengzhengyiyi.api.*;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.resources.Identifier;
+import net.minecraft.client.Minecraft;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -30,8 +30,8 @@ public class DateTimeDisplayEntrypoint implements ApiEntrypoint {
     }
 
     @Override
-    public ActionResult onMouseDown(int x, int y) {
-        return ActionResult.PASS;
+    public InteractionResult onMouseDown(int x, int y) {
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -39,24 +39,22 @@ public class DateTimeDisplayEntrypoint implements ApiEntrypoint {
     
     @Override
     public Identifier getIdentifier() {
-        return Identifier.of("zhengzhengyiyi", "datetime_display");
+        return Identifier.fromNamespaceAndPath("zhengzhengyiyi", "datetime_display");
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderButton(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
     	if (this.editor == null) return;
     	
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String timeText = now.format(formatter);
         
-        int textWidth = MinecraftClient.getInstance().textRenderer.getWidth(timeText);
+        int textWidth = Minecraft.getInstance().font.width(timeText);
         xPos = editor.width / 2 + textWidth / 2;
         
-//        System.out.println("Rendering date/time at: " + xPos + ", " + yPos);
-        
-        context.drawText(
-            MinecraftClient.getInstance().textRenderer, 
+        context.text(
+            Minecraft.getInstance().font, 
             timeText,
             xPos,
             yPos,

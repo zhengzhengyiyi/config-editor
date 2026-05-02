@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 
 import io.github.zhengzhengyiyi.ConfigEditorClient;
 import io.github.zhengzhengyiyi.gui.EditorScreen;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.resources.Identifier;
 
 /**
  * The entry point for other mods to interact with the config editor.
@@ -29,7 +29,7 @@ public interface ApiEntrypoint {
     void init();
     
     default Identifier getIdentifier() {
-    	return Identifier.of("config_editor", "plugin");
+    	return Identifier.fromNamespaceAndPath("config_editor", "plugin");
     }
 
     /**
@@ -51,8 +51,8 @@ public interface ApiEntrypoint {
      * @param x The x-coordinate of the mouse cursor.
      * @param y The y-coordinate of the mouse cursor.
      */
-    default ActionResult onMouseDown(int x, int y) {
-    	return ActionResult.SUCCESS;
+    default InteractionResult onMouseDown(int x, int y) {
+    	return InteractionResult.SUCCESS;
     }
 
     /**
@@ -64,12 +64,12 @@ public interface ApiEntrypoint {
     /**
      * Called when a key is typed on the keyboard.
      */
-    default ActionResult onType(int keyCode, int scanCode, int modifiers) {
-    	return ActionResult.SUCCESS;
+    default InteractionResult onType(int keyCode, int scanCode, int modifiers) {
+    	return InteractionResult.SUCCESS;
     }
     
-    default ActionResult onCharTyped(CharInput input) {
-    	return ActionResult.SUCCESS;
+    default InteractionResult onCharTyped(CharacterEvent input) {
+    	return InteractionResult.SUCCESS;
     }
 
     /**
@@ -79,6 +79,6 @@ public interface ApiEntrypoint {
      * @param mouseY The y-coordinate of the mouse cursor.
      * @param delta The partial ticks for smooth rendering.
      */
-    default void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    default void renderButton(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
     }
 }

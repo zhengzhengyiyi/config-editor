@@ -1,8 +1,8 @@
 package io.github.zhengzhengyiyi.api;
 
 import io.github.zhengzhengyiyi.util.highlighter.*;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public enum FileType {
 	JSON("json", new JsonSyntaxHighlighter()),
@@ -40,42 +40,28 @@ public enum FileType {
 	 */
 	public static class DefaultHighlighter implements HighLighter {
 	    
-	    /**
-	     * {@inheritDoc}
-	     * 
-	     * Simply draws the text without any syntax highlighting.
-	     */
 	    @Override
-	    public void drawHighlightedText(DrawContext context, TextRenderer textRenderer, String text, int x, int y, boolean editable) {
+	    public void drawHighlightedText(GuiGraphicsExtractor context, Font font, String text, int x, int y, boolean editable) {
 	        if (text == null || text.isEmpty()) return;
 	        
 	        int color = editable ? 0xFFFFFFFF : 0xFFAAAAAA;
-	        context.drawText(textRenderer, text, x, y, color, false);
+	        context.text(font, text, x, y, color, false);
 	    }
 	    
-	    /**
-	     * {@inheritDoc}
-	     * 
-	     * Returns the raw width of the text.
-	     */
 	    @Override
-	    public int getTextWidth(TextRenderer textRenderer, String text) {
+	    public int getTextWidth(Font font, String text) {
 	        if (text == null || text.isEmpty()) return 0;
-	        return textRenderer.getWidth(text);
+	        return font.width(text);
 	    }
 	    
-	    /**
-	     * {@inheritDoc}
-	     * Finds the character index by measuring width character by character.
-	     */
 	    @Override
-	    public int getCharIndexFromTokens(TextRenderer textRenderer, String line, int targetX) {
+	    public int getCharIndexFromTokens(Font font, String line, int targetX) {
 	        if (line == null || line.isEmpty()) return 0;
 	        
 	        int currentWidth = 0;
 	        for (int i = 0; i < line.length(); i++) {
 	            char c = line.charAt(i);
-	            int charWidth = textRenderer.getWidth(String.valueOf(c));
+	            int charWidth = font.width(String.valueOf(c));
 	            if (currentWidth + charWidth > targetX) {
 	                return i;
 	            }
@@ -84,21 +70,16 @@ public enum FileType {
 	        return line.length();
 	    }
 	    
-	    /**
-	     * {@inheritDoc}
-	     * 
-	     * Calculates the text width from the beginning of the line to the specified character index.
-	     */
 	    @Override
-	    public int getTextWidthUpToChar(TextRenderer textRenderer, String line, int charIndex) {
+	    public int getTextWidthUpToChar(Font font, String line, int charIndex) {
 	        if (line == null || line.isEmpty() || charIndex <= 0) return 0;
 	        
 	        if (charIndex >= line.length()) {
-	            return textRenderer.getWidth(line);
+	            return font.width(line);
 	        }
 	        
 	        String substring = line.substring(0, charIndex);
-	        return textRenderer.getWidth(substring);
+	        return font.width(substring);
 	    }
 	}
 }
