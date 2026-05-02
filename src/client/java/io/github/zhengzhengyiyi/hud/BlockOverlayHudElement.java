@@ -16,7 +16,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
 public class BlockOverlayHudElement implements HudElement {
-
     // Layout constants
     private static final int PADDING_X     = 8;
     private static final int PADDING_Y     = 5;
@@ -32,7 +31,7 @@ public class BlockOverlayHudElement implements HudElement {
     private static final int SUB_TEXT_COLOR = 0xFFAAAAAA; // grey for registry id
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, DeltaTracker delta) {
+    public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, @SuppressWarnings("null") DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
 
         // Only render in-game with no screen open
@@ -46,6 +45,7 @@ public class BlockOverlayHudElement implements HudElement {
         if (hit == null || hit.getType() != HitResult.Type.BLOCK) return;
 
         BlockHitResult blockHit = (BlockHitResult) hit;
+        @SuppressWarnings("null")
         BlockState state = level.getBlockState(blockHit.getBlockPos());
         if (state.isAir()) return;
 

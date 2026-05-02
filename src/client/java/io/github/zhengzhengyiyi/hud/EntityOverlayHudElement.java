@@ -48,7 +48,7 @@ public class EntityOverlayHudElement implements HudElement {
     private static final int HEALTH_LOW_COLOR = 0xFFDD5555;
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, DeltaTracker delta) {
+    public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, @SuppressWarnings("null") DeltaTracker delta) {
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.screen != null) return;
@@ -81,6 +81,7 @@ public class EntityOverlayHudElement implements HudElement {
         String healthText = isLiving
                 ? String.format("%.1f / %.1f", health, maxHealth)
                 : "";
+        @SuppressWarnings("null")
         int healthTextWidth = isLiving ? font.width(healthText) : 0;
 
         int maxTextWidth = Math.max(nameWidth, Math.max(idWidth, healthTextWidth + 4 + 60));
@@ -171,6 +172,7 @@ public class EntityOverlayHudElement implements HudElement {
             // Try to find it in the item registry by name
             try {
                 var itemRegistry = net.minecraft.core.registries.BuiltInRegistries.ITEM;
+                @SuppressWarnings("null")
                 var eggId = Identifier.fromNamespaceAndPath(parts[1], eggName);
                 var item = itemRegistry.getValue(eggId);
                 if (item != null && item != Items.AIR) {
