@@ -1,181 +1,163 @@
-# Config Editor - Minecraft Mod
+# Config Editor
 
-A professional in-game configuration file editor for Minecraft, providing advanced editing capabilities with syntax highlighting, real-time validation, and extensible plugin system.
+**Edit your mod config files without ever leaving the game.**
 
-![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.20.2-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.20.3-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.20.4-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.20.5-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.20.6-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.2-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.3-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.4-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.5-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.6-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.7-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.8-green.svg)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21.9-green.svg)
-![Mod Loader](https://img.shields.io/badge/Mod%20Loader-Fabric-blue.svg)
-![License](https://img.shields.io/badge/License-Apache%20License%202.0-red.svg)
+Config Editor is a Fabric client-side mod that gives you a full-featured text editor, a visual JSON editor, an AI assistant, and a block info overlay — all accessible with a keybind while you play.
 
-> ### **Thank you for 400+ downloads!**
-> Next version will coming soon. Your support means everything!
-> If you have any ideas, please post on [github discussions](https://github.com/zhengzhengyiyi/config-editor/discussions)
+---
 
-## Known Issues
-- #### Please download version 1.1.3, there is some issue in version under 1.1.3
-- #### May be have some unknown file lock issue.
+## Features
 
-## ✨ Features
+### 📝 In-Game Config Editor
+Open any config file from your `.minecraft/config` folder directly inside the game. No more alt-tabbing to Notepad or VS Code.
 
-### 📝 Professional Text Editing
-- **Advanced Syntax Highlighting**: Full support for multiple file formats with color-coded syntax highlighting
-- **Multi-Format Support**: JSON, Properties, TOML, YAML, CFG, INI, and plain text files
-- **Real-time Validation**: Instant error checking with visual indicators and tooltips
-- **Multi-line Editor**: Support for large configuration files with scrollable interface
-- **Intelligent Search**: Text search engine with highlight and navigation
+- Syntax highlighting for **JSON, TOML, YAML, Properties, CFG, and plain text**
+- Line numbers, horizontal and vertical scrollbars
+- **Find & Replace** (Ctrl+F) with previous/next navigation
+- **Auto-save with file locking** — retries up to 3 times if the file is busy
+- Unsaved-changes warning when you try to close
+- **Backup** button to snapshot your entire config directory before editing
+- **Open Folder** button to reveal the config directory in your file manager
+- Dark / Light / Auto theme with a toggle button
 
-### 🎯 User Experience
-- **File Management**: Browse and switch between configuration files easily
-- **Visual Feedback**: Clear modification indicators and confirmation dialogs
-- **Theme Support**: Dark, Light, and Auto themes with customizable backgrounds
-- **Accessibility**: Full keyboard navigation and screen reader support
+### 🖱️ Visual JSON Editor
+Switch to a point-and-click interface for JSON files. No need to remember syntax.
 
-![a show case of the gui](https://cdn.modrinth.com/data/SHXjjvQ7/images/48a2664240b2ca15a8d4b6944145943320d49060_350.webp)
+- Add, rename, delete, and reorder fields
+- Change value types (String / Number / Boolean / Null / Object) with one click
+- Nested object support with expand/collapse
+- Scroll through large files with up/down buttons
 
-### 🔧 Advanced Capabilities
-- **Auto-completion**: Code suggestions based on file structure and common patterns
-- **Backup System**: Automatic backup creation with configurable retention
-- **Performance Monitoring**: Built-in performance tracking for large files
-- **File Navigation**: Easy browsing through config directory with scrollable file list
+### 🤖 AI Chat Assistant (requires Ollama)
+Ask an AI about your config files without leaving the game.
 
-<details>
-<summary>🛠️ Developer API</summary>
+- Loads a file or entire folder into the conversation with one click
+- Uses a local [Ollama](https://ollama.com) server (default: `localhost:11434`, model: `tinyllama`)
+- Server availability check on open — shows a clear offline message if Ollama is not running
+- Scrollable chat history
 
-Config Editor provides a comprehensive API for developers to extend functionality through plugins:
+### � Block Info Overlay
+A Jade/WTHIT-style HUD element shown at the top of the screen while you play.
 
-### Core API Interface
+- Displays the **block name** and **registry ID** (e.g. `minecraft:stone`) of whatever your crosshair is pointing at
+- Shows the block's **item icon** next to the name
+- Semi-transparent background with a clean border
+- Only visible in-game — disappears when any screen is open
+- **Fully toggleable** via the config file (`show_block_overlay`)
 
-build.gradle
-```gradle
-dependencies {
-    implementation("io.github.zhengzhengyiyi:config_editor:project.config_editor_version")
-}
-```
-gradle.properties
-```properties
-config_editor_version=1.1.4+1.21.5
-```
+### 📦 NBT Viewer
+Point your crosshair at a block entity or entity and press the NBT key to open a viewer showing its NBT data as formatted JSON. Save it to `saved_nbt/` with a custom filename.
 
-```java
-public interface ApiEntrypoint {
-    // Plugin initialization
-    void init();
-    
-    // Editor lifecycle events
-    void onEditerOpen(EditorScreen editor);
-    void onEditerClose(EditorScreen editor);
-    
-    // Input handling with precise control
-    ActionResult onMouseDown(int x, int y);
-    void onMouseScroll();
-    ActionResult onType(int keyCode, int scanCode, int modifiers);
-    ActionResult onCharTyped(char character, int modifiers);
-    
-    // Custom rendering capabilities
-    void renderButton(DrawContext context, int mouseX, int mouseY, float delta);
-}
-```
+### 🔌 Plugin API
+Other mods can extend the editor by implementing the `ApiEntrypoint` interface. Built-in plugins include:
 
-### Built-in Plugins Examples
+| Plugin | What it does |
+|---|---|
+| **Undo/Redo** | Tracks edit history |
+| **Text Stats** | Shows character, word, and line count |
+| **Date/Time Display** | Shows the current time in the editor toolbar |
+| **Auto Bracket Completion** | Automatically closes `(`, `[`, `{`, `"` |
 
-The mod includes several example plugins demonstrating API capabilities:
+Manage which plugins are active from the **Plugins** button inside the editor.
 
-```java
-// Auto bracket completion
-public class AutoBracketCompletionEntrypoint implements ApiEntrypoint
+### ⚡ Performance Optimisations
+- **GC hint on world join/leave** — triggers a garbage collection pass before the new world starts allocating memory, reducing the RAM spike that causes join-world lag. Frees hundreds of MB in practice.
+- **Particle clear on level set** — drops stale particle objects from the old world before the new one loads.
+- Config is read from disk at most once every 2 seconds, not on every frame or keystroke.
 
-// Date-time display in editor
-public class DateTimeDisplayEntrypoint implements ApiEntrypoint
+---
 
-// Text statistics and analytics
-public class TextStatsEntrypoint implements ApiEntrypoint
+## Installation
 
-// Undo/redo functionality
-public class UndoRedoEntrypoint implements ApiEntrypoint
-```
+1. Install [Fabric Loader](https://fabricmc.net/use/) and [Fabric API](https://modrinth.com/mod/fabric-api)
+2. Drop `config_editor-*.jar` into your `mods/` folder
+3. Launch the game
 
-### Advanced Plugin Development
+**Requirements:**
+- Minecraft `26.1`
+- Fabric Loader `≥ 0.18.2`
+- Fabric API
+- Java `≥ 21`
 
-```java
-public class AdvancedPlugin implements ApiEntrypoint {
-    private static final Logger LOGGER = ApiEntrypoint.LOGGER;
-    
-    @Override
-    public void init() {
-        LOGGER.info("Advanced plugin initialized with custom features");
-    }
-    
-    @Override
-    public ActionResult onType(int keyCode, int scanCode, int modifiers) {
-        // Custom keyboard shortcuts
-        if (keyCode == GLFW.GLFW_KEY_F1 && hasControlDown()) {
-            showCustomHelp();
-            return ActionResult.FAIL; // Prevent default handling
-        }
-        return ActionResult.PASS; // Allow normal processing
-    }
-    
-    @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Add custom UI elements to editor
-        context.drawText(context.getTextRenderer(), "Custom Plugin", 10, 10, 0xFFFFFF, false);
-    }
-}
-```
+The AI Chat feature additionally requires [Ollama](https://ollama.com) running locally with a model pulled (e.g. `ollama pull tinyllama`).
 
-### Action Result System
-- `SUCCESS`: Event handled successfully, continue processing
-- `PASS`: Allow other plugins to handle the event
-- `FAIL`: Event handled completely, stop propagation
+---
 
-### Registration in fabric.mod.json
+## Usage
+
+All three keybinds are unbound by default. Assign them in **Options → Controls → Gameplay**.
+
+| Keybind | Action |
+|---|---|
+| Open Editor | Opens the config file editor |
+| Open AI Chat | Opens the AI chat assistant |
+| NBT Display | Opens the NBT viewer for the targeted block/entity |
+
+### Config File
+
+The mod's own settings are stored at `.minecraft/config/editor_config.json` and are editable both in-game and with any text editor.
 
 ```json
 {
-  "entrypoints": {
-    "config_editor": [
-      "com.yourmod.YourCustomPlugin",
-      "com.yourmod.AnotherPlugin"
-    ]
-  }
+  "readonly_mode": false,
+  "hint": true,
+  "theme": "DARK",
+  "doRenderBackground": false,
+  "doSuggestions": true,
+  "show_block_overlay": true
 }
 ```
-</details>
 
-## 🔍 Technical Features
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `readonly_mode` | boolean | `false` | Prevent editing files (view-only mode) |
+| `hint` | boolean | `true` | Auto-close brackets and quotes |
+| `theme` | string | `"DARK"` | Editor theme: `DARK`, `LIGHT`, or `AUTO` |
+| `doRenderBackground` | boolean | `false` | Draw a themed background behind the editor |
+| `doSuggestions` | boolean | `true` | Show autocomplete suggestions while typing |
+| `show_block_overlay` | boolean | `true` | Show the block info HUD overlay |
 
-### Performance Optimization
-- **Efficient Rendering**: Optimized text rendering for large files
-- **Memory Management**: Smart caching and resource cleanup
-- **Async Operations**: Non-blocking file operations
+---
 
-### File Handling
-- **Safe File Operations**: File locking and conflict detection
-- **Error Recovery**: Automatic recovery from corrupted files
-- **Encoding Support**: Full UTF-8 support with proper encoding detection
+## For Mod Developers — Plugin API
 
-## 📁 Supported File Types
+You can add custom behaviour to the editor by implementing `ApiEntrypoint` and registering it via the Fabric entrypoint system in your `fabric.mod.json`:
 
-- **JSON Configuration Files** (`.json`)
-- **Properties Files** (`.properties`)
-- **TOML Files** (`.toml`)
-- **YAML Files** (`.yml`, `.yaml`)
-- **Configuration Files** (`.cfg`, `.conf`, `.ini`)
-- **Text Files** (`.txt`)
+```json
+"entrypoints": {
+  "config_editor": [
+    "com.example.yourmod.YourEditorPlugin"
+  ]
+}
+```
 
-**Happy configuring!** 🎮
+```java
+public class YourEditorPlugin implements ApiEntrypoint {
+    @Override
+    public void init() { }
 
-*If you find this mod useful, please consider giving it a star on Modrinth!*
+    @Override
+    public void renderButton(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        // Draw custom HUD elements over the editor
+    }
+
+    @Override
+    public InteractionResult onType(int keyCode, int scanCode, int modifiers) {
+        // Intercept keystrokes — return FAIL to consume the event
+        return InteractionResult.PASS;
+    }
+}
+```
+
+---
+
+## Links
+
+- [Source Code](https://github.com/zhengzhengyiyi/config-editor)
+- [Author's Homepage](https://zhengzhengyiyi.github.io)
+
+---
+
+## License
+
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
