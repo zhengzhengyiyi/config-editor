@@ -27,6 +27,7 @@ import java.util.ArrayList;
 
 public class ConfigEditorClient implements ClientModInitializer {
 	public static String MOD_ID = "config_editor";
+	@SuppressWarnings("null")
 	public static ConfigManager<ModConfigData> configManager = new ConfigManager<>(Paths.get("config", "editor_config.json"), new ModConfigData(), ModConfigData.class);
 
 	/**
@@ -76,6 +77,7 @@ public class ConfigEditorClient implements ClientModInitializer {
 	
 	public static final List<ApiEntrypoint> TOTAL_ENTRYPOINTS = new ArrayList<>();
 	
+	@SuppressWarnings("null")
 	@Override
 	public void onInitializeClient() {
 		FabricLoader.getInstance()

@@ -3,7 +3,8 @@
 	"package": "io.github.zhengzhengyiyi.mixin.client",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"ExampleClientMixin"
+		"ExampleClientMixin",
+		"MinecraftMemoryMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -697,6 +697,7 @@ public class EditorScreen extends Screen {
             case AUTO -> config.theme = ModConfigData.ThemeMode.DARK;
         }
         ConfigEditorClient.configManager.save();
+        themeManager.invalidate();
         themeToggleButton.setMessage(Component.translatable(getThemeButtonText()));
     }
     

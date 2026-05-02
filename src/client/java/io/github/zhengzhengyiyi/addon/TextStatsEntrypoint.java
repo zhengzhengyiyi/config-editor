@@ -14,40 +14,51 @@ public class TextStatsEntrypoint implements ApiEntrypoint {
     private int statsX = 80;
     private int statsY = 15;
 
+    // Cached stats — only recomputed when the text reference changes
+    private String lastText = null;
+    private String cachedStats = "";
+
     @Override
     public void init() {}
-    
+
     @Override
     public Identifier getIdentifier() {
-    	return Identifier.fromNamespaceAndPath("zhengzhengyiyi", "text_stats_display");
+        return Identifier.fromNamespaceAndPath("zhengzhengyiyi", "text_stats_display");
     }
 
     @Override
     public void onEditerOpen(EditorScreen editor) {
         this.editor = editor;
-        
         statsX = this.editor.width / 2 + 35;
         statsY = this.editor.height - 10;
+        // Invalidate cache when editor opens
+        lastText = null;
+        cachedStats = "";
     }
 
     @Override
     public void renderButton(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (!enabled || editor == null || editor.getTextWidget() == null) return;
-        
-        String text = "";
+
         AbstractWidget textWidget = editor.getTextWidget();
-        
-        if (textWidget instanceof MultilineEditor) {
-    		text = ((MultilineEditor)textWidget).text;
+        String text = "";
+        if (textWidget instanceof MultilineEditor me) {
+            text = me.text;
         } else {
-			LOGGER.error("can not find current text");
-		}
-        
-        int charCount = text.length();
-        int wordCount = text.trim().isEmpty() ? 0 : text.split("\\s+").length;
-        int lineCount = text.isEmpty() ? 0 : text.split("\n").length;
-        
-        String stats = "letter: " + charCount + " | words: " + wordCount + " | Lines: " + lineCount;
-        context.text(Minecraft.getInstance().font, stats, statsX, statsY, 0xFFFFFF00, false);
+            LOGGER.error("can not find current text");
+        }
+
+        // Only recompute stats when the text has actually changed
+        if (!text.equals(lastText)) {
+            lastText = text;
+            int charCount = text.length();
+            int wordCount = text.isBlank() ? 0 : text.split("\\s+").length;
+            int lineCount = text.isEmpty() ? 0 : text.split("\n", -1).length;
+            cachedStats = "chars: " + charCount + " | words: " + wordCount + " | lines: " + lineCount;
+        }
+
+        if (!cachedStats.isEmpty()) {
+            context.text(Minecraft.getInstance().font, cachedStats, statsX, statsY, 0xFFFFFF00, false);
+        }
     }
 }

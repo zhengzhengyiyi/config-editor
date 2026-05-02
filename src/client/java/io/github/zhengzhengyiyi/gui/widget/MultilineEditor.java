@@ -45,22 +45,14 @@ public class MultilineEditor extends AbstractEditor {
     private int selectedSuggestion = -1;
     private boolean showSuggestions = false;
     private int maxLineWidth = 0;
+    /** Counts render frames; editable is refreshed from config every 20 frames. */
+    private int editableCheckTick = 0;
 
     public MultilineEditor(int x, int y, int width, int height, Component message) {
         super(x, y, width, height, message);
         this.textRenderer = Minecraft.getInstance().font;
         this.setFocused(false);
-        
-        new Thread(() -> {
-        	while (true) {
-	        	try {
-		        	Thread.sleep(500);
-		            editable = !ConfigEditorClient.configManager.getConfig().readonly_mode;
-	            } catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-        	}
-		}).start();
+        // editable is refreshed from config in extractWidgetRenderState every ~20 ticks
     }
     
     @SuppressWarnings("null")
@@ -68,6 +60,12 @@ public class MultilineEditor extends AbstractEditor {
     protected void extractWidgetRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (!this.visible) {
             return;
+        }
+
+        // Refresh editable flag from config every 20 frames (~1 second) instead of a background thread
+        if (++editableCheckTick >= 20) {
+            editableCheckTick = 0;
+            editable = !ConfigEditorClient.configManager.getConfig().readonly_mode;
         }
 
         context.enableScissor(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height);

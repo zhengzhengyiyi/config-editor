@@ -160,12 +160,38 @@ public class ConfigManager<T extends ConfigData> {
     
     /**
      * Returns the current configuration instance.
+     * Uses a file-modification-time check with a 2-second cooldown to avoid
+     * hitting the disk on every call.
      *
      * @return the current configuration instance
      */
     public T getConfig() {
-    	load();
+        maybeReload();
         return config;
+    }
+
+    /**
+     * Checks whether the config file has been modified since the last load,
+     * but at most once every 2 seconds to avoid constant disk I/O.
+     */
+    private long lastCheckMs = 0;
+    private static final long CHECK_INTERVAL_MS = 2000;
+
+    private void maybeReload() {
+        long now = System.currentTimeMillis();
+        if (now - lastCheckMs < CHECK_INTERVAL_MS) return;
+        lastCheckMs = now;
+
+        try {
+            if (!Files.exists(configPath)) return;
+            FileTime currentModifiedTime = Files.getLastModifiedTime(configPath);
+            if (lastModifiedTime == null ||
+                    currentModifiedTime.toMillis() > lastModifiedTime.toMillis()) {
+                load();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to check config modification time for {}: {}", configPath, e.getMessage());
+        }
     }
     
     /**
