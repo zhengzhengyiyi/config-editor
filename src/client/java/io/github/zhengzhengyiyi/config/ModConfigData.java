@@ -35,6 +35,13 @@ public class ModConfigData extends io.github.zhengzhengyiyi.api.config.ConfigDat
     public boolean doSuggestions = true;
     
     /**
+     * If true, shows a Jade/WTHIT-style overlay at the top of the screen
+     * displaying the name of the block the crosshair is pointing at.
+     */
+    @SerializedName("show_block_overlay")
+    public boolean showBlockOverlay = true;
+    
+    /**
      * The theme can be either dark, light and auto
      */
     public enum ThemeMode {

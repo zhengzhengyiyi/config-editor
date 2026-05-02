@@ -9,14 +9,17 @@ import io.github.zhengzhengyiyi.api.ApiEntrypoint;
 import io.github.zhengzhengyiyi.api.config.ConfigManager;
 import io.github.zhengzhengyiyi.config.ModConfigData;
 import io.github.zhengzhengyiyi.gui.*;
+import io.github.zhengzhengyiyi.hud.BlockOverlayHudElement;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.nio.file.Paths;
@@ -115,6 +118,12 @@ public class ConfigEditorClient implements ClientModInitializer {
 		ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             configManager.shutdown();
         });
+		
+		// Register block overlay HUD element
+		HudElementRegistry.addLast(
+			Identifier.fromNamespaceAndPath(MOD_ID, "block_overlay"),
+			new BlockOverlayHudElement()
+		);
 		
 //		testLanguageResources();
 	}

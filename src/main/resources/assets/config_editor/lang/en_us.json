@@ -49,5 +49,9 @@
   "configeditor.theme.auto": "Auto",
   
   "button.zhengzhengyiyi.disable": "Disabled",
-  "button.zhengzhengyiyi.enable": "Enabled"
+  "button.zhengzhengyiyi.enable": "Enabled",
+
+  "configeditor.overlay.block": "Block Overlay",
+  "configeditor.overlay.enabled": "Block overlay enabled",
+  "configeditor.overlay.disabled": "Block overlay disabled"
 }

@@ -49,5 +49,9 @@
   "configeditor.theme.auto": "自动",
   
   "button.zhengzhengyiyi.disable": "已禁用",
-  "button.zhengzhengyiyi.enable": "已启用"
+  "button.zhengzhengyiyi.enable": "已启用",
+
+  "configeditor.overlay.block": "方块信息显示",
+  "configeditor.overlay.enabled": "方块信息显示已启用",
+  "configeditor.overlay.disabled": "方块信息显示已禁用"
 }
