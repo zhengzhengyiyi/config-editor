@@ -7,6 +7,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
@@ -269,6 +270,17 @@ public class AIChatScreen extends Screen {
     @Override
     public boolean keyPressed(KeyEvent input) {
         int keyCode = input.key();
+
+        // Always pass Ctrl+A/C/V to the focused widget so clipboard works in text fields
+        if (input.hasControlDown()) {
+            if (keyCode == GLFW.GLFW_KEY_A || keyCode == GLFW.GLFW_KEY_C || keyCode == GLFW.GLFW_KEY_V) {
+                var focused = getFocused();
+                if (focused != null && focused.keyPressed(input)) {
+                    return true;
+                }
+            }
+        }
+
         if (keyCode == 256) {
             this.onClose();
             return true;

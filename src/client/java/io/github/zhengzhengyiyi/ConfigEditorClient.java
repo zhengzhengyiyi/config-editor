@@ -10,6 +10,7 @@ import io.github.zhengzhengyiyi.api.config.ConfigManager;
 import io.github.zhengzhengyiyi.config.ModConfigData;
 import io.github.zhengzhengyiyi.gui.*;
 import io.github.zhengzhengyiyi.hud.BlockOverlayHudElement;
+import io.github.zhengzhengyiyi.hud.EntityOverlayHudElement;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -125,6 +126,12 @@ public class ConfigEditorClient implements ClientModInitializer {
 		HudElementRegistry.addLast(
 			Identifier.fromNamespaceAndPath(MOD_ID, "block_overlay"),
 			new BlockOverlayHudElement()
+		);
+
+		// Register entity overlay HUD element (renders just below the block overlay)
+		HudElementRegistry.addLast(
+			Identifier.fromNamespaceAndPath(MOD_ID, "entity_overlay"),
+			new EntityOverlayHudElement()
 		);
 		
 //		testLanguageResources();

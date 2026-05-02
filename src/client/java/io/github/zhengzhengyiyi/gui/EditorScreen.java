@@ -662,6 +662,19 @@ public class EditorScreen extends Screen {
             LOGGER.info("Config editor force closed by user shortcut");
             return true;
         }
+
+        // Pass Ctrl+A/C/V through to the focused widget (editor or search field)
+        // before any screen-level handling so they always work
+        if (input.hasControlDown()) {
+            int k = input.key();
+            if (k == GLFW.GLFW_KEY_A || k == GLFW.GLFW_KEY_C || k == GLFW.GLFW_KEY_V) {
+                // Let the focused child handle it first
+                var focused = getFocused();
+                if (focused != null && focused.keyPressed(input)) {
+                    return true;
+                }
+            }
+        }
         
         if (editor == null) return super.keyPressed(input);
         

@@ -469,21 +469,36 @@ public class MultilineEditor extends AbstractEditor {
             }
         }
 
-//        if (controlDown) {
-//            if (keyCode == GLFW.GLFW_KEY_V) {
-//                pasteFromClipboard();
-//                updateSuggestions();
-//                return true;
-//            }
-//            if (keyCode == GLFW.GLFW_KEY_C) {
-//                copyToClipboard();
-//                return true;
-//            }
-//            if (keyCode == GLFW.GLFW_KEY_SPACE) {
-//                updateSuggestions();
-//                return true;
-//            }
-//        }
+        // --- Clipboard shortcuts ---
+        if (input.hasControlDown()) {
+            if (keyCode == GLFW.GLFW_KEY_A) {
+                // Select all: move cursor to end (full text is "selected" conceptually)
+                // Since we don't have visual selection yet, copy the whole text
+                Minecraft.getInstance().keyboardHandler.setClipboard(this.text);
+                this.cursorPosition = this.text.length();
+                updateCursorX();
+                return true;
+            }
+            if (keyCode == GLFW.GLFW_KEY_C) {
+                // Copy entire text to clipboard
+                Minecraft.getInstance().keyboardHandler.setClipboard(this.text);
+                return true;
+            }
+            if (keyCode == GLFW.GLFW_KEY_V) {
+                // Paste from clipboard at cursor position
+                String clipboard = Minecraft.getInstance().keyboardHandler.getClipboard();
+                if (clipboard != null && !clipboard.isEmpty()) {
+                    this.text = this.text.substring(0, this.cursorPosition)
+                            + clipboard
+                            + this.text.substring(this.cursorPosition);
+                    this.cursorPosition += clipboard.length();
+                    this.onTextChanged();
+                    updateCursorX();
+                    updateSuggestions();
+                }
+                return true;
+            }
+        }
         
         if (keyCode == GLFW.GLFW_KEY_LEFT) {
             this.cursorPosition = Mth.clamp(this.cursorPosition - 1, 0, this.text.length());
