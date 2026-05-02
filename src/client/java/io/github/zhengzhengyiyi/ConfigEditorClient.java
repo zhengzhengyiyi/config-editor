@@ -12,7 +12,7 @@ import io.github.zhengzhengyiyi.gui.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -48,21 +48,21 @@ public class ConfigEditorClient implements ClientModInitializer {
 	 * The keybinding for open the configure
 	 * @see KeyBinding
 	 */
-	public static KeyMapping key = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+	public static KeyMapping key = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 			"zhengzhengyiyi.key.open_gui",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_UNKNOWN,
 			KeyMapping.Category.GAMEPLAY
 	));
 
-	public static KeyMapping chatkey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+	public static KeyMapping chatkey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 			"zhengzhengyiyi.key.open_chat_gui",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_UNKNOWN,
 			KeyMapping.Category.GAMEPLAY
 	));
 	
-	public static KeyMapping nbtDisplayKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+	public static KeyMapping nbtDisplayKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 			"zhengzhengyiyi.key.nbtDisplay",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_UNKNOWN,
