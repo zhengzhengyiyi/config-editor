@@ -40,6 +40,7 @@ public class TextSyntaxHighlighter implements HighLighter{
         return line.length();
     }
     
+    @SuppressWarnings("null")
     public int getTextWidthUpToChar(Font font, String line, int charIndex) {
         if (line.isEmpty() || charIndex <= 0) return 0;
         
@@ -64,6 +65,7 @@ public class TextSyntaxHighlighter implements HighLighter{
         return totalWidth;
     }
     
+    @SuppressWarnings("null")
     public void drawHighlightedText(GuiGraphicsExtractor context, Font font, String text, int x, int y, boolean editable) {
         if (text.isEmpty()) return;
         
@@ -200,6 +202,7 @@ public class TextSyntaxHighlighter implements HighLighter{
                c == '|' || c == '^' || c == '~' || c == '@' || c == '#' || c == '$' || c == '%';
     }
     
+    @SuppressWarnings("null")
     public int getTextWidth(Font font, String text) {
         if (text == null || text.isEmpty()) return 0;
         

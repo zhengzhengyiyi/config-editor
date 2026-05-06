@@ -17,7 +17,7 @@ public interface HighLighter {
      * Draws syntax-highlighted text at the specified position.
      * 
      * @param context the draw context used for rendering
-     * @param textRenderer the text renderer for measuring and drawing text
+     * @param font the text renderer for measuring and drawing text
      * @param text the text to be highlighted and drawn
      * @param x the x-coordinate of the starting position
      * @param y the y-coordinate of the starting position

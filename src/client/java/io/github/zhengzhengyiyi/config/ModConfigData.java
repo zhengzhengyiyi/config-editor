@@ -40,7 +40,15 @@ public class ModConfigData extends io.github.zhengzhengyiyi.api.config.ConfigDat
      */
     @SerializedName("show_block_overlay")
     public boolean showBlockOverlay = true;
-    
+
+    /**
+     * If true, shows a Jade/WTHIT-style overlay just below the block overlay
+     * displaying the name, registry id, and health bar of the entity the
+     * crosshair is pointing at.
+     */
+    @SerializedName("show_entity_overlay")
+    public boolean showEntityOverlay = true;
+
     /**
      * The theme can be either dark, light and auto
      */

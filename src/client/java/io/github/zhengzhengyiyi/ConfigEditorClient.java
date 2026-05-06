@@ -51,7 +51,7 @@ public class ConfigEditorClient implements ClientModInitializer {
 	
 	/**
 	 * The keybinding for open the configure
-	 * @see KeyBinding
+	 * @see KeyMapping
 	 */
 	public static KeyMapping key = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 			"zhengzhengyiyi.key.open_gui",

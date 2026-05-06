@@ -53,7 +53,7 @@ public class EntityOverlayHudElement implements HudElement {
 
         if (mc.screen != null) return;
         if (mc.level == null || mc.player == null) return;
-        if (!ConfigEditorClient.configManager.getConfig().showBlockOverlay) return;
+        if (!ConfigEditorClient.configManager.getConfig().showEntityOverlay) return;
 
         // crosshairPickEntity is the entity the crosshair is directly targeting
         Entity entity = mc.crosshairPickEntity;

@@ -114,7 +114,9 @@ public class TextSearchEngine {
                         String beforeMatch = line.substring(0, matchInLine);
                         String matchText = line.substring(matchInLine, Math.min(matchInLine + searchText.length(), line.length()));
                         
+                        @SuppressWarnings("null")
                         int xStart = x + font.width(beforeMatch);
+                        @SuppressWarnings("null")
                         int highlightWidth = font.width(matchText);
                         
                         if (matchPos == getCurrentMatchPosition()) {
