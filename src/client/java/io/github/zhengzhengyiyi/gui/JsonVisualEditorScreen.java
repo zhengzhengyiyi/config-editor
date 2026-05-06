@@ -344,7 +344,7 @@ public class JsonVisualEditorScreen extends Screen {
     
     @SuppressWarnings("null")
     @Override
-    public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         int centerX = width / 2;
         
         context.centeredText(

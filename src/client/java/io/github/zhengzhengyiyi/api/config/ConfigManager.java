@@ -102,6 +102,7 @@ public class ConfigManager<T extends ConfigData> {
      * Starts a background thread that monitors the config file for changes.
      * Automatically reloads the configuration if the file is modified externally.
      */
+    @SuppressWarnings("unused")
     private void startFileWatcher() {
         if (fileWatcher != null && !fileWatcher.isShutdown()) {
             fileWatcher.shutdown();

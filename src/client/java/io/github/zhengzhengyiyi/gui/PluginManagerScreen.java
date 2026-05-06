@@ -61,6 +61,7 @@ public class PluginManagerScreen extends Screen {
         }
     }
 
+    @SuppressWarnings("null")
     @Override
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         context.centeredText(this.font, this.title, this.width / 2, 12, 0xFFFFFF);

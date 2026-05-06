@@ -73,7 +73,6 @@ public class NbtEditorScreen extends Screen {
         JsonObject jsonObject = new JsonObject();
         Set<String> keys = nbt.keySet();
         for (String key : keys) {
-            @SuppressWarnings("null")
             Tag element = nbt.get(key);
             jsonObject.addProperty(key, element.toString());
         }
@@ -103,7 +102,7 @@ public class NbtEditorScreen extends Screen {
 
     @SuppressWarnings("null")
     @Override
-    public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         super.extractRenderState(context, mouseX, mouseY, delta);
     }
 }

@@ -61,6 +61,7 @@ public class DateTimeDisplayEntrypoint implements ApiEntrypoint {
             cachedTimeText = LocalDateTime.now().format(FORMATTER);
         }
 
+        @SuppressWarnings("null")
         int textWidth = Minecraft.getInstance().font.width(cachedTimeText);
         xPos = editor.width / 2 + textWidth / 2;
 

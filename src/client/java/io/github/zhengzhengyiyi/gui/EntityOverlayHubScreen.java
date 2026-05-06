@@ -39,6 +39,7 @@ public class EntityOverlayHubScreen extends Screen {
         this.parent = parent;
     }
 
+    @SuppressWarnings("null")
     @Override
     protected void init() {
         super.init();
@@ -81,6 +82,7 @@ public class EntityOverlayHubScreen extends Screen {
      * Flips the {@code showEntityOverlay} config flag and saves the config.
      * Updates the button label to reflect the new state.
      */
+    @SuppressWarnings("null")
     private void toggleEntityOverlay() {
         ModConfigData cfg = ConfigEditorClient.configManager.getConfig();
         cfg.showEntityOverlay = !cfg.showEntityOverlay;
@@ -92,6 +94,7 @@ public class EntityOverlayHubScreen extends Screen {
      * Flips the {@code showBlockOverlay} config flag and saves the config.
      * Updates the button label to reflect the new state.
      */
+    @SuppressWarnings("null")
     private void toggleBlockOverlay() {
         ModConfigData cfg = ConfigEditorClient.configManager.getConfig();
         cfg.showBlockOverlay = !cfg.showBlockOverlay;
@@ -134,7 +137,7 @@ public class EntityOverlayHubScreen extends Screen {
     // -------------------------------------------------------------------------
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         // Dim background
         context.fill(0, 0, this.width, this.height, 0xA0000000);
 
@@ -167,7 +170,7 @@ public class EntityOverlayHubScreen extends Screen {
      * @return {@code true} if the event was consumed
      */
     @Override
-    public boolean keyPressed(KeyEvent input) {
+    public boolean keyPressed(@SuppressWarnings("null") KeyEvent input) {
         // Always pass Ctrl+A/C/V to the focused widget
         if (input.hasControlDown()) {
             int k = input.key();

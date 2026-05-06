@@ -45,6 +45,7 @@ public class AIChatScreen extends Screen {
         chatHistory.add("AI: I'm ready to assist you with anything!");
     }
 
+    @SuppressWarnings("null")
     @Override
     protected void init() {
         super.init();
@@ -150,6 +151,7 @@ public class AIChatScreen extends Screen {
         return totalLines;
     }
 
+    @SuppressWarnings("null")
     private List<String> wrapText(String text, int maxWidth) {
         List<String> lines = new ArrayList<>();
         String[] words = text.split(" ");
@@ -206,7 +208,7 @@ public class AIChatScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         int panelWidth = Math.min(400, this.width - 40);
         int panelHeight = Math.min(300, this.height - 80);
         int panelX = (this.width - panelWidth) / 2;
@@ -268,7 +270,7 @@ public class AIChatScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent input) {
+    public boolean keyPressed(@SuppressWarnings("null") KeyEvent input) {
         int keyCode = input.key();
 
         // Always pass Ctrl+A/C/V to the focused widget so clipboard works in text fields

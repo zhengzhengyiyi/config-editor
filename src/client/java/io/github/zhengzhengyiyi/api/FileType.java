@@ -40,7 +40,8 @@ public enum FileType {
 	 */
 	public static class DefaultHighlighter implements HighLighter {
 	    
-	    @Override
+	    @SuppressWarnings("null")
+		@Override
 	    public void drawHighlightedText(GuiGraphicsExtractor context, Font font, String text, int x, int y, boolean editable) {
 	        if (text == null || text.isEmpty()) return;
 	        
@@ -61,7 +62,8 @@ public enum FileType {
 	        int currentWidth = 0;
 	        for (int i = 0; i < line.length(); i++) {
 	            char c = line.charAt(i);
-	            int charWidth = font.width(String.valueOf(c));
+	            @SuppressWarnings("null")
+				int charWidth = font.width(String.valueOf(c));
 	            if (currentWidth + charWidth > targetX) {
 	                return i;
 	            }
@@ -70,7 +72,8 @@ public enum FileType {
 	        return line.length();
 	    }
 	    
-	    @Override
+	    @SuppressWarnings("null")
+		@Override
 	    public int getTextWidthUpToChar(Font font, String line, int charIndex) {
 	        if (line == null || line.isEmpty() || charIndex <= 0) return 0;
 	        

@@ -289,7 +289,6 @@ public class EditorScreen extends Screen {
             Path configDir = FabricLoader.getInstance().getConfigDir();
             String relativePath = configDir.relativize(file).toString();
             
-            @SuppressWarnings("null")
             Button button = Button.builder(
                     Component.literal(formatFileName(relativePath)),
                     _button -> switchFile(index))

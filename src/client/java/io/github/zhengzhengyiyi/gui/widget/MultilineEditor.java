@@ -57,7 +57,7 @@ public class MultilineEditor extends AbstractEditor {
     
     @SuppressWarnings("null")
     @Override
-    protected void extractWidgetRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (!this.visible) {
             return;
         }
@@ -398,8 +398,9 @@ public class MultilineEditor extends AbstractEditor {
                mouseY >= this.getY() + this.height - scrollbarHeight && mouseY <= this.getY() + this.height;
     }
 
+    @SuppressWarnings("null")
     @Override
-    public boolean keyPressed(@SuppressWarnings("null") KeyEvent input) {
+    public boolean keyPressed(KeyEvent input) {
         if (!this.editable) {
             return false;
         }
@@ -626,7 +627,7 @@ public class MultilineEditor extends AbstractEditor {
 
     @SuppressWarnings("null")
     @Override
-    protected void updateWidgetNarration(@SuppressWarnings("null") NarrationElementOutput builder) {
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
         this.defaultButtonNarrationText(builder);
     }
 
@@ -952,7 +953,7 @@ public class MultilineEditor extends AbstractEditor {
     
     @SuppressWarnings("null")
     @Override
-    public boolean mouseDragged(@SuppressWarnings("null") MouseButtonEvent click, double offsetX, double offsetY) {
+    public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (isDraggingHorizontalScroll) {
             int visibleWidth = this.width - 20;
             int dragDeltaX = (int) click.x() - dragStartX;
@@ -970,7 +971,7 @@ public class MultilineEditor extends AbstractEditor {
 
     @SuppressWarnings("null")
     @Override
-    public boolean mouseReleased(@SuppressWarnings("null") MouseButtonEvent click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         if (isDraggingHorizontalScroll) {
             isDraggingHorizontalScroll = false;
             return true;
