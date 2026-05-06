@@ -345,14 +345,20 @@ public class JsonVisualEditorScreen extends Screen {
     @SuppressWarnings("null")
     @Override
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        // Background
+        context.fill(0, 0, this.width, this.height, 0xFF1E1E2E);
+        
+        // Header bar
         int centerX = width / 2;
+        context.fill(0, 0, this.width, 35, 0xFF181825);
+        context.fill(0, 34, this.width, 35, 0xFF89B4FA);
         
         context.centeredText(
             textRenderer,
-            Component.translatable("configeditor.visual.title"),
+            Component.literal("✦ JSON Visual Editor"),
             centerX,
-            20,
-            0xFFFFFF
+            10,
+            0xFFCDD6F4
         );
         
         String fieldCountText = Component.translatable(
@@ -362,19 +368,20 @@ public class JsonVisualEditorScreen extends Screen {
         
         context.text(
             textRenderer,
-            fieldCountText,
+            "§7" + fieldCountText,
             centerX - 150,
-            35,
-            0xAAAAAA
+            22,
+            0xFF6C7086
         );
         
+        // Scroll indicators
         if (scrollOffset > 0) {
             context.text(
                 textRenderer,
-                "... ↑ ...",
+                "§7... ↑ more above ...",
                 centerX - 150,
                 45,
-                0x888888
+                0xFF6C7086
             );
         }
         
@@ -382,25 +389,41 @@ public class JsonVisualEditorScreen extends Screen {
             int bottomTextY = 50 + (MAX_VISIBLE_FIELDS * (FIELD_HEIGHT + 5));
             context.text(
                 textRenderer,
-                "... ↓ ...",
+                "§7... ↓ more below ...",
                 centerX - 150,
                 bottomTextY,
-                0x888888
+                0xFF6C7086
             );
         }
         
+        // Field rows with alternating backgrounds
+        int rowIndex = 0;
         for (FieldEntry entry : fieldEntries) {
-            int bgColor = entry.hasError ? 0x30FF5555 : 0x20FFFFFF;
-            context.fill(entry.x, entry.y, entry.x + entry.width, entry.y + entry.height, bgColor);
+            // Alternating row background
+            int rowBg = (rowIndex % 2 == 0) ? 0x20313244 : 0x20181825;
+            context.fill(entry.x - 5, entry.y, entry.x + entry.width + 5, entry.y + entry.height, rowBg);
             
+            // Error highlight
+            if (entry.hasError) {
+                context.fill(entry.x - 5, entry.y, entry.x + entry.width + 5, entry.y + entry.height, 0x30F38BA8);
+            }
+            
+            // Left border accent for depth
+            if (entry.depth > 0) {
+                int accentColor = 0xFF45475A;
+                context.fill(entry.x - 5, entry.y, entry.x - 4, entry.y + entry.height, accentColor);
+            }
+            
+            // Colon separator
             context.text(
                 textRenderer,
                 ":",
                 entry.x + entry.width / 2 - 10,
                 entry.y + 10,
-                0xFFFFFF
+                0xFF89B4FA
             );
             
+            // Tree structure lines
             for (int i = 0; i < entry.depth; i++) {
                 int lineX = entry.x - INDENT_WIDTH * (entry.depth - i) + 5;
                 context.text(
@@ -408,7 +431,7 @@ public class JsonVisualEditorScreen extends Screen {
                     "│",
                     lineX,
                     entry.y + 10,
-                    0x888888
+                    0xFF45475A
                 );
             }
             
@@ -418,23 +441,30 @@ public class JsonVisualEditorScreen extends Screen {
                     "├─",
                     entry.x - 15,
                     entry.y + 10,
-                    0x888888
+                    0xFF45475A
                 );
             }
             
+            // Type badge
             String typeLabel = entry.getTypeLabel();
             int typeColor = entry.getTypeColor();
+            int badgeX = entry.x + entry.width - 40;
+            int badgeY = entry.y + 8;
+            // Badge background
+            context.fill(badgeX - 2, badgeY - 1, badgeX + textRenderer.width(typeLabel) + 2, badgeY + 9, 0x40000000);
             context.text(
                 textRenderer,
                 typeLabel,
-                entry.x + entry.width - 40,
-                entry.y + 10,
+                badgeX,
+                badgeY,
                 typeColor
             );
             
             if (entry.keyField.isMouseOver(mouseX, mouseY) || entry.valueField.isMouseOver(mouseX, mouseY)) {
                 renderFieldTooltip(context, mouseX, mouseY, entry);
             }
+            
+            rowIndex++;
         }
         
         super.extractRenderState(context, mouseX, mouseY, delta);
@@ -442,10 +472,10 @@ public class JsonVisualEditorScreen extends Screen {
         if (fieldEntries.isEmpty()) {
             context.centeredText(
                 textRenderer,
-                Component.translatable("configeditor.visual.empty"),
+                Component.literal("§7No fields. Click 'Add Field' to start."),
                 centerX,
                 height / 2,
-                0x888888
+                0xFF6C7086
             );
         }
     }

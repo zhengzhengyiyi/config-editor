@@ -45,10 +45,12 @@ public class EntityOverlayHubScreen extends Screen {
         super.init();
 
         int centerX = this.width / 2;
-        int startY   = this.height / 2 - 60;
-        int btnW     = 220;
-        int btnH     = 20;
-        int gap      = 28;
+        int cardH   = 160;
+        int cardY   = this.height / 2 - cardH / 2 - 10;
+        int startY  = cardY + 42;
+        int btnW    = 220;
+        int btnH    = 20;
+        int gap     = 26;
 
         // --- Entity overlay toggle ---
         entityOverlayToggle = Button.builder(
@@ -70,7 +72,7 @@ public class EntityOverlayHubScreen extends Screen {
         this.addRenderableWidget(Button.builder(
                 Component.translatable("gui.done"),
                 button -> onClose())
-                .bounds(centerX - 100, this.height - 38, 200, btnH)
+                .bounds(centerX - 100, cardY + cardH - 30, 200, btnH)
                 .build());
     }
 
@@ -138,17 +140,33 @@ public class EntityOverlayHubScreen extends Screen {
 
     @Override
     public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        // Dim background
-        context.fill(0, 0, this.width, this.height, 0xA0000000);
+        // Full-screen dim
+        context.fill(0, 0, this.width, this.height, 0xB0101018);
+
+        int cardW = 260;
+        int cardH = 160;
+        int cardX = this.width / 2 - cardW / 2;
+        int cardY = this.height / 2 - cardH / 2 - 10;
+
+        // Card border
+        context.fill(cardX - 2, cardY - 2, cardX + cardW + 2, cardY + cardH + 2, 0xFF89B4FA);
+        // Card background
+        context.fill(cardX, cardY, cardX + cardW, cardY + cardH, 0xFF1E1E2E);
+        // Card title bar
+        context.fill(cardX, cardY, cardX + cardW, cardY + 22, 0xFF181825);
+        // Title bar bottom accent
+        context.fill(cardX, cardY + 21, cardX + cardW, cardY + 22, 0xFF89B4FA);
 
         // Title
-        context.centeredText(this.font, this.title, this.width / 2, this.height / 2 - 90, 0xFFFFFF);
+        context.centeredText(this.font, this.title, this.width / 2, cardY + 7, 0xFFCDD6F4);
 
-        // Status summary below the title
+        // Status summary
         ModConfigData cfg = ConfigEditorClient.configManager.getConfig();
-        String summary = "Entity: " + (cfg.showEntityOverlay ? "§aON§r" : "§cOFF§r")
-                + "   Block: " + (cfg.showBlockOverlay ? "§aON§r" : "§cOFF§r");
-        context.centeredText(this.font, Component.literal(summary), this.width / 2, this.height / 2 - 75, 0xAAAAAA);
+        String entityStatus = cfg.showEntityOverlay ? "§aON" : "§cOFF";
+        String blockStatus  = cfg.showBlockOverlay  ? "§aON" : "§cOFF";
+        context.centeredText(this.font,
+                Component.literal("Entity Overlay: " + entityStatus + "   Block Overlay: " + blockStatus),
+                this.width / 2, cardY + 28, 0xFF6C7086);
 
         super.extractRenderState(context, mouseX, mouseY, delta);
     }

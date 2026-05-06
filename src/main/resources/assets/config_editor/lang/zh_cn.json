@@ -1,5 +1,7 @@
 {
   "configeditor.title": "配置编辑器",
+  "configeditor.editor": "编辑器",
+  
   "configeditor.button.save": "保存",
   "configeditor.button.close": "关闭",
   "configeditor.button.plugins": "插件管理",
@@ -8,6 +10,7 @@
   "configeditor.button.visual": "可视化编辑",
   "configeditor.button.aichat": "AI助手",
   "configeditor.button.validate": "验证JSON",
+  
   "configeditor.search.placeholder": "搜索...",
   "configeditor.search.prev": "上一个",
   "configeditor.search.next": "下一个",
@@ -16,21 +19,30 @@
   "configeditor.visual.key": "键名",
   "configeditor.visual.value": "键值",
   "configeditor.visual.addfield": "添加字段",
-  "configeditor.visual.addobject": "添加Object",
+  "configeditor.visual.addobject": "添加对象",
   "configeditor.visual.rawedit": "原始编辑",
   "configeditor.visual.fieldcount": "字段数: %s",
   "configeditor.visual.empty": "暂无字段。点击'添加字段'开始编辑。",
   "configeditor.visual.newfield": "新字段",
+  "configeditor.visual.newobject": "新对象",
   
   "configeditor.visual.type.string": "字符串",
   "configeditor.visual.type.number": "数字",
   "configeditor.visual.type.boolean": "布尔值",
   "configeditor.visual.type.null": "空值",
+  "configeditor.visual.type.object": "对象",
   "configeditor.visual.type.unknown": "未知",
   
   "configeditor.visual.tooltip.type": "类型: %s",
   "configeditor.visual.tooltip.delete": "删除此字段",
   "configeditor.visual.tooltip.error": "当前类型的值无效",
+  "configeditor.visual.tooltip.expand": "展开/折叠对象",
+  
+  "configeditor.entityhub.title": "覆盖层设置",
+  "configeditor.entityhub.entity_on": "实体覆盖层: 开启",
+  "configeditor.entityhub.entity_off": "实体覆盖层: 关闭",
+  "configeditor.entityhub.block_on": "方块覆盖层: 开启",
+  "configeditor.entityhub.block_off": "方块覆盖层: 关闭",
   
   "configeditor.confirm.title": "确认",
   "configeditor.confirm.unsavedclose": "您有未保存的更改。确定要关闭吗？",
@@ -48,8 +60,10 @@
   "configeditor.theme.light": "浅色",
   "configeditor.theme.auto": "自动",
   
-  "button.zhengzhengyiyi.disable": "已禁用",
   "button.zhengzhengyiyi.enable": "已启用",
+  "button.zhengzhengyiyi.disable": "已禁用",
+  
+  "screen.zhengzhengyiyi.plugin_manager": "插件管理器",
 
   "configeditor.overlay.block": "方块信息显示",
   "configeditor.overlay.enabled": "方块信息显示已启用",

@@ -1,0 +1,71 @@
+{
+  "configeditor.title": "Éditeur de Configuration",
+  "configeditor.editor": "Éditeur",
+  
+  "configeditor.button.save": "Enregistrer",
+  "configeditor.button.close": "Fermer",
+  "configeditor.button.plugins": "Plugins",
+  "configeditor.button.openfolder": "Ouvrir le Dossier",
+  "configeditor.button.backup": "Sauvegarde",
+  "configeditor.button.visual": "Édition Visuelle",
+  "configeditor.button.aichat": "Chat IA",
+  "configeditor.button.validate": "Valider JSON",
+  
+  "configeditor.search.placeholder": "Rechercher...",
+  "configeditor.search.prev": "Préc.",
+  "configeditor.search.next": "Suiv.",
+  
+  "configeditor.visual.title": "Éditeur Visuel JSON",
+  "configeditor.visual.key": "Clé",
+  "configeditor.visual.value": "Valeur",
+  "configeditor.visual.addfield": "Ajouter un Champ",
+  "configeditor.visual.addobject": "Ajouter un Objet",
+  "configeditor.visual.rawedit": "Édition Brute",
+  "configeditor.visual.fieldcount": "Champs : %s",
+  "configeditor.visual.empty": "Aucun champ. Cliquez sur 'Ajouter un Champ' pour commencer.",
+  "configeditor.visual.newfield": "nouveau_champ",
+  "configeditor.visual.newobject": "nouvel_objet",
+  
+  "configeditor.visual.type.string": "Chaîne",
+  "configeditor.visual.type.number": "Nombre",
+  "configeditor.visual.type.boolean": "Booléen",
+  "configeditor.visual.type.null": "Nul",
+  "configeditor.visual.type.object": "Objet",
+  "configeditor.visual.type.unknown": "Inconnu",
+  
+  "configeditor.visual.tooltip.type": "Type : %s",
+  "configeditor.visual.tooltip.delete": "Supprimer ce champ",
+  "configeditor.visual.tooltip.error": "Valeur invalide pour le type actuel",
+  "configeditor.visual.tooltip.expand": "Développer/réduire l'objet",
+  
+  "configeditor.entityhub.title": "Paramètres de Superposition",
+  "configeditor.entityhub.entity_on": "Superposition d'Entité : ACTIVÉE",
+  "configeditor.entityhub.entity_off": "Superposition d'Entité : DÉSACTIVÉE",
+  "configeditor.entityhub.block_on": "Superposition de Bloc : ACTIVÉE",
+  "configeditor.entityhub.block_off": "Superposition de Bloc : DÉSACTIVÉE",
+  
+  "configeditor.confirm.title": "Confirmer",
+  "configeditor.confirm.unsavedclose": "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir fermer ?",
+  
+  "configeditor.message.saved": "Enregistré avec succès !",
+  "configeditor.message.jsonvalid": "Le JSON est valide !",
+  "configeditor.message.jsoninvalid": "Le JSON est invalide !",
+  
+  "configeditor.error.loadfailed": "Échec du chargement du fichier de configuration",
+  "configeditor.error.savefailed": "Échec de l'enregistrement du fichier",
+  "configeditor.error.fileretryfailed": "Échec de l'enregistrement après plusieurs tentatives",
+  "configeditor.error.invalidjson": "Format JSON invalide",
+  
+  "configeditor.theme.dark": "Sombre",
+  "configeditor.theme.light": "Clair",
+  "configeditor.theme.auto": "Auto",
+  
+  "button.zhengzhengyiyi.enable": "Activé",
+  "button.zhengzhengyiyi.disable": "Désactivé",
+  
+  "screen.zhengzhengyiyi.plugin_manager": "Gestionnaire de Plugins",
+
+  "configeditor.overlay.block": "Superposition de Bloc",
+  "configeditor.overlay.enabled": "Superposition de bloc activée",
+  "configeditor.overlay.disabled": "Superposition de bloc désactivée"
+}

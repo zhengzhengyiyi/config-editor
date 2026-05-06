@@ -50,23 +50,23 @@ public class AIChatScreen extends Screen {
     protected void init() {
         super.init();
         checkServerAvailability();
-        int panelWidth = Math.min(400, this.width - 40);
-        int panelHeight = Math.min(300, this.height - 80);
+        int panelWidth = Math.min(500, this.width - 40);
+        int panelHeight = Math.min(320, this.height - 100);
         int panelX = (this.width - panelWidth) / 2;
         int panelY = (this.height - panelHeight) / 2 - 20;
-        int inputY = panelY + panelHeight + 10;
-        int inputWidth = panelWidth - 100;
-        this.inputField = new EditBox(this.font, panelX, inputY, inputWidth, 20, Component.literal("Type your message..."));
+        int inputY = panelY + panelHeight + 8;
+        int inputWidth = panelWidth - 55;
+        this.inputField = new EditBox(this.font, panelX, inputY, inputWidth, 20, Component.literal("Type your message…"));
         this.inputField.setMaxLength(1024);
         this.inputField.setEditable(false);
         this.addRenderableWidget(this.inputField);
-        this.sendButton = Button.builder(Component.literal("Send"), button -> sendMessage())
-            .bounds(panelX + inputWidth + 5, inputY, 45, 20)
+        this.sendButton = Button.builder(Component.literal("Send ▶"), button -> sendMessage())
+            .bounds(panelX + inputWidth + 5, inputY, 50, 20)
             .build();
         this.sendButton.active = false;
         this.addRenderableWidget(this.sendButton);
         int pathY = inputY + 26;
-        this.pathField = new EditBox(this.font, panelX, pathY, inputWidth - 50, 20, Component.literal("Enter file or folder path relative to .minecraft or absolute"));
+        this.pathField = new EditBox(this.font, panelX, pathY, inputWidth - 50, 20, Component.literal("File/folder path…"));
         this.pathField.setMaxLength(1024);
         this.addRenderableWidget(this.pathField);
         this.loadButton = Button.builder(Component.literal("Load"), button -> loadPathAndSend())
@@ -74,19 +74,19 @@ public class AIChatScreen extends Screen {
             .build();
         this.addRenderableWidget(this.loadButton);
         this.clearButton = Button.builder(Component.literal("Clear"), button -> clearChat())
-            .bounds(panelX + panelWidth - 90, panelY - 25, 45, 20)
+            .bounds(panelX + panelWidth - 95, panelY - 24, 45, 18)
             .build();
         this.addRenderableWidget(this.clearButton);
-        this.settingsButton = Button.builder(Component.literal("Settings"), button -> openSettings())
-            .bounds(panelX + panelWidth - 45, panelY - 25, 45, 20)
+        this.settingsButton = Button.builder(Component.literal("⚙ Editor"), button -> openSettings())
+            .bounds(panelX + panelWidth - 48, panelY - 24, 48, 18)
             .build();
         this.addRenderableWidget(this.settingsButton);
         this.scrollUpButton = Button.builder(Component.literal("↑"), button -> scrollUp())
-            .bounds(panelX + panelWidth - 20, panelY + 25, 16, 16)
+            .bounds(panelX + panelWidth - 15, panelY + 23, 12, 14)
             .build();
         this.addRenderableWidget(this.scrollUpButton);
         this.scrollDownButton = Button.builder(Component.literal("↓"), button -> scrollDown())
-            .bounds(panelX + panelWidth - 20, panelY + panelHeight - 20, 16, 16)
+            .bounds(panelX + panelWidth - 15, panelY + panelHeight - 18, 12, 14)
             .build();
         this.addRenderableWidget(this.scrollDownButton);
         this.setInitialFocus(this.inputField);
@@ -132,10 +132,10 @@ public class AIChatScreen extends Screen {
     }
 
     private int getMaxScrollOffset() {
-        int panelWidth = Math.min(400, this.width - 40);
-        int panelHeight = Math.min(300, this.height - 80);
-        int maxVisibleLines = (panelHeight - 50) / 10;
-        int totalLines = getTotalChatLines(panelWidth - 30);
+        int panelWidth = Math.min(500, this.width - 40);
+        int panelHeight = Math.min(320, this.height - 100);
+        int maxVisibleLines = (panelHeight - 55) / 12;
+        int totalLines = getTotalChatLines(panelWidth - 32);
         return Math.max(0, totalLines - maxVisibleLines);
     }
 
@@ -192,8 +192,8 @@ public class AIChatScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        int panelWidth = Math.min(400, this.width - 40);
-        int panelHeight = Math.min(300, this.height - 80);
+        int panelWidth = Math.min(500, this.width - 40);
+        int panelHeight = Math.min(320, this.height - 100);
         int panelX = (this.width - panelWidth) / 2;
         int panelY = (this.height - panelHeight) / 2 - 20;
         if (mouseX >= panelX && mouseX <= panelX + panelWidth && mouseY >= panelY && mouseY <= panelY + panelHeight) {
@@ -209,27 +209,45 @@ public class AIChatScreen extends Screen {
 
     @Override
     public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        int panelWidth = Math.min(400, this.width - 40);
-        int panelHeight = Math.min(300, this.height - 80);
+        int panelWidth = Math.min(500, this.width - 40);
+        int panelHeight = Math.min(320, this.height - 100);
         int panelX = (this.width - panelWidth) / 2;
         int panelY = (this.height - panelHeight) / 2 - 20;
-        context.fill(panelX - 2, panelY - 2, panelX + panelWidth + 2, panelY + panelHeight + 2, 0xFF333333);
-        context.fill(panelX, panelY, panelX + panelWidth, panelY + panelHeight, 0xFF1a1a1a);
-        String title = "AI Chat Assistant";
+
+        // ── Outer glow / border ───────────────────────────────────────────────
+        context.fill(panelX - 2, panelY - 2, panelX + panelWidth + 2, panelY + panelHeight + 2, 0xFF45475A);
+        // ── Panel background ──────────────────────────────────────────────────
+        context.fill(panelX, panelY, panelX + panelWidth, panelY + panelHeight, 0xFF1E1E2E);
+        // ── Title bar ─────────────────────────────────────────────────────────
+        context.fill(panelX, panelY, panelX + panelWidth, panelY + 22, 0xFF181825);
+        context.fill(panelX, panelY + 21, panelX + panelWidth, panelY + 22, 0xFF89B4FA);
+
+        // Title text
+        String title = "✦ AI Chat Assistant";
         if (checkingServer) {
-            title += " (Checking server...)";
+            title += "  §7(checking…)";
         } else if (!serverAvailable) {
-            title += " (Server Offline)";
+            title += "  §c(offline)";
+        } else {
+            title += "  §a(online)";
         }
-        context.text(this.font, Component.literal(title), this.width / 2 - 70, panelY - 15, 0xFFFFFF, false);
-        context.horizontalLine(panelX + 5, panelX + panelWidth - 5, panelY + 20, 0xFF666666);
-        int chatY = panelY + 35;
-        int maxVisibleLines = (panelHeight - 50) / 12;
-        int textAreaWidth = panelWidth - 30;
+        context.text(this.font, Component.literal(title), panelX + 8, panelY + 7, 0xFFCDD6F4, false);
+
+        // ── Separator below title ─────────────────────────────────────────────
+        // (already drawn as the accent line above)
+
+        // ── Scroll bar track ──────────────────────────────────────────────────
         drawScrollBar(context, panelX, panelY, panelWidth, panelHeight);
+
         updateUIState();
         super.extractRenderState(context, mouseX, mouseY, delta);
-        context.enableScissor(panelX + 5, panelY + 25, panelX + panelWidth - 5, panelY + panelHeight - 5);
+
+        // ── Chat messages ─────────────────────────────────────────────────────
+        int chatY = panelY + 28;
+        int maxVisibleLines = (panelHeight - 55) / 12;
+        int textAreaWidth = panelWidth - 32;
+
+        context.enableScissor(panelX + 5, panelY + 23, panelX + panelWidth - 18, panelY + panelHeight - 5);
         int currentLine = 0;
         int visibleLineCount = 0;
         for (String message : chatHistory) {
@@ -238,6 +256,14 @@ public class AIChatScreen extends Screen {
                 if (currentLine >= chatScrollOffset && visibleLineCount < maxVisibleLines) {
                     int renderY = chatY + visibleLineCount * 12;
                     int color = getMessageColor(message);
+                    // Draw a subtle left-edge accent for AI messages
+                    if (message.startsWith("AI:") && line.equals(wrappedLines.get(0))) {
+                        context.fill(panelX + 5, renderY - 1, panelX + 7, renderY + 10, 0xFF89B4FA);
+                    } else if (message.startsWith("You:") && line.equals(wrappedLines.get(0))) {
+                        context.fill(panelX + 5, renderY - 1, panelX + 7, renderY + 10, 0xFFA6E3A1);
+                    } else if (message.startsWith("System:") && line.equals(wrappedLines.get(0))) {
+                        context.fill(panelX + 5, renderY - 1, panelX + 7, renderY + 10, 0xFFF9E2AF);
+                    }
                     context.text(this.font, line, panelX + 10, renderY, color, false);
                     visibleLineCount++;
                 }
@@ -246,26 +272,32 @@ public class AIChatScreen extends Screen {
         }
         if ((checkingServer || waitingForSendResponse || loadingFile) && visibleLineCount < maxVisibleLines) {
             int renderY = chatY + visibleLineCount * 12;
-            String loadingText = checkingServer ? "Checking server status" : (waitingForSendResponse ? "AI is thinking" : "Loading files...");
-            context.text(this.font, loadingText, panelX + 10, renderY, 0xFFFFFFFF, false);
+            String loadingText = checkingServer ? "§7Checking server…"
+                    : (waitingForSendResponse ? "§7AI is thinking…" : "§7Loading files…");
+            context.text(this.font, Component.literal(loadingText), panelX + 10, renderY, 0xFFAAAAAA, false);
         }
         context.disableScissor();
     }
 
     private int getMessageColor(String message) {
-        return 0xFFFFFFFF;
+        if (message.startsWith("You:"))    return 0xFFA6E3A1; // green  — user
+        if (message.startsWith("AI:"))     return 0xFFCDD6F4; // light  — AI
+        if (message.startsWith("System:")) return 0xFFF9E2AF; // yellow — system
+        return 0xFFBAC2DE;                                     // muted  — other
     }
 
     private void drawScrollBar(GuiGraphicsExtractor context, int panelX, int panelY, int panelWidth, int panelHeight) {
-        int scrollBarX = panelX + panelWidth - 18;
-        int scrollBarY = panelY + 25;
-        int scrollBarHeight = panelHeight - 30;
-        context.fill(scrollBarX, scrollBarY, scrollBarX + 12, scrollBarY + scrollBarHeight, 0xFF444444);
+        int scrollBarX = panelX + panelWidth - 16;
+        int scrollBarY = panelY + 23;
+        int scrollBarHeight = panelHeight - 28;
+        // Track
+        context.fill(scrollBarX, scrollBarY, scrollBarX + 10, scrollBarY + scrollBarHeight, 0xFF313244);
         int maxScrollOffset = getMaxScrollOffset();
         if (maxScrollOffset > 0) {
-            int thumbHeight = Math.max(20, (int)(scrollBarHeight * (1.0 / (maxScrollOffset + 1))));
+            int thumbHeight = Math.max(16, (int)(scrollBarHeight * (1.0 / (maxScrollOffset + 1))));
             int thumbY = scrollBarY + (int)((scrollBarHeight - thumbHeight) * (chatScrollOffset / (double)maxScrollOffset));
-            context.fill(scrollBarX, thumbY, scrollBarX + 12, thumbY + thumbHeight, 0xFF888888);
+            // Thumb
+            context.fill(scrollBarX + 1, thumbY, scrollBarX + 9, thumbY + thumbHeight, 0xFF89B4FA);
         }
     }
 

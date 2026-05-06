@@ -1,6 +1,8 @@
 package io.github.zhengzhengyiyi.config;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Configuration data class that holds all configurable variables for the editor.
@@ -48,6 +50,13 @@ public class ModConfigData extends io.github.zhengzhengyiyi.api.config.ConfigDat
      */
     @SerializedName("show_entity_overlay")
     public boolean showEntityOverlay = true;
+
+    /**
+     * List of disabled plugin identifiers (namespace:path format).
+     * Plugins in this list will not be loaded into ENTRYPOINTS on startup.
+     */
+    @SerializedName("disabled_plugins")
+    public List<String> disabledPlugins = new ArrayList<>();
 
     /**
      * The theme can be either dark, light and auto

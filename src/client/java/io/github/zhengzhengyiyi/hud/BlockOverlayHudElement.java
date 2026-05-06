@@ -25,10 +25,10 @@ public class BlockOverlayHudElement implements HudElement {
     private static final int LINE_GAP      = 2;
 
     // Colors
-    private static final int BG_COLOR       = 0xC0101010; // dark semi-transparent
-    private static final int BORDER_COLOR   = 0xFF444444; // subtle border
-    private static final int TEXT_COLOR     = 0xFFFFFFFF; // white
-    private static final int SUB_TEXT_COLOR = 0xFFAAAAAA; // grey for registry id
+    private static final int BG_COLOR       = 0xD0141420; // deep dark semi-transparent
+    private static final int BORDER_COLOR   = 0xFF89B4FA; // blue accent border
+    private static final int TEXT_COLOR     = 0xFFCDD6F4; // soft white
+    private static final int SUB_TEXT_COLOR = 0xFF6C7086; // muted grey for registry id
 
     @Override
     public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, @SuppressWarnings("null") DeltaTracker delta) {

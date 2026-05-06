@@ -39,13 +39,13 @@ public class EntityOverlayHudElement implements HudElement {
     private static final int TOP_OFFSET     = 52;
 
     // Colors
-    private static final int BG_COLOR         = 0xC0101010;
-    private static final int BORDER_COLOR     = 0xFF444444;
-    private static final int NAME_COLOR       = 0xFFFFFFFF;
-    private static final int ID_COLOR         = 0xFFAAAAAA;
-    private static final int HEALTH_BG_COLOR  = 0xFF333333;
-    private static final int HEALTH_FG_COLOR  = 0xFF55DD55;
-    private static final int HEALTH_LOW_COLOR = 0xFFDD5555;
+    private static final int BG_COLOR         = 0xD0141420; // deep dark semi-transparent
+    private static final int BORDER_COLOR     = 0xFF89B4FA; // blue accent border
+    private static final int NAME_COLOR       = 0xFFCDD6F4; // soft white
+    private static final int ID_COLOR         = 0xFF6C7086; // muted grey
+    private static final int HEALTH_BG_COLOR  = 0xFF313244; // dark track
+    private static final int HEALTH_FG_COLOR  = 0xFFA6E3A1; // green health
+    private static final int HEALTH_LOW_COLOR = 0xFFF38BA8; // red low health
 
     @Override
     public void extractRenderState(@SuppressWarnings("null") GuiGraphicsExtractor context, @SuppressWarnings("null") DeltaTracker delta) {

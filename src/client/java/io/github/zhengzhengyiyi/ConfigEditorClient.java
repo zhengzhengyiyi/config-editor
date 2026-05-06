@@ -81,6 +81,9 @@ public class ConfigEditorClient implements ClientModInitializer {
 	@SuppressWarnings("null")
 	@Override
 	public void onInitializeClient() {
+		// Load disabled plugins from config
+		List<String> disabledPluginIds = configManager.getConfig().disabledPlugins;
+		
 		FabricLoader.getInstance()
         .getEntrypointContainers(MOD_ID, ApiEntrypoint.class)
         .forEach(entrypoint -> {
@@ -94,17 +97,19 @@ public class ConfigEditorClient implements ClientModInitializer {
             }
         });
 		
+		// Add built-in plugins to TOTAL_ENTRYPOINTS
 		TOTAL_ENTRYPOINTS.add(new UndoRedoEntrypoint());
 		TOTAL_ENTRYPOINTS.add(new TextStatsEntrypoint());
 		TOTAL_ENTRYPOINTS.add(new DateTimeDisplayEntrypoint());
 		TOTAL_ENTRYPOINTS.add(new AutoBracketCompletionEntrypoint());
-		TOTAL_ENTRYPOINTS.add(new TextStatsEntrypoint());
 		
-		ENTRYPOINTS.add(new UndoRedoEntrypoint());
-		ENTRYPOINTS.add(new TextStatsEntrypoint());
-		ENTRYPOINTS.add(new DateTimeDisplayEntrypoint());
-		ENTRYPOINTS.add(new AutoBracketCompletionEntrypoint());
-		ENTRYPOINTS.add(new TextStatsEntrypoint());
+		// Add built-in plugins to ENTRYPOINTS only if not disabled
+		for (ApiEntrypoint plugin : TOTAL_ENTRYPOINTS) {
+			String pluginId = plugin.getIdentifier().toString();
+			if (!disabledPluginIds.contains(pluginId)) {
+				ENTRYPOINTS.add(plugin);
+			}
+		}
 		
 		ClientTickEvents.END_CLIENT_TICK.register((client) -> {
 			if (key.consumeClick()) {

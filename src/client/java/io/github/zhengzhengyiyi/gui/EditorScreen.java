@@ -71,7 +71,7 @@ public class EditorScreen extends Screen {
         themeToggleButton = Button.builder(
                 Component.translatable(getThemeButtonText()),
                 button -> toggleTheme())
-                .bounds(this.width - 55, 5, 50, 20)
+                .bounds(this.width - 55, 2, 50, 18)
                 .build();
         this.addRenderableWidget(themeToggleButton);
         
@@ -86,17 +86,18 @@ public class EditorScreen extends Screen {
 
         fileButtonList = new ArrayList<>();
         
+        // Scroll arrows sit at the very bottom of the sidebar, above the bottom bar
         scrollUpButton = Button.builder(Component.literal("↑"), button -> scrollUp())
-                .bounds(145, 25, 20, 20)
+                .bounds(5, this.height - 48, 75, 18)
                 .build();
         scrollDownButton = Button.builder(Component.literal("↓"), button -> scrollDown())
-                .bounds(145, this.height - 45, 20, 20)
+                .bounds(84, this.height - 48, 75, 18)
                 .build();
         
         managePluginsButton = Button.builder(
                 Component.translatable("configeditor.button.plugins"),
                 button -> client.setScreen(new PluginManagerScreen(this)))
-                .bounds(this.width - 40, this.height - 30, 40, 20)
+                .bounds(this.width - 40, this.height - 23, 38, 18)
                 .build();
         
         this.addRenderableWidget(scrollUpButton);
@@ -106,8 +107,8 @@ public class EditorScreen extends Screen {
         renderFileList();
         
         editor = new MultilineEditor(
-                170, 20,
-                this.width - 180, this.height - 55,
+                165, 21,
+                this.width - 175, this.height - 48,
                 Component.translatable("configeditor.editor"));
         editor.setChangedListener(text -> {
             if (!buffer.equals(text)) {
@@ -118,41 +119,41 @@ public class EditorScreen extends Screen {
             }
         });
 
-        int bottomY = this.height - 30;
+        int bottomY = this.height - 23;
         int centerX = this.width / 2;
         
         backupButton = Button.builder(
                 Component.translatable("configeditor.button.backup"), 
                 button -> BackupHelper.backupEntireConfigDirectory())
-                .bounds(centerX - 200, bottomY, 80, 20)
+                .bounds(centerX - 130, bottomY, 80, 18)
                 .build();
 
         saveButton = Button.builder(
                 Component.translatable("configeditor.button.save"),
                 button -> saveFile())
-                .bounds(centerX - 110, bottomY, 80, 20)
+                .bounds(centerX - 42, bottomY, 80, 18)
                 .build();
         
         visualEditButton = Button.builder(
                 Component.translatable("configeditor.button.visual"),
                 button -> openVisualEditor())
-                .bounds(centerX + 10, bottomY, 100, 20)
+                .bounds(centerX + 46, bottomY, 100, 18)
                 .build();
 //        visualEditButton.active = false;
         
         openFolderButton = Button.builder(
                 Component.translatable("configeditor.button.openfolder"),
                 button -> openConfigFolder())
-                .bounds(0, 0, 80, 20)
+                .bounds(5, bottomY, 90, 18)
                 .build();
         
         int searchX = this.width - 320;
         searchField = new EditBox(
             font, 
             searchX, 
-            5, 
+            2, 
             150, 
-            20, 
+            18, 
             Component.translatable("configeditor.search.placeholder")
         );
         searchField.setResponder(text -> {
@@ -167,7 +168,7 @@ public class EditorScreen extends Screen {
         searchPrevButton = Button.builder(
             Component.translatable("configeditor.search.prev"), 
             button -> findPrevious())
-            .bounds(searchX + 155, 5, 40, 20)
+            .bounds(searchX + 155, 2, 38, 18)
             .build();
         searchPrevButton.active = false;
         searchPrevButton.visible = true;
@@ -175,7 +176,7 @@ public class EditorScreen extends Screen {
         searchNextButton = Button.builder(
             Component.translatable("configeditor.search.next"), 
             button -> findNext())
-            .bounds(searchX + 195, 5, 40, 20)
+            .bounds(searchX + 195, 2, 38, 18)
             .build();
         searchNextButton.active = false;
         searchNextButton.visible = true;
@@ -186,19 +187,14 @@ public class EditorScreen extends Screen {
                 searchField.setValue("");
                 endSearch();
             })
-            .bounds(searchX + 235, 5, 20, 20)
+            .bounds(searchX + 235, 2, 18, 18)
             .build();
         closeSearchButton.visible = true;
-        
-        int quickButtonX = this.width - 100;
-        int quickButtonY = this.height - 20;
-        int quickButtonWidth = 55;
-        int quickButtonHeight = 20;
         
         aiChatButton = Button.builder(
             Component.translatable("configeditor.button.aichat"),
             button -> openAiChat())
-            .bounds(quickButtonX, quickButtonY, quickButtonWidth, quickButtonHeight)
+            .bounds(this.width - 100, bottomY, 55, 18)
             .build();
         
         this.addRenderableWidget(backupButton);
@@ -282,21 +278,23 @@ public class EditorScreen extends Screen {
         }
         fileButtonList.clear();
         
-        int buttonY = 25;
-        for (int i = fileListScrollOffset; i < configFiles.size() && i < fileListScrollOffset + 15; i++) {
+        // File list starts below the "FILES" header (y=20) and stops above the scroll arrows (height-50)
+        int maxVisible = Math.max(1, (this.height - 70) / 22);
+        int buttonY = 22;
+        for (int i = fileListScrollOffset; i < configFiles.size() && i < fileListScrollOffset + maxVisible; i++) {
             int index = i;
             Path file = configFiles.get(i);
             Path configDir = FabricLoader.getInstance().getConfigDir();
             String relativePath = configDir.relativize(file).toString();
             
             Button button = Button.builder(
-                    Component.literal(formatFileName(relativePath)),
+                    Component.literal((index == selectedIndex ? "▶ " : "  ") + formatFileName(relativePath)),
                     _button -> switchFile(index))
-                    .bounds(10, buttonY, 130, 20)
+                    .bounds(5, buttonY, 158, 20)
                     .build();
             this.addRenderableWidget(button);
             fileButtonList.add(button);
-            buttonY += 23;
+            buttonY += 22;
         }
     }
 
@@ -309,7 +307,8 @@ public class EditorScreen extends Screen {
     }
 
     private void scrollDown() {
-        if (fileListScrollOffset < configFiles.size() - 15) {
+        int maxVisible = Math.max(1, (this.height - 70) / 22);
+        if (fileListScrollOffset < configFiles.size() - maxVisible) {
             fileListScrollOffset++;
             renderFileList();
             updateScrollButtons();
@@ -317,8 +316,9 @@ public class EditorScreen extends Screen {
     }
 
     private void updateScrollButtons() {
+        int maxVisible = Math.max(1, (this.height - 70) / 22);
         scrollUpButton.active = fileListScrollOffset > 0;
-        scrollDownButton.active = fileListScrollOffset < configFiles.size() - 15;
+        scrollDownButton.active = fileListScrollOffset < configFiles.size() - maxVisible;
     }
 
     private void updateButtonStates() {
@@ -576,17 +576,44 @@ public class EditorScreen extends Screen {
     @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (ConfigEditorClient.configManager.getConfig().doRenderBackground) {
+            // Main background
             context.fill(0, 0, this.width, this.height, themeManager.getBackgroundColor());
+            // Sidebar panel
+            context.fill(0, 0, 163, this.height, themeManager.getSidebarColor());
+            // Sidebar right border
+            context.fill(162, 0, 163, this.height, themeManager.getBorderColor());
+            // Separator above sidebar scroll arrows
+            context.fill(0, this.height - 50, 163, this.height - 49, themeManager.getBorderColor());
+            // Top bar background
+            context.fill(163, 0, this.width, 20, themeManager.getPanelColor());
+            // Top bar bottom border
+            context.fill(163, 19, this.width, 20, themeManager.getBorderColor());
+            // Bottom bar background
+            context.fill(0, this.height - 26, this.width, this.height, themeManager.getPanelColor());
+            // Bottom bar top border
+            context.fill(0, this.height - 27, this.width, this.height - 26, themeManager.getBorderColor());
         }
+
+        // Sidebar "FILES" header
+        context.text(this.font, "§7FILES", 8, 8, themeManager.getMutedTextColor(), false);
+
         super.extractRenderState(context, mouseX, mouseY, delta);
-        
+
+        // Status bar — file name with modified indicator
         if (!configFiles.isEmpty()) {
-            String status = modified ? "* " + configFiles.get(selectedIndex).getFileName().toString() : 
-                configFiles.get(selectedIndex).getFileName().toString();
-            String editorType = "[File]";
-            context.text(this.font, status + editorType, 170, 5, modified ? 0xFFFF00 : 0xFFFFFF, false);
+            String fileName = configFiles.get(selectedIndex).getFileName().toString();
+            int nameColor;
+            String label;
+            if (modified) {
+                label = "● " + fileName;
+                nameColor = themeManager.getAccentYellow();
+            } else {
+                label = "  " + fileName;
+                nameColor = themeManager.getTextColor();
+            }
+            context.text(this.font, label, 172, 5, nameColor, false);
         }
-        
+
         for (io.github.zhengzhengyiyi.api.ApiEntrypoint entrypoint : ConfigEditorClient.ENTRYPOINTS) {
             entrypoint.renderButton(context, mouseX, mouseY, delta);
         }

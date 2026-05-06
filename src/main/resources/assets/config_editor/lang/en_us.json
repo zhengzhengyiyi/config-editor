@@ -1,5 +1,7 @@
 {
   "configeditor.title": "Config Editor",
+  "configeditor.editor": "Editor",
+  
   "configeditor.button.save": "Save",
   "configeditor.button.close": "Close",
   "configeditor.button.plugins": "Plugins",
@@ -8,6 +10,7 @@
   "configeditor.button.visual": "Visual Edit",
   "configeditor.button.aichat": "AI Chat",
   "configeditor.button.validate": "Validate JSON",
+  
   "configeditor.search.placeholder": "Search...",
   "configeditor.search.prev": "Prev",
   "configeditor.search.next": "Next",
@@ -21,16 +24,25 @@
   "configeditor.visual.fieldcount": "Fields: %s",
   "configeditor.visual.empty": "No fields. Click 'Add Field' to start.",
   "configeditor.visual.newfield": "new_field",
+  "configeditor.visual.newobject": "new_object",
   
   "configeditor.visual.type.string": "String",
   "configeditor.visual.type.number": "Number",
   "configeditor.visual.type.boolean": "Boolean",
   "configeditor.visual.type.null": "Null",
+  "configeditor.visual.type.object": "Object",
   "configeditor.visual.type.unknown": "Unknown",
   
   "configeditor.visual.tooltip.type": "Type: %s",
   "configeditor.visual.tooltip.delete": "Delete this field",
   "configeditor.visual.tooltip.error": "Invalid value for current type",
+  "configeditor.visual.tooltip.expand": "Expand/collapse object",
+  
+  "configeditor.entityhub.title": "Overlay Settings",
+  "configeditor.entityhub.entity_on": "Entity Overlay: ON",
+  "configeditor.entityhub.entity_off": "Entity Overlay: OFF",
+  "configeditor.entityhub.block_on": "Block Overlay: ON",
+  "configeditor.entityhub.block_off": "Block Overlay: OFF",
   
   "configeditor.confirm.title": "Confirm",
   "configeditor.confirm.unsavedclose": "You have unsaved changes. Are you sure you want to close?",
@@ -48,8 +60,10 @@
   "configeditor.theme.light": "Light",
   "configeditor.theme.auto": "Auto",
   
-  "button.zhengzhengyiyi.disable": "Disabled",
   "button.zhengzhengyiyi.enable": "Enabled",
+  "button.zhengzhengyiyi.disable": "Disabled",
+  
+  "screen.zhengzhengyiyi.plugin_manager": "Plugin Manager",
 
   "configeditor.overlay.block": "Block Overlay",
   "configeditor.overlay.enabled": "Block overlay enabled",
